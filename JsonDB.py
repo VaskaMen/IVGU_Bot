@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from Lesson import Lesson
 from Subject import Subject
@@ -31,7 +32,7 @@ class JsonDB:
         for i in data:
             print(data[f"{i}"])
             work_days.append( WorkDay(
-                date=i,
+                date=datetime.strptime(i,'%Y-%m-%d').date(),
                 lessons=self.get_lessons_from_dict(data[f"{i}"]['lessons'])
             ))
         return work_days

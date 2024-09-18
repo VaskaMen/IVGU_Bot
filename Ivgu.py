@@ -27,3 +27,6 @@ class Ivgu:
     def get_schedule_lines(self) ->  list[WebElement]:
         el = self.wd.find_elements(by=By.CLASS_NAME, value='active-day')
         return el
+
+    def close(self):
+        self.wd.close()
