@@ -1,7 +1,10 @@
 import time
 
+import requests
 import schedule
 from datetime import datetime, timedelta
+
+from urllib3 import request
 
 from Ivgu import Ivgu
 from JsonDB import JsonDB
@@ -10,39 +13,39 @@ from WorkDay import WorkDay
 
 def update_sche():
     ivgu = Ivgu()
-    ivgu.open_student_page()
-    time.sleep(3)
     ivgu.login("miha2204n@gmail.com", "8azr25pb")
-    time.sleep(2)
-    ivgu.open_schedule()
-    time.sleep(2)
 
-
-    el = ivgu.get_schedule_lines()
+    el = ivgu.get_schedule_lines(ivgu.get_schedule_page())
     sc = SubjectConvertor()
-    workDays: list[WorkDay] = list()
+    work_days: list[WorkDay] = list()
 
     for i in el:
-        d = datetime.strptime(i.get_attribute("data-date"),'%Y-%m-%d').date()
+        d = datetime.strptime(i["data-date"], '%Y-%m-%d').date()
 
-        title = i.get_attribute("title")
+        title = i['title']
 
-        workDays.append(
+        work_days.append(
             WorkDay(
                 lessons=sc.get_lessons(title),
                 date=d
             )
         )
-    print(workDays)
+
+    print(work_days[len(work_days)-1].date)
     jdb = JsonDB()
-    jdb.add_new_work_days(work_days=workDays)
-    ivgu.close()
+    jdb.add_new_work_days(work_days=work_days)
 
-
-schedule.every().minute.do(update_sche)
+update_sche()
+schedule.every(30).minutes.do(update_sche)
 while True:
     try:
         schedule.run_pending()
         time.sleep(10)
     except Exception as ex:
         print(ex)
+
+
+
+
+
+# https://uni.ivanovo.ac.ru/index.php/ajaxapi?action=get_lectures_form_student&date=2024-09-20&stud_id=12618

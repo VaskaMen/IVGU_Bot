@@ -28,6 +28,7 @@ def lesson_print(l: WorkDay):
 
 @bot.message_handler(commands = ['schedule'])
 def url(message):
+    print(f"{datetime.now()} send message to ", message.from_user.id)
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn1 = types.KeyboardButton("Сегодня")
     btn2 = types.KeyboardButton('Завтра')
@@ -37,6 +38,7 @@ def url(message):
 
 @bot.message_handler(commands = ['schedule_all'])
 def url(message):
+    print(f"{datetime.now()} send message to ", message.from_user.id)
     markup = types.ReplyKeyboardMarkup()
     for i in workDays:
         if i.date >= datetime.now().date():
@@ -48,6 +50,7 @@ def url(message):
 
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
+    print(f"{datetime.now()} send message to ", message.from_user.id)
 
     if message.text == "Сегодня":
             for day in workDays:

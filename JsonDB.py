@@ -30,7 +30,6 @@ class JsonDB:
         data = self.read_work_days()
         work_days: list[WorkDay]  = list()
         for i in data:
-            print(data[f"{i}"])
             work_days.append( WorkDay(
                 date=datetime.strptime(i,'%Y-%m-%d').date(),
                 lessons=self.get_lessons_from_dict(data[f"{i}"]['lessons'])
