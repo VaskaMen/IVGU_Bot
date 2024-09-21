@@ -3,18 +3,16 @@ from datetime import datetime
 
 import schedule
 
-from ScheduleObject.Ivgu import Ivgu
-from ScheduleObject.WorkDay import WorkDay
-from SubjectConvertor import SubjectConvertor
-from User import User
-from UserDB import UserDB
-from WorkDaysDB import WorkDaysDB
-from JsonDBBase import JsonDBBase
-from ScheduleObject.Subject import Subject
+import Seecret
+from IVGU.Ivgu import Ivgu
+from IVGU.ScheduleObject.WorkDay import WorkDay
+from IVGU.SubjectConvertor import SubjectConvertor
+from JsonDB.WorkDaysDB import WorkDaysDB
+
 
 def update_sche():
     ivgu = Ivgu()
-    ivgu.login("miha2204n@gmail.com", "8azr25pb")
+    ivgu.login(Seecret.IVGU_LOGIN, Seecret.IVGU_PASSWORD)
 
     el = ivgu.get_schedule_lines(ivgu.get_schedule_page())
     sc = SubjectConvertor()
@@ -44,12 +42,3 @@ while True:
         time.sleep(10)
     except Exception as ex:
         print(ex)
-
-
-
-
-
-
-
-
-# https://uni.ivanovo.ac.ru/index.php/ajaxapi?action=get_lectures_form_student&date=2024-09-20&stud_id=12618

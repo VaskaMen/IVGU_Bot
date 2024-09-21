@@ -1,11 +1,11 @@
 import json
 from datetime import datetime
 
-from JsonDBBase import JsonDBBase
-from ScheduleObject.Lesson import Lesson
-from ScheduleObject.Subject import Subject
-from ScheduleObject.TeacherPlace import TeacherPlace
-from ScheduleObject.WorkDay import WorkDay
+from JsonDB.JsonDBBase import JsonDBBase
+from IVGU.ScheduleObject.Lesson import Lesson
+from IVGU.ScheduleObject.Subject import Subject
+from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
+from IVGU.ScheduleObject.WorkDay import WorkDay
 
 
 class WorkDaysDB(JsonDBBase):

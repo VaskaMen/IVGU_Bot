@@ -1,7 +1,6 @@
 import json
 
-
-from JsonDBBase import JsonDBBase
+from JsonDB.JsonDBBase import JsonDBBase
 from User import User
 
 

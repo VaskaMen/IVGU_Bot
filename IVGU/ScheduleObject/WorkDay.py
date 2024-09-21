@@ -2,7 +2,7 @@ from datetime import date
 
 from attr import dataclass
 
-from ScheduleObject.Lesson import Lesson
+from IVGU.ScheduleObject.Lesson import Lesson
 
 week = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
 

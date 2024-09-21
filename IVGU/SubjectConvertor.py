@@ -1,8 +1,8 @@
 from bs4 import BeautifulSoup, ResultSet, PageElement
 
-from ScheduleObject.Lesson import Lesson
-from ScheduleObject.Subject import Subject
-from ScheduleObject.TeacherPlace import TeacherPlace
+from IVGU.ScheduleObject.Lesson import Lesson
+from IVGU.ScheduleObject.Subject import Subject
+from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 
 
 class SubjectConvertor:

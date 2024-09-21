@@ -1,17 +1,14 @@
 import re
-import threading
-import time
 from datetime import datetime, timedelta, date
 
-import schedule
 import telebot
 from telebot import types
 from telebot.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ForceReply
 
 from User import User
-from UserDB import UserDB
-from WorkDaysDB import WorkDaysDB
-from ScheduleObject.WorkDay import WorkDay
+from JsonDB.UserDB import UserDB
+from JsonDB.WorkDaysDB import WorkDaysDB
+from IVGU.ScheduleObject.WorkDay import WorkDay
 
 week = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
 
@@ -81,7 +78,7 @@ class IvguBot:
         self.bot.send_message(user_id, str(work_day),parse_mode='Markdown')
 
     def handler_today_tomorrow(self, message):
-        print(f"Send message to {message.from_user.id}")
+        print(f"{datetime.now()} Send message to {message.from_user.id}")
         if message.text == "Сегодня":
             self.send_work_day(message.from_user.id, self.get_work_day_date(datetime.now().date()))
         if message.text == "Завтра":
@@ -89,7 +86,7 @@ class IvguBot:
             self.send_work_day(message.from_user.id, self.get_work_day_date(d))
 
     def handler_work_day_date(self, message):
-        print(f"Send message to {message.from_user.id}")
+        print(f"{datetime.now()} Send message to {message.from_user.id}")
         if self.check_date_format(message.text):
             search =  self.convert_str_to_date(message.text)
             self.send_work_day(message.from_user.id, self.get_work_day_date(search))
@@ -97,7 +94,7 @@ class IvguBot:
     def register_massage_handler(self):
         @self.bot.message_handler(commands = ['schedule'])
         def actual(message):
-            print(f"Send message to {message.from_user.id}")
+            print(f"{datetime.now()} Send message to {message.from_user.id}")
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             btn1 = types.KeyboardButton("Сегодня")
             btn2 = types.KeyboardButton('Завтра')
@@ -108,7 +105,7 @@ class IvguBot:
 
         @self.bot.message_handler(commands = ['schedule_all'])
         def schedule_all_actual(message):
-            print(f"Send message to {message.from_user.id}")
+            print(f"{datetime.now()} Send message to {message.from_user.id}")
             markup = types.ReplyKeyboardMarkup()
             actual = self.get_only_actual_days(self.work_days)
 
@@ -121,7 +118,7 @@ class IvguBot:
 
         @self.bot.message_handler(commands=['schedule_history'])
         def schedule_history(message):
-            print(f"Send message to {message.from_user.id}")
+            print(f"{datetime.now()} Send message to {message.from_user.id}")
             markup = types.ReplyKeyboardMarkup()
             last = self.get_last_days(7, self.work_days)
 
@@ -156,41 +153,8 @@ class IvguBot:
 
         @self.bot.message_handler(content_types=['text'])
         def text(message):
-            print(f"Send message to {datetime.now()}")
+            print(f"{datetime.now()} Send message to {message.from_user.id}")
             if self.check_date_format(message.text):
                 d = self.convert_str_to_date(message.text)
                 work_day = self.get_work_day_date(d)
                 self.send_work_day(message.from_user.id, work_day)
-
-
-ivgu_bot = IvguBot('7142763014:AAHsANyInKzPyvqYs0bodnePc-XvxuLyhtU')
-
-
-def run_bot():
-    ivgu_bot.update_work_days()
-    ivgu_bot.bot.polling(none_stop=True, interval=0)
-
-
-
-def sche():
-    while True:
-            schedule.run_pending()
-            time.sleep(10)
-
-
-schedule.every().minute.do(ivgu_bot.update_work_days)
-
-threads = []
-t1 = threading.Thread(target=run_bot)
-t2 = threading.Thread(target=sche)
-threads.append(t1)
-threads.append(t2)
-
-for t in threads:
-    t.start()
-
-for t in threads:
-        t.join()
-
-
-# 7142763014:AAHsANyInKzPyvqYs0bodnePc-XvxuLyhtU

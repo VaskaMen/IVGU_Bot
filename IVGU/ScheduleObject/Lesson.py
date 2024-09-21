@@ -1,9 +1,7 @@
-from datetime import datetime
-
 from attr import dataclass
 
-from ScheduleObject.Subject import Subject
-from ScheduleObject.TeacherPlace import TeacherPlace
+from IVGU.ScheduleObject.Subject import Subject
+from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 
 
 @dataclass
