@@ -2,7 +2,7 @@ from datetime import date
 
 from attr import dataclass
 
-from Lesson import Lesson
+from ScheduleObject.Lesson import Lesson
 
 
 @dataclass
@@ -17,3 +17,5 @@ class WorkDay:
                 l.dict() for l in self.lessons
             ]
         }
+
+

@@ -7,9 +7,8 @@ import schedule
 import telebot
 from telebot import types
 
-from JsonDB import JsonDB
-from Lesson import Lesson
-from WorkDay import WorkDay
+from WorkDaysDB import WorkDaysDB
+from ScheduleObject.WorkDay import WorkDay
 
 
 bot = telebot.TeleBot('7142763014:AAHsANyInKzPyvqYs0bodnePc-XvxuLyhtU')
@@ -75,8 +74,12 @@ def chek_date_foramt(s:str):
 
 def update_work_days():
     global workDays
-    jdb = JsonDB()
-    workDays = jdb.get_work_days()
+    jdb = WorkDaysDB()
+    new_days = jdb.get_work_days()
+    d = jdb.get_diferens_work_days(new_days, workDays)
+    for i in d:
+        bot.send_message(5276492925, lesson_print(i), parse_mode='Markdown')
+    workDays = new_days
 
 
 def run_bot():

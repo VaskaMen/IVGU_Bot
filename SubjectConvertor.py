@@ -1,10 +1,8 @@
-from datetime import datetime
-
 from bs4 import BeautifulSoup, ResultSet, PageElement
 
-from Lesson import Lesson
-from Subject import Subject
-from TeacherPlace import TeacherPlace
+from ScheduleObject.Lesson import Lesson
+from ScheduleObject.Subject import Subject
+from ScheduleObject.TeacherPlace import TeacherPlace
 
 
 class SubjectConvertor:

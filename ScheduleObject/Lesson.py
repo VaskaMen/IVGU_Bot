@@ -2,8 +2,8 @@ from datetime import datetime
 
 from attr import dataclass
 
-from Subject import Subject
-from TeacherPlace import TeacherPlace
+from ScheduleObject.Subject import Subject
+from ScheduleObject.TeacherPlace import TeacherPlace
 
 
 @dataclass

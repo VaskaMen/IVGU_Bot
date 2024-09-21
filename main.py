@@ -1,50 +1,49 @@
-import time
+from User import User
+from UserDB import UserDB
+from WorkDaysDB import WorkDaysDB
+from JsonDBBase import JsonDBBase
+from ScheduleObject.Subject import Subject
 
-import requests
-import schedule
-from datetime import datetime, timedelta
-
-from urllib3 import request
-
-from Ivgu import Ivgu
-from JsonDB import JsonDB
-from SubjectConvertor import SubjectConvertor
-from WorkDay import WorkDay
-
-def update_sche():
-    ivgu = Ivgu()
-    ivgu.login("miha2204n@gmail.com", "8azr25pb")
-
-    el = ivgu.get_schedule_lines(ivgu.get_schedule_page())
-    sc = SubjectConvertor()
-    work_days: list[WorkDay] = list()
-
-    for i in el:
-        d = datetime.strptime(i["data-date"], '%Y-%m-%d').date()
-
-        title = i['title']
-
-        work_days.append(
-            WorkDay(
-                lessons=sc.get_lessons(title),
-                date=d
-            )
-        )
-
-    print(work_days[len(work_days)-1].date)
-    jdb = JsonDB()
-    jdb.add_new_work_days(work_days=work_days)
-
-update_sche()
-schedule.every(30).minutes.do(update_sche)
-while True:
-    try:
-        schedule.run_pending()
-        time.sleep(10)
-    except Exception as ex:
-        print(ex)
+# def update_sche():
+#     ivgu = Ivgu()
+#     ivgu.login("miha2204n@gmail.com", "8azr25pb")
+#
+#     el = ivgu.get_schedule_lines(ivgu.get_schedule_page())
+#     sc = SubjectConvertor()
+#     work_days: list[WorkDay] = list()
+#
+#     for i in el:
+#         d = datetime.strptime(i["data-date"], '%Y-%m-%d').date()
+#
+#         title = i['title']
+#
+#         work_days.append(
+#             WorkDay(
+#                 lessons=sc.get_lessons(title),
+#                 date=d
+#             )
+#         )
+#
+#     print(work_days[len(work_days)-1].date)
+#     jdb = JsonDB()
+#     jdb.add_new_work_days(work_days=work_days)
+#
+# update_sche()
+# schedule.every(30).minutes.do(update_sche)
+# while True:
+#     try:
+#         schedule.run_pending()
+#         time.sleep(10)
+#     except Exception as ex:
+#         print(ex)
 
 
+
+
+
+js = UserDB("users.json")
+# js.add_new_user(User(128754, False))
+print(js.get_all_users())
 
 
 
