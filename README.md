@@ -6,6 +6,6 @@
 
 
 
-IVGU_LOGIN = "********"
-IVGU_PASSWORD = "********"
-BOT_TOKEN = "******:******-*******"
+IVGU_LOGIN = "LOGIN"
+IVGU_PASSWORD = "PASSWORD"
+BOT_TOKEN = "TOKEN"
