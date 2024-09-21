@@ -4,6 +4,8 @@ from attr import dataclass
 
 from ScheduleObject.Lesson import Lesson
 
+week = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+
 
 @dataclass
 class WorkDay:
@@ -18,4 +20,11 @@ class WorkDay:
             ]
         }
 
-
+    def __str__(self) -> str:
+        res = f"***{self.date} {week[self.date.weekday()]}***\n\n"
+        for i in self.lessons:
+            res += f"⌚  ***{i.subject.time}*** \n📘  {i.subject.name} \n🔹  ___{i.subject.type}___ \n"
+            for t in i.teacher_place:
+                res += f"👨‍🏫  {t.teacher} \n🚪  ***{t.place}***\n"
+            res += "\n\n"
+        return res

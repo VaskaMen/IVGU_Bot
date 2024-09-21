@@ -12,7 +12,7 @@ class WorkDaysDB(JsonDBBase):
 
     def add_new_work_days(self, work_days: list[WorkDay]):
         data = self.read_file()
-        with open('workDays.json', "w", encoding="utf-8") as f:
+        with open(self.file_name, "w", encoding="utf-8") as f:
             for i in work_days:
                 data[f"{i.date}"] = i.dict()
             json.dump(data, f, ensure_ascii=False, indent=4)
@@ -58,8 +58,8 @@ class WorkDaysDB(JsonDBBase):
             ))
         return teacher_place
 
-    def get_diferens_work_days(self, w1: list[WorkDay], w2:[WorkDay]):
-        dif = []
+    def get_diferens_work_days(self, w1: list[WorkDay], w2:[WorkDay]) -> list[WorkDay]:
+        dif: list[WorkDay] = list()
         for w in w1:
             if w not in w2:
                 dif.append(w)
