@@ -81,17 +81,29 @@ class IvguBot:
         print(f"{datetime.now()} Send message to {message.from_user.id}")
         if message.text == "Сегодня":
             self.send_work_day(message.from_user.id, self.get_work_day_date(datetime.now().date()))
-        if message.text == "Завтра":
+        elif message.text == "Завтра":
             d = datetime.now().date() + timedelta(days=1)
             self.send_work_day(message.from_user.id, self.get_work_day_date(d))
+        else:
+            self.bot.send_message(message.from_user.id, "Не удалось найти этот день")
 
     def handler_work_day_date(self, message):
         print(f"{datetime.now()} Send message to {message.from_user.id}")
         if self.check_date_format(message.text):
             search =  self.convert_str_to_date(message.text)
             self.send_work_day(message.from_user.id, self.get_work_day_date(search))
+        else:
+            self.bot.send_message(message.from_user.id, "Не удалось найти этот день.")
 
     def register_massage_handler(self):
+        @self.bot.message_handler(commands=['start'])
+        def start(message):
+            self.bot.send_message(message.from_user.id, """
+                Тут ты можешь получить расписание с сайта https://uni.ivanovo.ac.ru/ для группы Прикладной информатики в цифровой экономике\n
+                Расписание проверяется каждые 30 минут. При желание ты можешь подписаться на рассылку уведомлений при изменении в расписани. 
+                Для этого вызови команду:\n/subscribe_updates\n
+            """)
+
         @self.bot.message_handler(commands = ['schedule'])
         def actual(message):
             print(f"{datetime.now()} Send message to {message.from_user.id}")
