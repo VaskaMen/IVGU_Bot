@@ -9,8 +9,14 @@ from TelegramBot import IvguBot
 ivgu_bot = IvguBot(Seecret.BOT_TOKEN)
 
 def run_bot():
-    ivgu_bot.update_work_days()
-    ivgu_bot.bot.polling(none_stop=True, interval=0)
+    while True:
+        try:
+            ivgu_bot.update_work_days()
+            ivgu_bot.bot.polling(none_stop=True, interval=0)
+        except Exception as ex:
+            print(ex)
+            time.sleep(10)
+
 
 
 

@@ -35,7 +35,7 @@ def update_sche():
     jdb.add_new_work_days(work_days=work_days)
 
 update_sche()
-schedule.every(30).minutes.do(update_sche)
+schedule.every(10).minutes.do(update_sche)
 while True:
     try:
         schedule.run_pending()
