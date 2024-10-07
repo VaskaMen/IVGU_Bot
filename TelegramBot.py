@@ -37,16 +37,18 @@ class IvguBot:
         self.changes = self.get_only_actual_days(self.changes)
         self.work_days = new_days
         self.send_notification()
+        self.changes.clear()
 
     def send_notification(self):
         self.users = self.users_DB.get_all_users()
         if len(self.changes) != 0:
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             day_chaged_str = ""
-            for i in self.changes:
-                btn = types.KeyboardButton(str(i.date))
+
+            for day in self.changes:
+                btn = types.KeyboardButton(f"{day.date} {week[day.date.weekday()]}")
                 markup.add(btn)
-                day_chaged_str += f"{i.date} \n"
+                day_chaged_str += f"{day.date} \n"
 
             self.send_message_for_all_get_changes_users(f"Появилось новое расписание\n {day_chaged_str}", markup=markup)
 

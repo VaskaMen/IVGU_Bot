@@ -15,7 +15,6 @@ def run_bot():
             ivgu_bot.bot.polling(none_stop=True, interval=0)
         except Exception as ex:
             print(ex)
-            time.sleep(10)
 
 
 
