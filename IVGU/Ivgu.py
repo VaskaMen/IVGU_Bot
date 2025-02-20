@@ -32,3 +32,11 @@ class Ivgu:
         el = BeautifulSoup(html_page, 'html.parser').find_all('div',{'class': 'active-day'})
         return el
 
+    def get_schedule_page(self,
+                          department:int,
+                          training_form: int,
+                          level: int,
+                          course: int,
+                          term: int,
+                          ) -> str:
+        return self.session.get(f'https://uni.ivanovo.ac.ru/info/showschedule/{department}/{training_form}/{level}/{course}/{term}').text

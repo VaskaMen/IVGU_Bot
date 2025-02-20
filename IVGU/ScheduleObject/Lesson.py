@@ -1,4 +1,4 @@
-from attr import dataclass
+from dataclasses import dataclass
 
 from IVGU.ScheduleObject.Subject import Subject
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace

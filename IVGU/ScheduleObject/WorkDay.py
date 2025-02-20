@@ -1,6 +1,8 @@
 from datetime import date
 
-from attr import dataclass
+
+from dataclasses import dataclass
+
 
 from IVGU.ScheduleObject.Lesson import Lesson
 
