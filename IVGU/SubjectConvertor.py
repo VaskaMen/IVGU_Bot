@@ -28,9 +28,9 @@ class SubjectConvertor:
         for line in subject_lines:
             subjects.append(
                 Subject(
-                    name=self.__find_subject_name(line),
-                    time=self.__find_subject_time(line),
-                    type=self.__find_subject_type(line)
+                    name=self.find_subject_name(line),
+                    time=self.find_subject_time(line),
+                    type=self.find_subject_type(line)
                 )
             )
         return subjects
@@ -64,15 +64,15 @@ class SubjectConvertor:
         return res[1:]
 
     @staticmethod
-    def __find_subject_name(element: PageElement) -> str:
+    def find_subject_name(element: PageElement) -> str:
         return element.text.split(',')[1].split('(')[0].strip()
 
     @staticmethod
-    def __find_subject_time(element: PageElement) -> str:
+    def find_subject_time(element: PageElement) -> str:
         return element.text.split(',')[0]
 
     @staticmethod
-    def __find_subject_type(element: PageElement) -> str:
+    def find_subject_type(element: PageElement) -> str:
         return element.text.split(',', maxsplit=1)[1].split('(')[1].replace(")", "")
 
     @staticmethod

@@ -1,7 +1,12 @@
 from bs4 import BeautifulSoup, ResultSet, Tag, NavigableString, PageElement
 
+from IVGU.Table.TableObjects.Cell import Cell
+from IVGU.Table.TableObjects.Line import Line
+
 
 class TableConvertor:
+    cell = Cell()
+    line = Line()
     def get_groups_names(self, table: str) -> list[str]:
         names = []
         table_head = self.__get_table_head(table)
@@ -31,20 +36,3 @@ class TableConvertor:
     def get_subject_tables(self,page:str) ->list[str]:
         subject_tables = BeautifulSoup(page, 'html.parser').select('.second-table')
         return self.result_set_to_list_str(subject_tables)
-
-    @staticmethod
-    def get_lines_of_subjects(table: str) -> ResultSet[Tag]:
-        tbody = BeautifulSoup(table, "html.parser")
-        tbody.find('thead').extract()
-        tr = BeautifulSoup(str(tbody),'html.parser').select('tr:not(thead tr)')
-        td = BeautifulSoup(str(tr),'html.parser').select('td')
-        return td
-
-    def lines_separator_into_cells(self, td: ResultSet[Tag]) -> ResultSet[Tag]:
-        for id,elem in enumerate(td):
-            colspan = elem.get("colspan")
-            if colspan is not None:
-                elem["colspan"] = ''
-                for i in range(int(colspan)-1):
-                    td.insert(id+i, elem)
-        return td
