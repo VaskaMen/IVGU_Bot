@@ -27,6 +27,24 @@ class TableConvertor:
         return len(tr[-1])
 
     @staticmethod
+    def get_tbody_of_times(table: str) -> BeautifulSoup:
+        tbody = BeautifulSoup(table, "html.parser")
+        tbody.find('thead').extract()
+        return tbody
+
+    def get_time_table(self,page:str) ->list[str]:
+        subject_tables = BeautifulSoup(page, 'html.parser').select('.first-table')
+        return self.result_set_to_list_str(subject_tables)
+
+    @staticmethod
+    def  get_time_codes(tbody:BeautifulSoup):
+        all_times = BeautifulSoup(str(tbody), "html.parser").select('.text-bold.cell.text-center')
+        time_codes = {}
+        for i in all_times:
+            time_codes[f"{i.get('data-time')}"] = i.text
+        return time_codes
+
+    @staticmethod
     def result_set_to_list_str(result_set:  ResultSet[PageElement | Tag | NavigableString]) -> list[str]:
         mas = []
         for result in result_set:
@@ -36,3 +54,5 @@ class TableConvertor:
     def get_subject_tables(self,page:str) ->list[str]:
         subject_tables = BeautifulSoup(page, 'html.parser').select('.second-table')
         return self.result_set_to_list_str(subject_tables)
+
+

@@ -22,7 +22,8 @@ class Cell:
         teacher = str(teacher_cell[0]).replace('<','>').split('>')[2].split(',')[0]
         return teacher
 
-    def get_raw_teacher(self, cell: str) -> ResultSet[Tag]:
+    @staticmethod
+    def get_raw_teacher(cell: str) -> ResultSet[Tag]:
         teacher_cell = BeautifulSoup(cell, 'html.parser').select('.white-space-nowrap i')
         return teacher_cell
 
@@ -30,3 +31,16 @@ class Cell:
         place_cell = self.get_raw_teacher(cell)
         place = str(place_cell[0]).replace('<','>').split('>')[2].split(',')[1].lstrip()
         return place
+
+    def get_data_date_from_cell(self,cell: str):
+        data = self.get_raw_data(cell)
+        return data.get("data-date")
+
+    @staticmethod
+    def get_raw_data(cell: str):
+        data = BeautifulSoup(str(cell), 'html.parser').select(".cell")[0]
+        return data
+
+    def get_data_time_from_cell(self,cell: str):
+        data = data = self.get_raw_data(cell)
+        return data.get("data-time")
