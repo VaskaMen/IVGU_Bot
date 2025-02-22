@@ -2,6 +2,8 @@ import re
 
 from bs4 import BeautifulSoup, ResultSet, Tag
 
+from IVGU.ScheduleObject.Lesson import Lesson
+from IVGU.ScheduleObject.Subject import Subject
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 
 
@@ -70,3 +72,12 @@ class Cell:
     def get_data_time_from_cell(self,cell: str):
         data = data = self.__get_raw_data(cell)
         return data.get("data-time")
+
+    def construct_of_subject(self,cell: Tag, subgroup: str,timecodes: dict[str, str]) ->Subject:
+        name_of_subject = self.get_subject_name_from_cell(str(cell))
+        subject_type = self.get_subject_type_from_cell(str(cell))
+        time = timecodes[self.get_data_time_from_cell(str(cell))]
+        return Subject(time,name_of_subject,subject_type,subgroup)
+
+    def construct_of_lesson(self,cell: Tag, subgroup: str,timecodes: dict[str, str]) -> Lesson:
+        return Lesson(self.construct_of_subject(cell,subgroup,timecodes),self.get_teacher_from_cell(str(cell)))

@@ -1,13 +1,14 @@
-from dataclasses import dataclass
+
 
 from IVGU.ScheduleObject.Subject import Subject
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 
 
-@dataclass
+
 class Lesson:
-    subject: Subject
-    teacher_place: list[TeacherPlace]
+    def __init__(self,subject:Subject=Subject(),teacher_place:list[TeacherPlace]=list(), is_empty:bool=False):
+        self.subject = subject
+        self.teacher_place = teacher_place
 
     def dict(self):
         return {

@@ -1,5 +1,8 @@
+from adodbapi.ado_consts import directions
 from bs4 import BeautifulSoup, ResultSet, Tag, NavigableString, PageElement
 
+from IVGU.ScheduleObject.Lesson import Lesson
+from IVGU.ScheduleObject.Subject import Subject
 from IVGU.Table.TableObjects.Cell import Cell
 from IVGU.Table.TableObjects.Line import Line
 
@@ -55,4 +58,37 @@ class TableConvertor:
         subject_tables = BeautifulSoup(page, 'html.parser').select('.second-table')
         return self.result_set_to_list_str(subject_tables)
 
+    @staticmethod
+    def get_names_of_all_directions(table: str) -> list[str]:
+        tr = BeautifulSoup(table, 'html.parser').select('thead tr')[1].select('th')
+        directions = []
+        for elem in tr:
+            elem = str(elem).replace('<',">").split(">")
+            directions.append(elem[-3])
+        return directions
 
+    @staticmethod
+    def have_groups(table: str):
+        tr = BeautifulSoup(table, 'html.parser').select('thead tr')
+        return len(tr) == 4
+
+    def get_lesson_from_table(self,table:str,time_table:str):
+        lines = self.line.get_lines_of_subjects(table)
+        all_cells = self.line.lines_separator_into_cells(lines)
+
+        tbody = self.get_tbody_of_times(time_table)
+        timecodes = self.get_time_codes(tbody)
+        quantity = self.get_quantity_of_subgroups(table)
+        group = 1
+        mas = []
+        for i in all_cells:
+            if group > 2:
+                group = 1
+            if i.text != "":
+                mas.append(self.cell.construct_of_lesson(i,group,timecodes))
+            else:
+                mas.append(Lesson(is_empty=True))
+            group += 1
+
+
+        return mas
