@@ -1,15 +1,14 @@
-from adodbapi.ado_consts import directions
 from bs4 import BeautifulSoup, ResultSet, Tag, NavigableString, PageElement
-
-from IVGU.ScheduleObject.Lesson import Lesson
-from IVGU.ScheduleObject.Subject import Subject
 from IVGU.Table.TableObjects.Cell import Cell
+from IVGU.Table.TableObjects.Constructors import Constructors
 from IVGU.Table.TableObjects.Line import Line
+
 
 
 class TableConvertor:
     cell = Cell()
     line = Line()
+    constr = Constructors()
     def get_groups_names(self, table: str) -> list[str]:
         names = []
         table_head = self.__get_table_head(table)
@@ -85,14 +84,17 @@ class TableConvertor:
             if group > 2:
                 group = 1
             if i.text != "" and self.have_groups(table):
-                mas.append(self.cell.construct_of_lesson(i,group,timecodes))
+                mas.append(self.constr.construct_of_lesson(i,group,timecodes))
             elif i.text != "" and not self.have_groups(table):
-                mas.append(self.cell.construct_of_lesson(i,str(0),timecodes))
+                mas.append(self.constr.construct_of_lesson(i,str(0),timecodes))
             elif self.have_groups(table):
-                mas.append(self.cell.construct_of_empty_lesson(i,group,timecodes))
+                mas.append(self.constr.construct_of_empty_lesson(i,group,timecodes))
             else:
-                mas.append(self.cell.construct_of_empty_lesson(i,str(0),timecodes))
+                mas.append(self.constr.construct_of_empty_lesson(i,str(0),timecodes))
             group += 1
 
 
         return mas
+
+    def get_workdays_from_table(self):
+        pass
