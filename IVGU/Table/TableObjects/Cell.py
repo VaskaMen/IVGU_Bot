@@ -44,15 +44,18 @@ class Cell:
         return place.lstrip()
 
     def __get_raw_teacher(self,cell: str) -> list[Tag]:
-        teacher_cell = BeautifulSoup(cell, 'html.parser').select('.white-space-nowrap i')
-        clean_teacher_cell = self.__clean_teachers(teacher_cell)
+        teacher_cells = BeautifulSoup(cell, 'html.parser').select('.white-space-nowrap')
+        clean_teacher_cell = self.__clean_teachers(teacher_cells)
         return clean_teacher_cell
+
+    def __get_first_i(self,tag: Tag):
+        return tag.select('i')[0]
+
 
     def __clean_teachers(self,teacher_cells:ResultSet[Tag]) -> list[Tag]:
         clean_teachers = []
         for i in teacher_cells:
-            if self.have_digits(i.text):
-                clean_teachers.append(i)
+            clean_teachers.append(self.__get_first_i(i))
         return clean_teachers
 
     @staticmethod
@@ -81,3 +84,10 @@ class Cell:
 
     def construct_of_lesson(self,cell: Tag, subgroup: str,timecodes: dict[str, str]) -> Lesson:
         return Lesson(self.construct_of_subject(cell,subgroup,timecodes),self.get_teacher_from_cell(str(cell)))
+
+    def construct_of_empty_lesson(self,cell:Tag, subgroup: str,timecodes: dict[str, str]) ->Lesson:
+        return Lesson(self.construct_of_empty_subject(cell,subgroup,timecodes),list())
+
+    def construct_of_empty_subject(self,cell:Tag, subgroup: str,timecodes: dict[str, str]) ->Subject:
+        time = timecodes[self.get_data_time_from_cell(str(cell))]
+        return Subject(time=time,group=subgroup)

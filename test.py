@@ -6,7 +6,7 @@ tbc = TableConvertor()
 ivgu = Ivgu()
 ivgu.login(Seecret.IVGU_LOGIN, Seecret.IVGU_PASSWORD)
 
-page = ivgu.get_schedule_page(118, 6, 1, 1, 2)
+page = ivgu.get_schedule_page(118, 6, 1, 4, 2)
 tables = tbc.get_subject_tables(page)
 time_tables = tbc.get_time_table(page)
 

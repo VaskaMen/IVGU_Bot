@@ -84,10 +84,14 @@ class TableConvertor:
         for i in all_cells:
             if group > 2:
                 group = 1
-            if i.text != "":
+            if i.text != "" and self.have_groups(table):
                 mas.append(self.cell.construct_of_lesson(i,group,timecodes))
+            elif i.text != "" and not self.have_groups(table):
+                mas.append(self.cell.construct_of_lesson(i,str(0),timecodes))
+            elif self.have_groups(table):
+                mas.append(self.cell.construct_of_empty_lesson(i,group,timecodes))
             else:
-                mas.append(Lesson(is_empty=True))
+                mas.append(self.cell.construct_of_empty_lesson(i,str(0),timecodes))
             group += 1
 
 
