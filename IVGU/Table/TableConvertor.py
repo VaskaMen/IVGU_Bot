@@ -75,27 +75,40 @@ class TableConvertor:
     def get_lessons_from_table(self,table:str,time_table:str):
         lines = self.line.get_lines_of_subjects(table)
         all_cells = self.line.lines_separator_into_cells(lines)
-        have_group = self.have_subgroups(table)
+        have_subgroup = self.have_subgroups(table)
         all_groups = self.get_groups_names(table)
-        sorted_cells_by_groups = self.cell.cells_sorted_by_groups(all_cells,all_groups,have_group)
+        sorted = self.__sorting_station_for_cells(all_cells, all_groups, have_subgroup)
+        tbody = self.get_tbody_of_times(time_table)
+        timecodes = self.get_time_codes(tbody)
+        all_lessons_to_direction = self.__separate_lessons_to_directions(sorted, timecodes, have_subgroup)
+        return all_lessons_to_direction
+
+    def __separate_lessons_to_directions(self, sorted:dict[str, dict[str, list[Tag]]], timecodes:dict[str, str], have_subgroup:bool) ->dict[str, dict[str, list[Lesson]]]:
+        separated: dict[str, dict[str, list[Lesson]]] = {}
+        for direction in sorted:
+            separated.setdefault(direction,{})
+            for day in sorted[direction]:
+                separated[direction].setdefault(day,[])
+                separated[direction][day] = self.__tags_to_lessons(sorted[direction][day], timecodes, have_subgroup)
+        return separated
+
+    def __tags_to_lessons(self, lessons_tags: list[Tag], timecodes:dict[str, str], have_subgroup:bool) -> list[Lesson]:
+        lessons = []
+        group = 1
+        for cell in lessons_tags:
+            if group == 2:
+                group = 1
+            lesson = self.__get_lesson(cell, str(group), timecodes, have_subgroup)
+            lessons.append(lesson)
+            group += 1
+        return lessons
+
+    def __sorting_station_for_cells(self, all_cells:ResultSet[Tag], all_groups: list[str], have_subgroup: bool) -> dict[str, dict[str, list[Tag]]]:
+        sorted_cells_by_groups = self.cell.cells_sorted_by_groups(all_cells,all_groups,have_subgroup)
         sorted_by_all: dict[str,dict[str,list[Tag]]] = {}
         for sorted in sorted_cells_by_groups:
             sorted_by_all[sorted] = self.cell.cells_sorted_by_dates(sorted_cells_by_groups[sorted])
-        tbody = self.get_tbody_of_times(time_table)
-        timecodes = self.get_time_codes(tbody)
-        group = 1
-        mas: dict[str, dict[str, list[Lesson]]] = {}
-        for direction in sorted_by_all:
-            mas.setdefault(direction,{})
-            for day in sorted_by_all[direction]:
-                mas[direction].setdefault(day,[])
-                for cell in sorted_by_all[direction][day]:
-                    if group == 2:
-                        group = 1
-                    lessons = self.__get_lesson(cell, str(group), timecodes, have_group)
-                    mas[direction][f"{day}"].append(lessons)
-                    group += 1
-        return mas
+        return sorted_by_all
 
     def __get_lesson(self, cell:Tag, group: str, timecodes: dict[str, str], have_group:bool) ->Lesson:
         if cell.text != "" and have_group:
