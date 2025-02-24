@@ -1,4 +1,7 @@
 from bs4 import BeautifulSoup, ResultSet, Tag, NavigableString, PageElement
+from datetime import datetime
+from IVGU.ScheduleObject.Lesson import Lesson
+from IVGU.ScheduleObject.WorkDay import WorkDay
 from IVGU.Table.TableObjects.Cell import Cell
 from IVGU.Table.TableObjects.Constructors import Constructors
 from IVGU.Table.TableObjects.Line import Line
@@ -71,30 +74,41 @@ class TableConvertor:
         tr = BeautifulSoup(table, 'html.parser').select('thead tr')
         return len(tr) == 4
 
-    def get_lesson_from_table(self,table:str,time_table:str):
+    def get_lessons_from_table(self,table:str,time_table:str):
         lines = self.line.get_lines_of_subjects(table)
         all_cells = self.line.lines_separator_into_cells(lines)
-
+        sorted_cells = self.cell.cells_sorted_by_dates(all_cells)
         tbody = self.get_tbody_of_times(time_table)
         timecodes = self.get_time_codes(tbody)
-        quantity = self.get_quantity_of_subgroups(table)
+        have_group = self.have_groups(table)
         group = 1
-        mas = []
-        for i in all_cells:
-            if group > 2:
-                group = 1
-            if i.text != "" and self.have_groups(table):
-                mas.append(self.constr.construct_of_lesson(i,group,timecodes))
-            elif i.text != "" and not self.have_groups(table):
-                mas.append(self.constr.construct_of_lesson(i,str(0),timecodes))
-            elif self.have_groups(table):
-                mas.append(self.constr.construct_of_empty_lesson(i,group,timecodes))
-            else:
-                mas.append(self.constr.construct_of_empty_lesson(i,str(0),timecodes))
-            group += 1
+        mas:dict[str,list[Lesson]] = {}
+        for day in sorted_cells:
 
-
+            for cell in sorted_cells[day]:
+                if group > 2:
+                    group = 1
+                lessons = self.__get_lesson(cell, str(group), timecodes, have_group)
+                mas.setdefault(f"{day}",[])
+                mas[f"{day}"].append(lessons)
+                group += 1
         return mas
 
-    def get_workdays_from_table(self):
-        pass
+    def __get_lesson(self, cell:Tag, group: str, timecodes: dict[str, str], have_group:bool) ->Lesson:
+        if cell.text != "" and have_group:
+            return self.constr.construct_of_lesson(cell,group,timecodes)
+        elif cell.text != "" and  not have_group:
+            return self.constr.construct_of_lesson(cell,str(0),timecodes)
+        elif have_group:
+            return self.constr.construct_of_empty_lesson(cell,group,timecodes)
+        else:
+            return self.constr.construct_of_empty_lesson(cell,str(0),timecodes)
+
+    def get_workdays_from_table(self,table: str,time_table:str) ->list[WorkDay]:
+        lessons = self.get_lessons_from_table(table,time_table)
+        list_of_workdays = []
+        for date in lessons:
+            list = lessons[f"{date}"]
+            converted_date = datetime.strptime(date,'%Y-%m-%d')
+            list_of_workdays.append(WorkDay(list,converted_date))
+        return list_of_workdays

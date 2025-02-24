@@ -11,7 +11,7 @@ from IVGU.Table.TableObjects.Cell import Cell
 class Constructors(Cell):
 
     def get_teacher_from_cell(self,cell: str) -> list[TeacherPlace]:
-        teacher_cell = self.__get_raw_teacher(cell)
+        teacher_cell = self.get_raw_teacher(cell)
         all_teach_place = []
         for i in teacher_cell:
             teacher_place = self.get_teacher_from_tag(i)
@@ -19,8 +19,8 @@ class Constructors(Cell):
         return all_teach_place
 
     def get_teacher_from_tag(self,tag: Tag) ->TeacherPlace:
-        teacher = self.__get_teacher_name(str(tag))
-        place = self.__get_place(str(tag))
+        teacher = self.get_teacher_name(str(tag))
+        place = self.get_place(str(tag))
         teach_place = TeacherPlace(teacher,place)
         return teach_place
 
@@ -39,7 +39,3 @@ class Constructors(Cell):
     def construct_of_empty_subject(self,cell:Tag, subgroup: str,timecodes: dict[str, str]) ->Subject:
         time = timecodes[self.get_data_time_from_cell(str(cell))]
         return Subject(time=time,group=subgroup)
-
-    def construct_of_workday(self,cell:Tag,lessons:list[Lesson]):
-        data = self.get_data_date_from_cell(str(cell))
-        return WorkDay(lessons,data)

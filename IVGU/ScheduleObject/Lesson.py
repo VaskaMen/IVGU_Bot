@@ -17,3 +17,5 @@ class Lesson:
                 t.__dict__ for t in self.teacher_place
             ]
         }
+    def __str__(self):
+        return self.dict()
