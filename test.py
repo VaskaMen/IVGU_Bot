@@ -15,10 +15,10 @@ time_tables = tbc.get_time_table(page)
 
 
 
-lessons = tbc.get_workdays_from_table(tables[0],time_tables[0])
+workdays = tbc.get_lessons_from_table(tables[0],time_tables[0])
 
 
 subgroups = {}
 all_directions = tbc.get_names_of_all_directions(tables[0])
 
-console.print(lessons)
+console.print(workdays)

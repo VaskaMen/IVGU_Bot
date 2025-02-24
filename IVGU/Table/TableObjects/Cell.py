@@ -61,7 +61,33 @@ class Cell:
         data = self.__get_raw_data(cell)
         return data.get("data-time")
 
-    def cells_sorted_by_dates(self,all_cells: ResultSet[Tag]) ->dict[str, list[Tag]] :
+    def cells_sorted_by_groups(self,all_cells: ResultSet[Tag],groups: list[str],have_subgroups:bool) ->dict[str, list[Tag]] :
+        sorted_cells: dict[str, list[Tag]] = {}
+        if len(groups) == 1:
+            sorted_cells[groups[0]] = all_cells
+            return sorted_cells
+        elif not have_subgroups and len(groups) == 2:
+            sorted_cells.setdefault(f'{groups[0]}',[])
+            sorted_cells.setdefault(f'{groups[1]}',[])
+            for id,cell in enumerate(all_cells):
+                sorted_cells[f"{groups[id%2]}"].append(cell)
+            return sorted_cells
+        elif have_subgroups and len(groups) == 2:
+            sorted_cells.setdefault(f'{groups[0]}',[])
+            sorted_cells.setdefault(f'{groups[1]}',[])
+            counter = 1
+            for cell in all_cells:
+                if counter == 1 or counter == 2:
+                    sorted_cells[f"{groups[0]}"].append(cell)
+                if counter == 3 or counter == 4:
+                    sorted_cells[f"{groups[1]}"].append(cell)
+                if counter == 4:
+                    counter = 0
+                counter += 1
+            return sorted_cells
+
+
+    def cells_sorted_by_dates(self,all_cells: list[Tag]) ->dict[str, list[Tag]] :
         sorted_cells: dict[str, list[Tag]] = {}
         for cell in all_cells:
             data = self.get_data_date_from_cell(str(cell))

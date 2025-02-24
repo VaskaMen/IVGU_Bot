@@ -6,8 +6,6 @@ from IVGU.Table.TableObjects.Cell import Cell
 from IVGU.Table.TableObjects.Constructors import Constructors
 from IVGU.Table.TableObjects.Line import Line
 
-
-
 class TableConvertor:
     cell = Cell()
     line = Line()
@@ -70,28 +68,33 @@ class TableConvertor:
         return directions
 
     @staticmethod
-    def have_groups(table: str):
+    def have_subgroups(table: str):
         tr = BeautifulSoup(table, 'html.parser').select('thead tr')
         return len(tr) == 4
 
     def get_lessons_from_table(self,table:str,time_table:str):
         lines = self.line.get_lines_of_subjects(table)
         all_cells = self.line.lines_separator_into_cells(lines)
-        sorted_cells = self.cell.cells_sorted_by_dates(all_cells)
+        have_group = self.have_subgroups(table)
+        all_groups = self.get_groups_names(table)
+        sorted_cells_by_groups = self.cell.cells_sorted_by_groups(all_cells,all_groups,have_group)
+        sorted_by_all: dict[str,dict[str,list[Tag]]] = {}
+        for sorted in sorted_cells_by_groups:
+            sorted_by_all[sorted] = self.cell.cells_sorted_by_dates(sorted_cells_by_groups[sorted])
         tbody = self.get_tbody_of_times(time_table)
         timecodes = self.get_time_codes(tbody)
-        have_group = self.have_groups(table)
         group = 1
-        mas:dict[str,list[Lesson]] = {}
-        for day in sorted_cells:
-
-            for cell in sorted_cells[day]:
-                if group > 2:
-                    group = 1
-                lessons = self.__get_lesson(cell, str(group), timecodes, have_group)
-                mas.setdefault(f"{day}",[])
-                mas[f"{day}"].append(lessons)
-                group += 1
+        mas: dict[str, dict[str, list[Lesson]]] = {}
+        for direction in sorted_by_all:
+            mas.setdefault(direction,{})
+            for day in sorted_by_all[direction]:
+                mas[direction].setdefault(day,[])
+                for cell in sorted_by_all[direction][day]:
+                    if group == 2:
+                        group = 1
+                    lessons = self.__get_lesson(cell, str(group), timecodes, have_group)
+                    mas[direction][f"{day}"].append(lessons)
+                    group += 1
         return mas
 
     def __get_lesson(self, cell:Tag, group: str, timecodes: dict[str, str], have_group:bool) ->Lesson:
@@ -112,3 +115,13 @@ class TableConvertor:
             converted_date = datetime.strptime(date,'%Y-%m-%d')
             list_of_workdays.append(WorkDay(list,converted_date))
         return list_of_workdays
+
+    # def get_group_schedule(self,table: str,time_table:str) -> list[GroupSchedule]:
+    #     workdays = self.get_workdays_from_table(table,time_table)
+    #
+    # def get_sorted_workdays(self,table:str) ->dict[str, list[WorkDay]]:
+    #     sorted_workdays: dict[str, list[WorkDay]] = {}
+    #     all_directions = self.get_names_of_all_directions(table)
+    #     for direction in all_directions:
+    #         sorted_workdays.setdefault(f"{direction}",[])
+    #         sorted_workdays[f"{direction}"].append()
