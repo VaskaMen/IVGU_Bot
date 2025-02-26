@@ -83,14 +83,29 @@ class TableConvertor:
         all_lessons_to_direction = self.__separate_lessons_to_directions(sorted, timecodes, have_subgroup)
         return all_lessons_to_direction
 
-    def __separate_lessons_to_directions(self, sorted:dict[str, dict[str, list[Tag]]], timecodes:dict[str, str], have_subgroup:bool) ->dict[str, dict[str, list[Lesson]]]:
-        separated: dict[str, dict[str, list[Lesson]]] = {}
+    def __separate_lessons_to_directions(self, sorted:dict[str, dict[str, list[Tag]]], timecodes:dict[str, str], have_subgroup:bool) ->dict[str, dict[str, WorkDay]]:
+        separated: dict[str, dict[str, WorkDay]] = {}
         for direction in sorted:
             separated.setdefault(direction,{})
-            for day in sorted[direction]:
-                separated[direction].setdefault(day,[])
-                separated[direction][day] = self.__tags_to_lessons(sorted[direction][day], timecodes, have_subgroup)
+            lessons_by_dates = self.__lessons_separated_by_dates(sorted[direction],timecodes,have_subgroup)
+            separated[direction] = lessons_by_dates
+
         return separated
+
+    def __lessons_separated_by_dates(self,direction: dict[str, list[Tag]],timecodes:dict[str, str],have_subgroup:bool) -> dict[str, WorkDay]:
+        sorted_by_dates:dict[str,WorkDay] = {}
+        for day in direction:
+            direction.setdefault(day,[])
+            list_of_lessons = self.__tags_to_lessons(direction[day], timecodes, have_subgroup)
+            converted_date = self.converted_day(day)
+            workday = WorkDay(list_of_lessons,converted_date)
+            sorted_by_dates[day] = workday
+        return sorted_by_dates
+
+    @staticmethod
+    def converted_day(date:str) -> datetime:
+        converted_date = datetime.strptime(date,'%Y-%m-%d')
+        return converted_date
 
     def __tags_to_lessons(self, lessons_tags: list[Tag], timecodes:dict[str, str], have_subgroup:bool) -> list[Lesson]:
         lessons = []
@@ -125,16 +140,10 @@ class TableConvertor:
         list_of_workdays = []
         for date in lessons:
             list = lessons[f"{date}"]
-            converted_date = datetime.strptime(date,'%Y-%m-%d')
+            converted_date = self.converted_day(date)
             list_of_workdays.append(WorkDay(list,converted_date))
         return list_of_workdays
 
     # def get_group_schedule(self,table: str,time_table:str) -> list[GroupSchedule]:
     #     workdays = self.get_workdays_from_table(table,time_table)
     #
-    # def get_sorted_workdays(self,table:str) ->dict[str, list[WorkDay]]:
-    #     sorted_workdays: dict[str, list[WorkDay]] = {}
-    #     all_directions = self.get_names_of_all_directions(table)
-    #     for direction in all_directions:
-    #         sorted_workdays.setdefault(f"{direction}",[])
-    #         sorted_workdays[f"{direction}"].append()
