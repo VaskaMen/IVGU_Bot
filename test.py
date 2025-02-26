@@ -15,6 +15,6 @@ time_tables = tbc.get_time_table(page)
 
 
 
-workdays = tbc.get_lessons_from_table(tables[0],time_tables[0])
+lessons_sorted = tbc.get_lessons_from_table(tables[0],time_tables[0])["Прикладная информатика"]["2025-02-28"]
 
-console.print(workdays)
+console.print(lessons_sorted.dict())

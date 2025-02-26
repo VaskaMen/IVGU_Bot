@@ -111,7 +111,7 @@ class TableConvertor:
         lessons = []
         group = 1
         for cell in lessons_tags:
-            if group == 2:
+            if group == 3:
                 group = 1
             lesson = self.__get_lesson(cell, str(group), timecodes, have_subgroup)
             lessons.append(lesson)

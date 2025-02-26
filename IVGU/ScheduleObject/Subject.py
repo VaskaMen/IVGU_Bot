@@ -7,9 +7,3 @@ class Subject:
         self.name = name
         self.type = type
         self.group = group
-
-    # def __eq__(self, other):
-    #     if self is other:
-    #         return self.time == other.time
-    #     else:
-    #         return False
