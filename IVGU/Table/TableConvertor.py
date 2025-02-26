@@ -134,16 +134,3 @@ class TableConvertor:
             return self.constr.construct_of_empty_lesson(cell,group,timecodes)
         else:
             return self.constr.construct_of_empty_lesson(cell,str(0),timecodes)
-
-    def get_workdays_from_table(self,table: str,time_table:str) ->list[WorkDay]:
-        lessons = self.get_lessons_from_table(table,time_table)
-        list_of_workdays = []
-        for date in lessons:
-            list = lessons[f"{date}"]
-            converted_date = self.converted_day(date)
-            list_of_workdays.append(WorkDay(list,converted_date))
-        return list_of_workdays
-
-    # def get_group_schedule(self,table: str,time_table:str) -> list[GroupSchedule]:
-    #     workdays = self.get_workdays_from_table(table,time_table)
-    #
