@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 
 from dataclasses import dataclass
@@ -16,7 +16,7 @@ class WorkDay:
 
     def dict(self):
         return {
-            'date': f"{self.date.year}-{self.date.month}-{self.date.day}",
+            'date': date.strftime(self.date,'%Y-%m-%d'),
             'lessons': self.get_dict_lesson()
         }
 

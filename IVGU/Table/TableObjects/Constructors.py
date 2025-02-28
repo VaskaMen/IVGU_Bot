@@ -3,7 +3,6 @@ from bs4 import Tag
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.Subject import Subject
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
-from IVGU.ScheduleObject.WorkDay import WorkDay
 from IVGU.Table.TableObjects.Cell import Cell
 
 

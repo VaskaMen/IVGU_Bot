@@ -12,10 +12,17 @@ class WorkDaysDB(JsonDBBase):
 
     def add_new_work_days(self, work_days: list[WorkDay]):
         data = self.read_file()
-        with open(self.file_name, "w", encoding="utf-8") as f:
-            for i in work_days:
-                data[f"{i.date}"] = i.dict()
-            json.dump(data, f, ensure_ascii=False, indent=4)
+        with open(self.file_name, "w", encoding="utf-8") as file:
+            for workday in work_days:
+                data[f"{workday.date}"] = workday.dict()
+            json.dump(data, file, ensure_ascii=False, indent=4)
+
+    def add_directions(self, directions: list[str]):
+        data = self.read_file()
+        with open(self.file_name, "w", encoding="utf-8") as file:
+            for direction in directions:
+                data[f"{direction}"] = {}
+            json.dump(data, file, ensure_ascii=False, indent=4)
 
     def get_work_days(self) -> list[WorkDay]:
         data = self.read_file()

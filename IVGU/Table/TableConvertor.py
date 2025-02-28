@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup, ResultSet, Tag, NavigableString, PageElement
-from datetime import datetime
+from datetime import datetime, date
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.WorkDay import WorkDay
 from IVGU.Table.TableObjects.Cell import Cell
@@ -103,8 +103,8 @@ class TableConvertor:
         return sorted_by_dates
 
     @staticmethod
-    def converted_day(date:str) -> datetime:
-        converted_date = datetime.strptime(date,'%Y-%m-%d')
+    def converted_day(raw_date:str) -> date:
+        converted_date = datetime.strptime(raw_date,'%Y-%m-%d').date()
         return converted_date
 
     def __tags_to_lessons(self, lessons_tags: list[Tag], timecodes:dict[str, str], have_subgroup:bool) -> list[Lesson]:

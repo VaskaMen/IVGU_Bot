@@ -40,3 +40,8 @@ class Ivgu:
                           term: int,
                           ) -> str:
         return self.session.get(f'https://uni.ivanovo.ac.ru/info/showschedule/{department}/{training_form}/{level}/{course}/{term}').text
+
+    def get_page_of_departments(self,
+                                institute: int,
+                                ):
+        return self.session.get(f"https://uni.ivanovo.ac.ru/info/institutes/{institute}").text
