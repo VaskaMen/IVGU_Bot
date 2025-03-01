@@ -20,6 +20,6 @@ directions = tbc.get_names_of_all_directions(tables[0])
 
 
 
-lessons_sorted = tbc.get_lessons_from_table(tables[0],time_tables[0])
-wddb.add_directions(directions)
-# console.print(lessons_sorted.dict())
+lessons_sorted = tbc.get_direction_schedule(tables[1],time_tables[1])
+wddb.add_directions_schedule(lessons_sorted)
+# console.print(lessons_sorted[0].dict())

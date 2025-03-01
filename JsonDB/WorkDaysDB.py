@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 
+from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 from JsonDB.JsonDBBase import JsonDBBase
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.Subject import Subject
@@ -10,11 +11,11 @@ from IVGU.ScheduleObject.WorkDay import WorkDay
 
 class WorkDaysDB(JsonDBBase):
 
-    def add_new_work_days(self, work_days: list[WorkDay]):
+    def add_directions_schedule(self, list_schedule: list[DirectionSchedule]):
         data = self.read_file()
         with open(self.file_name, "w", encoding="utf-8") as file:
-            for workday in work_days:
-                data[f"{workday.date}"] = workday.dict()
+            for direction in list_schedule:
+                data[f"{direction.direction}"] = direction.dict()
             json.dump(data, file, ensure_ascii=False, indent=4)
 
     def add_directions(self, directions: list[str]):
@@ -71,3 +72,10 @@ class WorkDaysDB(JsonDBBase):
             if w not in w2:
                 dif.append(w)
         return dif
+
+    # def add_new_work_days(self, work_days: dict[str, dict[str, WorkDay]]):
+    #     data = self.read_file()
+    #     with open(self.file_name, "w", encoding="utf-8") as file:
+    #         for workday in work_days:
+    #             data[f"{workday.date}"] = workday.dict()
+    #         json.dump(data, file, ensure_ascii=False, indent=4)

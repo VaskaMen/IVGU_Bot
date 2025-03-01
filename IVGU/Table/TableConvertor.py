@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup, ResultSet, Tag, NavigableString, PageElement
 from datetime import datetime, date
+
+from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.WorkDay import WorkDay
 from IVGU.Table.TableObjects.Cell import Cell
@@ -71,6 +73,14 @@ class TableConvertor:
     def have_subgroups(table: str):
         tr = BeautifulSoup(table, 'html.parser').select('thead tr')
         return len(tr) == 4
+
+    def get_direction_schedule(self, table:str, time_table:str) ->list[DirectionSchedule]:
+        lessons = self.get_lessons_from_table(table,time_table)
+        direction_schedule: list[DirectionSchedule] = []
+        for direction in lessons:
+            dir_sched = DirectionSchedule(direction,lessons[direction])
+            direction_schedule.append(dir_sched)
+        return direction_schedule
 
     def get_lessons_from_table(self,table:str,time_table:str):
         lines = self.line.get_lines_of_subjects(table)
