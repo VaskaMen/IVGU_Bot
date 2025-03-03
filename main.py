@@ -4,17 +4,17 @@ from datetime import datetime
 import schedule
 
 import Seecret
-from IVGU.Ivgu import Ivgu
+from IVGU.IVGUPage import IVGUPage
 from IVGU.ScheduleObject.WorkDay import WorkDay
 from IVGU.SubjectConvertor import SubjectConvertor
 from JsonDB.WorkDaysDB import WorkDaysDB
 
 
 def update_sche():
-    ivgu = Ivgu()
+    ivgu = IVGUPage()
     ivgu.login(Seecret.IVGU_LOGIN, Seecret.IVGU_PASSWORD)
 
-    el = ivgu.get_schedule_lines(ivgu.get_schedule_page())
+    el = ivgu.get_schedule_lines(ivgu._get_schedule_page())
     sc = SubjectConvertor()
     work_days: list[WorkDay] = list()
 

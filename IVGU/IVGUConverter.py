@@ -1,21 +1,14 @@
 from bs4 import BeautifulSoup, Tag, ResultSet
 
-import Seecret
-from IVGU.Ivgu import Ivgu
+class IVGUConverter:
 
-class IvguConverter:
-    ivgu = Ivgu()
-
-    def __init__(self):
-        self.ivgu.login(Seecret.IVGU_LOGIN, Seecret.IVGU_PASSWORD)
-
-    def get_departments(self,institute: int) -> dict[str, str]:
-        all_tags = self.__get_tags_departments(institute)
+    def _get_departments_from_page(self, page: str):
+        all_tags = self.__get_tags_departments(page)
         all_departments = self.__get_departments_from_tags(all_tags)
         return all_departments
 
-    def __get_tags_departments(self, institute:int) ->ResultSet[Tag]:
-        page = self.ivgu.get_page_of_departments(institute)
+    @staticmethod
+    def __get_tags_departments(page:str) ->ResultSet[Tag]:
         all_tags = BeautifulSoup(page, "html.parser").select('.uk-nav-sub a[href^="/info/chair/"]')
         return all_tags
 
@@ -31,13 +24,13 @@ class IvguConverter:
         number = tag.get("href").split('/')[-1]
         return number
 
-    def get_institutes(self,university_number: int) -> dict[str, str]:
-        all_tags = self.__get_tags_institutes(university_number)
+    def _get_institutes_from_page(self,page:str):
+        all_tags = self.__get_tags_institutes(page)
         all_institutes = self.__get_institutes_from_tags(all_tags)
         return all_institutes
 
-    def __get_tags_institutes(self, university_number: int) ->ResultSet[Tag]:
-        page = self.ivgu.get_page_of_institutes(university_number)
+    @staticmethod
+    def __get_tags_institutes(page:str) ->ResultSet[Tag]:
         all_tags = BeautifulSoup(page, "html.parser").select('.uk-nav-sub a[href^="/info/institutes/"]')
         return all_tags
 
