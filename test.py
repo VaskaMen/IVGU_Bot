@@ -1,5 +1,6 @@
 from rich.console import Console
 import Seecret
+from IVGU.IVGU_Converter.IvguConverter import IvguConverter
 from IVGU.Ivgu import Ivgu
 from IVGU.Table.TableConvertor import TableConvertor
 from JsonDB.WorkDaysDB import WorkDaysDB
@@ -7,6 +8,7 @@ from SQLDB.SQLDBB import SQLDBB
 
 sqldbb = SQLDBB()
 tbc = TableConvertor()
+ivgu_con = IvguConverter()
 ivgu = Ivgu()
 console = Console()
 wddb = WorkDaysDB("luboe.json")
@@ -22,7 +24,21 @@ directions = tbc.get_names_of_all_directions(tables[0])
 
 lessons_sorted = tbc.get_direction_schedule(tables[1],time_tables[1])
 for direction in lessons_sorted:
+    sqldbb.add_direction(direction.direction,118)
     for day in direction.schedule:
         for lesson in direction.schedule[day].lessons:
                 sqldbb.add_lesson(lesson)
+
+
+
+institutes = ivgu_con.get_institutes(2)
+
+for institute in institutes:
+    departments = ivgu_con.get_departments(int(institutes[institute]))
+    sqldbb.add_institute(int(institutes[institute]),institute)
+    for department in departments:
+        sqldbb.add_department(int(departments[department]),department,int(institutes[institute]))
+
+sqldbb.commit()
 console.print(lessons_sorted[0].dict())
+

@@ -2,19 +2,25 @@ class SQLCommands:
 
     @staticmethod
     def add_subject(name:str):
-        return f"""insert or ignore into Subject(name) values('{name}')"""
+        return  f"""
+                INSERT INTO Subjects (name)
+                SELECT '{name}'
+                WHERE NOT EXISTS (
+                SELECT 1 FROM Subjects WHERE name = '{name}'
+                )"""
 
     @staticmethod
     def find_subject_by_name(name:str):
-        return f"""select * from Subject where name = '{name}'"""
+        return f"""select * from Subjects where name = '{name}'"""
 
     @staticmethod
     def find_subject_by_id(id:int):
-        return f"""select * from Subject where id = {id}"""
+        return f"""select * from Subjects where id = {id}"""
 
     @staticmethod
     def add_teacher(name:str):
-        return f"""INSERT INTO Teachers (name)
+        return  f"""
+                INSERT INTO Teachers (name)
                 SELECT '{name}'
                 WHERE NOT EXISTS (
                 SELECT 1 FROM Teachers WHERE name = '{name}'
@@ -29,8 +35,13 @@ class SQLCommands:
         return f"""select * from Teachers where id = {id}"""
 
     @staticmethod
-    def add_teachers_of_lesson(teacher_id: int,lesson_id:int):
-        return f"""insert or ignore into TeachersLesson(teacher, lesson) values({teacher_id},{lesson_id})"""
+    def add_teachers_of_lesson(teacher_id: int,lesson_id:int, place_id: int):
+        return  f"""
+                INSERT INTO TeachersLesson (teacher,lesson,place)
+                SELECT {teacher_id},{lesson_id},{place_id}
+                WHERE NOT EXISTS (
+                SELECT 1 FROM TeachersLesson WHERE teacher = {teacher_id}, lesson = {lesson_id}, place ={place_id}
+                )"""
 
     @staticmethod
     def find_teacher_of_lesson_by_lesson_id(lesson_id:int):
@@ -38,7 +49,12 @@ class SQLCommands:
 
     @staticmethod
     def add_place(place:str):
-        return f"""insert or ignore into Places(place) values('{place}')"""
+        return  f"""
+                INSERT INTO Places (place)
+                SELECT '{place}'
+                WHERE NOT EXISTS (
+                SELECT 1 FROM Places WHERE place = '{place}'
+                )"""
 
     @staticmethod
     def find_place_by_place(place:str):
@@ -49,8 +65,13 @@ class SQLCommands:
         return f"""select * from Places where id = {id}"""
 
     @staticmethod
-    def add_department(number:str):
-        return f"""insert or ignore into Departments(number) values('{number}')"""
+    def add_department(id_of_dep:int,name: str,institute_id: int):
+        return  f"""
+                INSERT INTO Departments (id, name, institute)
+                SELECT {id_of_dep},'{name}',{institute_id}
+                WHERE NOT EXISTS (
+                SELECT 1 FROM Departments WHERE id = {id_of_dep}
+                )"""
 
     @staticmethod
     def find_department_by_number(number:str):
@@ -61,21 +82,49 @@ class SQLCommands:
         return f"""select * from Departments where id = {id}"""
 
     @staticmethod
+    def add_institute(id_institute: int,name: str):
+        return  f"""
+                INSERT INTO Institutes (id,name)
+                SELECT {id_institute},'{name}'
+                WHERE NOT EXISTS (
+                SELECT 1 FROM Institutes WHERE id = {id_institute}
+                )"""
+
+    @staticmethod
     def add_direction(name:str, id_department: int):
-        return f"""insert or ignore into Directions(name,department) values('{name}',{id_department})"""
+        return  f"""
+                INSERT INTO Directions (name,department)
+                SELECT '{name}',{id_department}
+                WHERE NOT EXISTS (
+                SELECT 1 FROM Directions WHERE name = '{name}'
+                )"""
 
     @staticmethod
     def add_level(name:str):
-        return f"""insert or ignore into Levels(name) values('{name}')"""
+        return  f"""
+                INSERT INTO Levels (name)
+                SELECT '{name}'
+                WHERE NOT EXISTS (
+                SELECT 1 FROM Levels WHERE name = '{name}'
+                )"""
 
     @staticmethod
     def add_subgroup(name:str):
-        return f"""insert or ignore into Subgroups(name) values('{name}')"""
+        return  f"""
+                INSERT INTO Subgroups (name)
+                SELECT '{name}'
+                WHERE NOT EXISTS (
+                SELECT 1 FROM Subgroups WHERE name = '{name}'
+                )"""
 
     @staticmethod
     def add_group(course:int,subgroup_id:int,level_id:int,direction_id:int):
-        return f"""insert or ignore into Levels(course,subgroup,level,direction)
-         values({course},{subgroup_id}),{level_id},{direction_id}"""
+        return  f"""
+                INSERT INTO Groups (course,subgroup,level,direction)
+                SELECT {course},{subgroup_id},{level_id},{direction_id}
+                WHERE NOT EXISTS (
+                SELECT 1 FROM Directions WHERE course = {course}, subgroup = {subgroup_id}, level = {level_id}, direction = {direction_id}
+                )"""
 
     @staticmethod
     def add_lesson(subject_id:int,place_id:int,time:str,type:str,date:str,group_id: int):

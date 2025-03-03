@@ -9,31 +9,41 @@ from SQLDB.SQLCommands.SQLCommands import SQLCommands
 
 class SQLDBB:
     def __init__(self):
-        self.con = sqlite3.connect("lesson.db")
-        self.cur = self.con.cursor()
-        self.cur.execute(CreateCommands.create_table_levels())
-        self.cur.execute(CreateCommands.create_table_departments())
-        self.cur.execute(CreateCommands.create_table_groups())
-        self.cur.execute(CreateCommands.create_table_places())
-        self.cur.execute(CreateCommands.create_table_lessons())
-        self.cur.execute(CreateCommands.create_table_directions())
-        self.cur.execute(CreateCommands.create_table_subgroups())
-        self.cur.execute(CreateCommands.create_table_subjects())
-        self.cur.execute(CreateCommands.create_table_teachers())
-        self.cur.execute(CreateCommands.create_table_teachers_lesson())
-        self.con.commit()
+        self.__con = sqlite3.connect("lesson.db")
+        self.__cur = self.__con.cursor()
+        self.__cur.execute(CreateCommands.create_table_levels())
+        self.__cur.execute(CreateCommands.create_table_institutes())
+        self.__cur.execute(CreateCommands.create_table_departments())
+        self.__cur.execute(CreateCommands.create_table_groups())
+        self.__cur.execute(CreateCommands.create_table_places())
+        self.__cur.execute(CreateCommands.create_table_lessons())
+        self.__cur.execute(CreateCommands.create_table_directions())
+        self.__cur.execute(CreateCommands.create_table_subgroups())
+        self.__cur.execute(CreateCommands.create_table_subjects())
+        self.__cur.execute(CreateCommands.create_table_teachers())
+        self.__cur.execute(CreateCommands.create_table_teachers_lesson())
+        self.__con.commit()
 
     def add_subject(self, subject: Subject):
-        self.cur.execute(SQLCommands.add_subject(subject.name))
-        self.con.commit()
+        self.__cur.execute(SQLCommands.add_subject(subject.name))
 
     def add_teacher_place(self,teachplace: TeacherPlace):
-        self.cur.execute(SQLCommands.add_teacher(teachplace.teacher))
-        self.cur.execute(SQLCommands.add_place(teachplace.place))
-        self.con.commit()
+        self.__cur.execute(SQLCommands.add_teacher(teachplace.teacher))
+        self.__cur.execute(SQLCommands.add_place(teachplace.place))
 
     def add_lesson(self,lesson: Lesson):
         self.add_subject(lesson.subject)
         for teacher_place in lesson.teacher_places:
             self.add_teacher_place(teacher_place)
-        self.con.commit()
+
+    def add_direction(self,direction: str, department_id: int):
+        self.__cur.execute(SQLCommands.add_direction(direction, department_id))
+
+    def add_department(self, id_of_department: int, name:str, id_of_institute: int):
+        self.__cur.execute(SQLCommands.add_department(id_of_department, name,id_of_institute))
+
+    def add_institute(self,id_of_institute: int,name: str):
+        self.__cur.execute(SQLCommands.add_institute(id_of_institute,name))
+
+    def commit(self):
+        self.__con.commit()

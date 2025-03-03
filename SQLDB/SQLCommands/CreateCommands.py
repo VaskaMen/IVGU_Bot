@@ -1,7 +1,7 @@
 class CreateCommands:
     @staticmethod
     def create_table_subjects() -> str:
-        return """create table if not exists Subject
+        return """create table if not exists Subjects
         (
         id integer primary key autoincrement,
         name text
@@ -26,11 +26,21 @@ class CreateCommands:
         """
 
     @staticmethod
+    def create_table_institutes():
+        return """create table if not exists Institutes
+        (
+        id integer primary key,
+        name text
+        )
+        """
+
+    @staticmethod
     def create_table_departments() -> str:
         return """create table if not exists Departments
         (
         id integer primary key,
-        number integer
+        name text,
+        institute int
         )
         """
 

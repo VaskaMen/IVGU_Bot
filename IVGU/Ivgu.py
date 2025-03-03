@@ -45,3 +45,8 @@ class Ivgu:
                                 institute: int,
                                 ):
         return self.session.get(f"https://uni.ivanovo.ac.ru/info/institutes/{institute}").text
+
+    def get_page_of_institutes(self,
+                               university_number: int,
+                               ):
+        return self.session.get(f"https://uni.ivanovo.ac.ru/info/university/{university_number}").text
