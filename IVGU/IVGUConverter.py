@@ -45,3 +45,27 @@ class IVGUConverter:
     def __get_number_of_institute(tag: Tag) -> str:
         number = tag.get("href").split('/')[-1]
         return number
+
+    def _get_schedule_links_from_page(self,page:str) -> list[str]:
+        all_tags = self.__get_tags_of_schedule(page)
+        all_links = self.__get_links_from_tags_of_schedule(all_tags)
+        return all_links
+
+
+    def __get_links_from_tags_of_schedule(self, tags: list[Tag]) ->list[str] :
+        all_links = []
+        for tag in tags:
+            href = self.__get_href_from_tag(tag)
+            all_links.append(href)
+        return all_links
+
+    @staticmethod
+    def __get_tags_of_schedule(page:str) ->list[Tag]:
+        all_tags = BeautifulSoup(page, "html.parser").select('a[href^="/info/showschedule/"]')
+        filtered_tags = [tag for tag in all_tags if "/exam" not in tag['href']]
+        return filtered_tags
+
+    @staticmethod
+    def __get_href_from_tag(tag: Tag) -> str:
+        href = tag.get("href")
+        return href

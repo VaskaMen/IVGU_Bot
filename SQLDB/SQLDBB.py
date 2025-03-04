@@ -23,6 +23,10 @@ class SQLDBB:
         self.__cur.execute(CreateCommands.create_table_teachers())
         self.__cur.execute(CreateCommands.create_table_teachers_lesson())
         self.__con.commit()
+        self.__cur.execute(SQLCommands.add_level(1,"Бакалавриат"))
+        self.__cur.execute(SQLCommands.add_level(2,"Магистратура"))
+        self.__cur.execute(SQLCommands.add_level(3,"Специалитет"))
+        self.__con.commit()
 
     def add_subject(self, subject: Subject):
         self.__cur.execute(SQLCommands.add_subject(subject.name))

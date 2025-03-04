@@ -4,10 +4,9 @@ from IVGU.IVGUAuthorisation import IVGUAuthorisation
 
 class IVGUPage(IVGUAuthorisation):
 
-    @staticmethod
-    def get_schedule_lines(html_page) -> ResultSet[PageElement]:
-        el = BeautifulSoup(html_page, 'html.parser').find_all('div',{'class': 'active-day'})
-        return el
+    def get_page(self,path: str):
+       return self._session.get(f"https://uni.ivanovo.ac.ru{path}").text
+
 
     def _get_schedule_page(self,
                            department:int,
@@ -27,3 +26,8 @@ class IVGUPage(IVGUAuthorisation):
                                 university_number: int,
                                 ):
         return self._session.get(f"https://uni.ivanovo.ac.ru/info/university/{university_number}").text
+
+    def _get_page_of_list_schedule(self,
+                                   department: int
+                                   ):
+        return self._session.get(f"https://uni.ivanovo.ac.ru/info/schedule/{department}").text

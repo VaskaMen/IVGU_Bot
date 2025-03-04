@@ -18,3 +18,9 @@ class DirectionSchedule:
         for keys in self.schedule:
             schedule[f'{keys}'] = self.schedule[f"{keys}"].dict()
         return schedule
+
+    def __eq__(self, other):
+        if other is DirectionSchedule:
+            if self.direction == other.direction:
+                return True
+        return False

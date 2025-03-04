@@ -48,7 +48,7 @@ class CreateCommands:
     def create_table_levels() -> str:
         return """create table if not exists Levels
         (
-        id integer primary key autoincrement,
+        id integer primary key,
         name text
         )
         """

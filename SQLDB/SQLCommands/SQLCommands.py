@@ -100,12 +100,12 @@ class SQLCommands:
                 )"""
 
     @staticmethod
-    def add_level(name:str):
+    def add_level(id:int,name:str):
         return  f"""
-                INSERT INTO Levels (name)
-                SELECT '{name}'
+                INSERT INTO Levels (id,name)
+                SELECT {id},'{name}'
                 WHERE NOT EXISTS (
-                SELECT 1 FROM Levels WHERE name = '{name}'
+                SELECT 1 FROM Levels WHERE id = {id}
                 )"""
 
     @staticmethod
