@@ -1,5 +1,6 @@
 import sqlite3
 
+from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.Subject import Subject
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
@@ -35,10 +36,19 @@ class SQLDBB:
         self.__cur.execute(SQLCommands.add_teacher(teachplace.teacher))
         self.__cur.execute(SQLCommands.add_place(teachplace.place))
 
+    def add_direction_schedule(self,direction: DirectionSchedule,department_id:int):
+        self.add_direction(direction.direction,department_id)
+        for day in direction.schedule:
+            for lesson in direction.schedule[day].lessons:
+                    self.add_lesson(lesson)
+
     def add_lesson(self,lesson: Lesson):
         self.add_subject(lesson.subject)
         for teacher_place in lesson.teacher_places:
             self.add_teacher_place(teacher_place)
+
+    def add_subgroup(self, subgroup_name: str):
+        self.__cur.execute(SQLCommands.add_subgroup(subgroup_name))
 
     def add_direction(self,direction: str, department_id: int):
         self.__cur.execute(SQLCommands.add_direction(direction, department_id))

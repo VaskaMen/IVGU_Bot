@@ -75,14 +75,15 @@ class TableConvertor:
         return len(tr) == 4
 
     def get_direction_schedule(self, table:str, time_table:str) ->list[DirectionSchedule]:
-        lessons = self.get_lessons_from_table(table,time_table)
+        all_subgroups = self.__get_names_subgroups_names(table)
+        lessons = self.get_lessons_from_table(table,time_table,all_subgroups)
         direction_schedule: list[DirectionSchedule] = []
         for direction in lessons:
             dir_sched = DirectionSchedule(direction,lessons[direction])
             direction_schedule.append(dir_sched)
         return direction_schedule
 
-    def get_lessons_from_table(self,table:str,time_table:str):
+    def get_lessons_from_table(self,table:str,time_table:str,all_subgroups: list[str]):
         lines = self.line.get_lines_of_subjects(table)
         all_cells = self.line.lines_separator_into_cells(lines)
         have_subgroup = self.have_subgroups(table)
@@ -90,23 +91,23 @@ class TableConvertor:
         sorted = self.__sorting_station_for_cells(all_cells, all_groups, have_subgroup)
         tbody = self.get_tbody_of_times(time_table)
         timecodes = self.get_time_codes(tbody)
-        all_lessons_to_direction = self.__separate_lessons_to_directions(sorted, timecodes, have_subgroup)
+        all_lessons_to_direction = self.__separate_lessons_to_directions(sorted, timecodes,all_subgroups, have_subgroup)
         return all_lessons_to_direction
 
-    def __separate_lessons_to_directions(self, sorted:dict[str, dict[str, list[Tag]]], timecodes:dict[str, str], have_subgroup:bool) ->dict[str, dict[str, WorkDay]]:
+    def __separate_lessons_to_directions(self, sorted:dict[str, dict[str, list[Tag]]], timecodes:dict[str, str],all_subgroups: list[str], have_subgroup:bool) ->dict[str, dict[str, WorkDay]]:
         separated: dict[str, dict[str, WorkDay]] = {}
         for direction in sorted:
             separated.setdefault(direction,{})
-            lessons_by_dates = self.__lessons_separated_by_dates(sorted[direction],timecodes,have_subgroup)
+            lessons_by_dates = self.__lessons_separated_by_dates(sorted[direction],timecodes,all_subgroups,have_subgroup)
             separated[direction] = lessons_by_dates
 
         return separated
 
-    def __lessons_separated_by_dates(self,direction: dict[str, list[Tag]],timecodes:dict[str, str],have_subgroup:bool) -> dict[str, WorkDay]:
+    def __lessons_separated_by_dates(self,direction: dict[str, list[Tag]],timecodes:dict[str, str], all_subgroups: list[str],have_subgroup:bool) -> dict[str, WorkDay]:
         sorted_by_dates:dict[str,WorkDay] = {}
         for day in direction:
             direction.setdefault(day,[])
-            list_of_lessons = self.__tags_to_lessons(direction[day], timecodes, have_subgroup)
+            list_of_lessons = self.__tags_to_lessons(direction[day], timecodes,all_subgroups, have_subgroup)
             converted_date = self.converted_day(day)
             workday = WorkDay(list_of_lessons,converted_date)
             sorted_by_dates[day] = workday
@@ -117,16 +118,24 @@ class TableConvertor:
         converted_date = datetime.strptime(raw_date,'%Y-%m-%d').date()
         return converted_date
 
-    def __tags_to_lessons(self, lessons_tags: list[Tag], timecodes:dict[str, str], have_subgroup:bool) -> list[Lesson]:
+    def __tags_to_lessons(self, lessons_tags: list[Tag], timecodes:dict[str, str],all_subgroups: list[str], have_subgroup:bool) -> list[Lesson]:
         lessons = []
-        group = 1
+        group = 0
         for cell in lessons_tags:
-            if group == 3:
-                group = 1
-            lesson = self.__get_lesson(cell, str(group), timecodes, have_subgroup)
+            if group == len(all_subgroups):
+                group = 0
+            lesson = self.__get_lesson(cell, all_subgroups[group], timecodes, have_subgroup)
             lessons.append(lesson)
             group += 1
         return lessons
+
+    @staticmethod
+    def __get_names_subgroups_names(table:str) ->list[str]:
+        th = BeautifulSoup(table, 'html.parser').select('thead tr')[-1].select("th")
+        all_subgroups = []
+        for subgroup in th:
+            all_subgroups.append(subgroup.text)
+        return all_subgroups
 
     def __sorting_station_for_cells(self, all_cells:ResultSet[Tag], all_groups: list[str], have_subgroup: bool) -> dict[str, dict[str, list[Tag]]]:
         sorted_cells_by_groups = self.cell.cells_sorted_by_groups(all_cells,all_groups,have_subgroup)
