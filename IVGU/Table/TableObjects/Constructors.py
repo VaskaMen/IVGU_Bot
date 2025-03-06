@@ -37,4 +37,4 @@ class Constructors(Cell):
 
     def construct_of_empty_subject(self,cell:Tag, subgroup: str,timecodes: dict[str, str]) ->Subject:
         time = timecodes[self.get_data_time_from_cell(str(cell))]
-        return Subject(time=time,group=subgroup)
+        return Subject(time=time,subgroup=subgroup)

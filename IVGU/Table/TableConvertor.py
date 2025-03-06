@@ -75,7 +75,7 @@ class TableConvertor:
         return len(tr) == 4
 
     def get_direction_schedule(self, table:str, time_table:str) ->list[DirectionSchedule]:
-        all_subgroups = self.__get_names_subgroups_names(table)
+        all_subgroups = self.__get_subgroups_names(table)
         lessons = self.get_lessons_from_table(table,time_table,all_subgroups)
         direction_schedule: list[DirectionSchedule] = []
         for direction in lessons:
@@ -130,10 +130,10 @@ class TableConvertor:
         return lessons
 
     @staticmethod
-    def __get_names_subgroups_names(table:str) ->list[str]:
-        th = BeautifulSoup(table, 'html.parser').select('thead tr')[-1].select("th")
+    def __get_subgroups_names(table:str) ->list[str]:
+        th_for_true_subgroups = BeautifulSoup(table, 'html.parser').select(' thead tr .white-space-nowrap.font-12.child-column.text-center, thead tr th[rowspan]')
         all_subgroups = []
-        for subgroup in th:
+        for subgroup in th_for_true_subgroups:
             all_subgroups.append(subgroup.text)
         return all_subgroups
 

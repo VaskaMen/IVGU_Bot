@@ -44,6 +44,7 @@ class SQLDBB:
 
     def add_lesson(self,lesson: Lesson):
         self.add_subject(lesson.subject)
+        self.add_subgroup(lesson.subject.subgroup)
         for teacher_place in lesson.teacher_places:
             self.add_teacher_place(teacher_place)
 
