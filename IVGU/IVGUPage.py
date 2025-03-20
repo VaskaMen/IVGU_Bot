@@ -1,5 +1,3 @@
-from bs4 import BeautifulSoup, ResultSet, PageElement
-
 from IVGU.IVGUAuthorisation import IVGUAuthorisation
 
 class IVGUPage(IVGUAuthorisation):

@@ -61,7 +61,8 @@ class Cell:
         data = self.__get_raw_data(cell)
         return data.get("data-time")
 
-    def cells_sorted_by_groups(self,all_cells: ResultSet[Tag],groups: list[str],have_subgroups:bool) ->dict[str, list[Tag]] :
+    @staticmethod
+    def cells_sorted_by_groups(all_cells: ResultSet[Tag],groups: list[str],have_subgroups:bool) ->dict[str, list[Tag]] :
         sorted_cells: dict[str, list[Tag]] = {}
         if len(groups) == 1:
             sorted_cells[groups[0]] = all_cells
