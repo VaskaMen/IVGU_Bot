@@ -9,9 +9,10 @@ from IVGU.Table.TableObjects.Constructors import Constructors
 from IVGU.Table.TableObjects.Line import Line
 
 class TableConvertor:
-    cell = Cell()
+    cel = Cell()
     line = Line()
     constr = Constructors()
+
     def get_groups_names(self, table: str) -> list[str]:
         names = []
         table_head = self.__get_table_head(table)
@@ -56,7 +57,7 @@ class TableConvertor:
             mas.append(str(result))
         return mas
 
-    def get_subject_tables(self,page:str) ->list[str]:
+    def get_subject_tables(self, page:str) ->list[str]:
         subject_tables = BeautifulSoup(page, 'html.parser').select('.second-table')
         return self.result_set_to_list_str(subject_tables)
 
@@ -138,10 +139,10 @@ class TableConvertor:
         return all_subgroups
 
     def __sorting_station_for_cells(self, all_cells:ResultSet[Tag], all_groups: list[str], have_subgroup: bool) -> dict[str, dict[str, list[Tag]]]:
-        sorted_cells_by_groups = self.cell.cells_sorted_by_groups(all_cells,all_groups,have_subgroup)
+        sorted_cells_by_groups = self.cel.cells_sorted_by_groups(all_cells, all_groups, have_subgroup)
         sorted_by_all: dict[str,dict[str,list[Tag]]] = {}
         for sorted in sorted_cells_by_groups:
-            sorted_by_all[sorted] = self.cell.cells_sorted_by_dates(sorted_cells_by_groups[sorted])
+            sorted_by_all[sorted] = self.cel.cells_sorted_by_dates(sorted_cells_by_groups[sorted])
         return sorted_by_all
 
     def __get_lesson(self, cell:Tag, group: str, timecodes: dict[str, str], have_group:bool) ->Lesson:
