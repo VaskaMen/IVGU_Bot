@@ -27,13 +27,12 @@ tbmark.table_markup()
 
 
 
-
 # print(tbmark.table.prettify())
 srtio = StringIO(tbmark.table.prettify())
 panda = pd.read_html(srtio)
 keys = panda[0].keys()
-g = panda[0].get(keys[2])
-for i in g:
-    if not pd.isnull(i):
-        print(i)
+lines = panda[0].get(keys[2])
+for line in lines:
+    if not pd.isnull(line):
+        print(line)
 
