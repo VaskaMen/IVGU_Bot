@@ -38,10 +38,6 @@ class TableConvertor:
         tbody.find('thead').extract()
         return tbody
 
-    def get_time_table(self,page:str) ->list[str]:
-        subject_tables = BeautifulSoup(page, 'html.parser').select('.first-table')
-        return self.result_set_to_list_str(subject_tables)
-
     @staticmethod
     def  get_time_codes(tbody:BeautifulSoup):
         all_times = BeautifulSoup(str(tbody), "html.parser").select('.text-bold.cell.text-center')

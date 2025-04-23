@@ -1,5 +1,3 @@
-
-
 from IVGU.ScheduleObject.Subject import Subject
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 
@@ -18,4 +16,4 @@ class Lesson:
             ]
         }
     def __str__(self):
-        return self.dict()
+        return str(self.dict())
