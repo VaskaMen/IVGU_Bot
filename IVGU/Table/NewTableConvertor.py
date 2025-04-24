@@ -4,19 +4,12 @@ from bs4 import BeautifulSoup, ResultSet, PageElement, Tag, NavigableString
 from pandas import Index
 
 from IVGU.ScheduleObject.Lesson import Lesson
-from IVGU.ScheduleObject.Subject import Subject
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 from IVGU.ScheduleObject.WorkDay import WorkDay
 from IVGU.Table.LineConvertor import LineConvertor
 
 
 class NewTableConvertor(LineConvertor):
-    def get_subject(self,timecodes:dict[str,str], subgroup: str,line:str) -> Subject:
-        time = self._get_time(line, timecodes)
-        name = self._get_name_of_lesson(line)
-        type = self._get_type_of_subject(line)
-        return Subject(time,name,type,subgroup)
-
     @staticmethod
     def __result_set_to_list_str(result_set:  ResultSet[PageElement | Tag | NavigableString]) -> list[str]:
         mas = []
@@ -56,7 +49,16 @@ class NewTableConvertor(LineConvertor):
         return all_teacherplaces
 
     def get_lesson(self, timecodes:dict[str,str], subgroup: str,line:str) ->Lesson:
-        return Lesson(self.get_subject(timecodes,subgroup,line),self.get_list_of_teacherplace(line))
+        time = self._get_time(line, timecodes)
+        name = self._get_name_of_lesson(line)
+        type_subject = self._get_type_of_subject(line)
+        teacher_place = self.get_list_of_teacherplace(line)
+        return Lesson(
+            time= time,
+            name=name,
+            type_subject=type_subject,
+            teacher_place=teacher_place
+        )
 
     def get_lessons(self, timecodes:dict[str,str], subgroup: str, lines: list[str]) ->list[Lesson]:
         all_lessons = []
@@ -74,6 +76,10 @@ class NewTableConvertor(LineConvertor):
         list_workdays = []
         for date in sorted_lines:
             lessons = self.get_lessons(timecodes, subgroup,sorted_lines[date])
-            workday = WorkDay(lessons,self.converted_day(date))
+            workday = WorkDay(
+                lessons=lessons,
+                date=self.converted_day(date),
+                subgroup=subgroup
+            )
             list_workdays.append(workday)
         return list_workdays

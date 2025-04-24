@@ -23,11 +23,10 @@ tbmark.table_markup()
 time_table = tableex.get_time_table(page)
 timecodes = newtab.get_time_codes(time_table)
 
-# print(tbmark.table.prettify())
 srtio = StringIO(tbmark.table.prettify())
 panda = pd.read_html(srtio)
 keys = panda[0].keys()
-lines = panda[0].get(keys[1])
+lines = panda[0].get(keys[2])
 sorted_lines = newtab.lines_sorted_by_dates(lines)
 
 all_subgroups = newtab.get_all_subgroups(keys)
@@ -37,11 +36,6 @@ for key in keys:
         print(workday)
 
 
-# st1 = "$date_time~13~  $date_date~2025-04-26~  $lesson  Английский язык в сфере профессиональной коммуникации (практическое занятие)  (Факультатив)  $lesson  $teacher  Доцент Мелентьева О.А., Д - Дистанционно  $teacher  $teacher  Доцент Москалева С.И., Д - Дистанционно  $teacher  $date_date~2025-04-26~  $date_time~13~"
-# print(newtab.get_lesson(timecodes,"EA",st1))
-
-# for teachplace in all_teahplaces:
-#     print(newtab.get_teacher(teachplace))
-#     print(newtab.get_place(teachplace))
-#     print("")
-
+# workdays = newtab.get_workdays(timecodes,newtab.get_subgroup(keys[2]), sorted_lines)
+# for workday in workdays:
+#     print(workday)

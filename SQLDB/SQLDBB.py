@@ -2,7 +2,6 @@ import sqlite3
 
 from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 from IVGU.ScheduleObject.Lesson import Lesson
-from IVGU.ScheduleObject.Subject import Subject
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 from SQLDB.SQLCommands.CreateCommands import CreateCommands
 from SQLDB.SQLCommands.SQLCommands import SQLCommands
@@ -29,8 +28,8 @@ class SQLDBB:
         self.__cur.execute(SQLCommands.add_level(3,"Специалитет"))
         self.__con.commit()
 
-    def add_subject(self, subject: Subject):
-        self.__cur.execute(SQLCommands.add_subject(subject.name))
+    def add_subject(self, lesson: Lesson):
+        self.__cur.execute(SQLCommands.add_subject(lesson.name))
 
     def add_teacher_place(self,teachplace: TeacherPlace):
         self.__cur.execute(SQLCommands.add_teacher(teachplace.teacher))
@@ -43,8 +42,8 @@ class SQLDBB:
                     self.add_lesson(lesson)
 
     def add_lesson(self,lesson: Lesson):
-        self.add_subject(lesson.subject)
-        self.add_subgroup(lesson.subject.subgroup)
+        self.add_subject(lesson)
+        self.add_subgroup(lesson.type_subject)
         for teacher_place in lesson.teacher_places:
             self.add_teacher_place(teacher_place)
 
