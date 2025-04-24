@@ -23,10 +23,13 @@ class LineConvertor:
         return lesson.split("(")[0].rstrip()
 
     def get_teachers_with_place(self, line: str) -> list[str]:
-        st = line.split("$teacher")
-        st.pop(0)
-        st.pop(-1)
-        return self.__clean_teachers(st)
+        if "$teacher" in line:
+            st = line.split("$teacher")
+            st.pop(0)
+            st.pop(-1)
+            return self.__clean_teachers(st)
+        else:
+            return ["None,None"]
 
     @staticmethod
     def get_teacher(teacher_place: str):
@@ -34,8 +37,12 @@ class LineConvertor:
 
     @staticmethod
     def get_place(teacher_place: str) -> str:
-       return teacher_place.split(",")[1].strip()
-
+        teach_place = teacher_place.split(",")
+        if len(teach_place) >= 2:
+            correct_teach_place = teach_place[1].strip()
+            return correct_teach_place
+        else:
+            return ""
     @staticmethod
     def __clean_teachers(line: list[str]) -> list[str]:
         new_line = []
@@ -49,3 +56,11 @@ class LineConvertor:
         raw_time = self.__get_date_time_code_from_line(line)
         time = timecodes[raw_time]
         return time
+
+    def lines_sorted_by_dates(self, all_lines: list[str]) ->dict[str, list[str]] :
+        sorted_lines: dict[str, list[str]] = {}
+        for line in all_lines:
+            data = self._get_date_date_from_line(str(line))
+            sorted_lines.setdefault(f"{data}",[])
+            sorted_lines[f"{data}"].append(line)
+        return sorted_lines

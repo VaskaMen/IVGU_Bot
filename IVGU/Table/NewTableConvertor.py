@@ -1,9 +1,12 @@
+from datetime import date, datetime
+
 from bs4 import BeautifulSoup, ResultSet, PageElement, Tag, NavigableString
 from pandas import Index
 
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.Subject import Subject
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
+from IVGU.ScheduleObject.WorkDay import WorkDay
 from IVGU.Table.LineConvertor import LineConvertor
 
 
@@ -54,3 +57,23 @@ class NewTableConvertor(LineConvertor):
 
     def get_lesson(self, timecodes:dict[str,str], subgroup: str,line:str) ->Lesson:
         return Lesson(self.get_subject(timecodes,subgroup,line),self.get_list_of_teacherplace(line))
+
+    def get_lessons(self, timecodes:dict[str,str], subgroup: str, lines: list[str]) ->list[Lesson]:
+        all_lessons = []
+        for line in lines:
+            lesson = self.get_lesson(timecodes,subgroup,line)
+            all_lessons.append(lesson)
+        return all_lessons
+
+    @staticmethod
+    def converted_day(raw_date:str) -> date:
+        converted_date = datetime.strptime(raw_date,'%Y-%m-%d').date()
+        return converted_date
+
+    def get_workdays(self,timecodes:dict[str,str], subgroup: str, sorted_lines:dict[str, list[str]]) -> list[WorkDay]:
+        list_workdays = []
+        for date in sorted_lines:
+            lessons = self.get_lessons(timecodes, subgroup,sorted_lines[date])
+            workday = WorkDay(lessons,self.converted_day(date))
+            list_workdays.append(workday)
+        return list_workdays
