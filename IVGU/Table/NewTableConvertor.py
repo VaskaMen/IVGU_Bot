@@ -3,10 +3,13 @@ from datetime import date, datetime
 from bs4 import BeautifulSoup, ResultSet, PageElement, Tag, NavigableString
 from pandas import Index
 
+from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 from IVGU.ScheduleObject.WorkDay import WorkDay
 from IVGU.Table.LineConvertor import LineConvertor
+from test import direction
+from test_2 import workdays
 
 
 class NewTableConvertor(LineConvertor):
@@ -25,16 +28,23 @@ class NewTableConvertor(LineConvertor):
             time_codes[f"{i.get('data-time')}"] = i.text
         return time_codes
 
-    @staticmethod
-    def get_all_subgroups(keys_subgroups: Index) -> list[str]:
+    def get_all_subgroups(self, keys_subgroups: Index) -> list[str]:
         all_subgroups = []
         for key in keys_subgroups:
-            all_subgroups.append(key[-1])
+            all_subgroups.append(self.get_subgroup(key))
         return all_subgroups
 
     @staticmethod
     def get_subgroup(key_subgroup) -> str:
         return key_subgroup[-1]
+
+    @staticmethod
+    def get_all_directions(keys: Index) -> list[str]:
+        all_directions = []
+        for key in keys:
+            if "Направление" in key[0]:
+                all_directions.append(key[0])
+        return all_directions
 
     def get_teacherplace(self, teacherplace: str) -> TeacherPlace:
         teacher = self.get_teacher(teacherplace)
@@ -76,10 +86,13 @@ class NewTableConvertor(LineConvertor):
         list_workdays = []
         for date in sorted_lines:
             lessons = self.get_lessons(timecodes, subgroup,sorted_lines[date])
-            workday = WorkDay(
-                lessons=lessons,
-                date=self.converted_day(date),
-                subgroup=subgroup
-            )
+            workday = WorkDay(lessons = lessons,date = self.converted_day(date),subgroup = subgroup)
             list_workdays.append(workday)
         return list_workdays
+
+    def get_direction_schedules(self,timecodes:dict[str,str],subgroup: str, keys: Index,sorted_lines:dict[str, list[str]]):
+        list_dir_sched = []
+        for key in keys:
+            workdays = self.get_workdays(timecodes,subgroup,sorted_lines)
+            directionschedule = DirectionSchedule(self.)
+        return DirectionSchedule(direction,list_workdays)

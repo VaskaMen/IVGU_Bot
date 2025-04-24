@@ -15,19 +15,6 @@ class WorkDay:
     date: date
     subgroup: str
 
-    # def dict(self):
-    #     return {
-    #         'date': date.strftime(self.date,'%Y-%m-%d'),
-    #         'lessons': self.get_dict_lesson()
-    #     }
-    #
-    # def get_dict_lesson(self):
-    #     lessons = []
-    #     for lesson in self.lessons:
-    #         if lesson.subject.name != "":
-    #             lessons.append(lesson.dict())
-    #     return lessons
-
     def __str__(self) -> str:
         res = f"***{self.date} {week[self.date.weekday()]}***\n\n"
         for i in self.lessons:
