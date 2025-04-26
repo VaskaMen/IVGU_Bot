@@ -8,8 +8,7 @@ from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 from IVGU.ScheduleObject.WorkDay import WorkDay
 from IVGU.Table.LineConvertor import LineConvertor
-from test import direction
-from test_2 import workdays
+
 
 
 class NewTableConvertor(LineConvertor):
@@ -19,6 +18,29 @@ class NewTableConvertor(LineConvertor):
         for result in result_set:
             mas.append(str(result))
         return mas
+
+
+
+    def split_directions(self,table:str) -> ResultSet[Tag]:
+        directions = self.__get_table_head_directions(table)
+        splitted_directions = self.tags_splitter(directions)
+        return splitted_directions
+
+    @staticmethod
+    def __get_table_head_directions(table: str) -> ResultSet[Tag]:
+        tr = BeautifulSoup(table, 'html.parser').select('thead tr')
+        th = BeautifulSoup(str(tr[2]), 'html.parser').select('th')
+        return th
+
+    @staticmethod
+    def tags_splitter(td: ResultSet[Tag]) -> ResultSet[Tag]:
+        for id,elem in enumerate(td):
+            colspan = elem.get("colspan")
+            if colspan is not None:
+                elem["colspan"] = "1"
+                for i in range(int(colspan)-1):
+                    td.insert(id+i, elem)
+        return td
 
     @staticmethod
     def get_time_codes(tbody:ResultSet[Tag]) -> dict[str,str]:
@@ -90,9 +112,9 @@ class NewTableConvertor(LineConvertor):
             list_workdays.append(workday)
         return list_workdays
 
-    def get_direction_schedules(self,timecodes:dict[str,str],subgroup: str, keys: Index,sorted_lines:dict[str, list[str]]):
-        list_dir_sched = []
-        for key in keys:
-            workdays = self.get_workdays(timecodes,subgroup,sorted_lines)
-            directionschedule = DirectionSchedule(self.)
-        return DirectionSchedule(direction,list_workdays)
+    # def get_direction_schedules(self,timecodes:dict[str,str],subgroup: str, keys: Index,sorted_lines:dict[str, list[str]]):
+    #     list_dir_sched = []
+    #     for key in keys:
+    #         workdays = self.get_workdays(timecodes,subgroup,sorted_lines)
+    #         directionschedule = DirectionSchedule(self.)
+    #     return DirectionSchedule(direction,list_workdays)
