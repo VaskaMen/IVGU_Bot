@@ -19,12 +19,15 @@ class NewTableConvertor(LineConvertor):
             mas.append(str(result))
         return mas
 
-
-
-    def split_directions(self,table:str) -> ResultSet[Tag]:
+    def split_directions(self,table:str) -> BeautifulSoup:
         directions = self.__get_table_head_directions(table)
         splitted_directions = self.tags_splitter(directions)
-        return splitted_directions
+
+        bs = BeautifulSoup(table, 'html.parser')
+        tr = bs.select('thead tr')
+        tr[2].clear()
+        self.insert_tags(tr[2], splitted_directions)
+        return bs
 
     @staticmethod
     def __get_table_head_directions(table: str) -> ResultSet[Tag]:
@@ -41,6 +44,14 @@ class NewTableConvertor(LineConvertor):
                 for i in range(int(colspan)-1):
                     td.insert(id+i, elem)
         return td
+
+    @staticmethod
+    def insert_tags(tag_to_insert: Tag, tags: ResultSet[Tag]):
+        for tag in tags:
+            copy = tag.copy_self()
+            copy.append(tag.text)
+            tag_to_insert.append(copy)
+
 
     @staticmethod
     def get_time_codes(tbody:ResultSet[Tag]) -> dict[str,str]:
