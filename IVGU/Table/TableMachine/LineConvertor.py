@@ -1,6 +1,3 @@
-from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
-
-
 class LineConvertor:
     @staticmethod
     def __get_date_time_code_from_line(line:str) -> str:

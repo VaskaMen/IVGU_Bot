@@ -14,7 +14,7 @@ class Table:
     __tbc = TableConvertor()
     __tableex = TableExtractor()
 
-    def get_schedules(self, page: str) -> list[DirectionSchedule]:
+    def get_schedules_from_page(self, page: str) -> list[DirectionSchedule]:
         tables = self.__tableex.get_subject_tables(page)
         time_table = self.__tableex.get_time_table(page)
         timecodes = self.__tableex.get_time_codes(time_table)
