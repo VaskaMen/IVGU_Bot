@@ -6,7 +6,7 @@ from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 from IVGU.ScheduleObject.WorkDay import WorkDay
-from IVGU.Table.LineConvertor import LineConvertor
+from IVGU.Table.TableMachine.LineConvertor import LineConvertor
 
 
 class Constructors(LineConvertor):

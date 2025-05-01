@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup, ResultSet, Tag
 from pandas import Index
 
-from IVGU.Table.Constructors import Constructors
+from IVGU.Table.TableMachine.Constructors import Constructors
 
 
 
