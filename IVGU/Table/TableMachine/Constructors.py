@@ -33,7 +33,9 @@ class Constructors(LineConvertor):
         all_teacherplaces = []
         all_teachers_with_place = self.get_teachers_with_place(line)
         for teachers_with_place in  all_teachers_with_place:
-            all_teacherplaces.append(self.get_teacherplace(teachers_with_place))
+            teacher_place = self.get_teacherplace(teachers_with_place)
+            if teacher_place.teacher != "":
+                all_teacherplaces.append(teacher_place)
         return all_teacherplaces
 
     def get_teacherplace(self, teacherplace: str) -> TeacherPlace:

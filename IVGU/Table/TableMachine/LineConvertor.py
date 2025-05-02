@@ -33,7 +33,10 @@ class LineConvertor:
 
     @staticmethod
     def get_teacher(teacher_place: str):
-       return teacher_place.split(",")[0]
+        if "(" not in teacher_place:
+            return teacher_place.split(",")[0]
+        else:
+            return ""
 
     @staticmethod
     def get_place(teacher_place: str) -> str:
