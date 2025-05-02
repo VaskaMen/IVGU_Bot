@@ -100,7 +100,6 @@ class CreateCommands:
         (
         id integer primary key autoincrement,
         subject integer,
-        place integer,
         time text,
         type text,
         [date] date,
@@ -114,6 +113,7 @@ class CreateCommands:
         (
         id integer primary key autoincrement,
         teacher integer,
+        place integer,
         lesson integer
         ) 
         """
