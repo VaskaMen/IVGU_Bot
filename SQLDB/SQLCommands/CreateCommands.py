@@ -73,6 +73,16 @@ class CreateCommands:
         """
 
     @staticmethod
+    def create_table_subdirections() -> str:
+        return """create table if not exists SubDirections
+        (
+        id integer primary key autoincrement,
+        name text,
+        direction int
+        )
+        """
+
+    @staticmethod
     def create_table_groups() -> str:
         return """create table if not exists Groups
         (
@@ -80,7 +90,7 @@ class CreateCommands:
         course integer,
         subgroup integer,
         level integer,
-        direction integer
+        subdirection integer
         )
         """
 

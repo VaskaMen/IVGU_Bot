@@ -3,6 +3,7 @@ import sqlite3
 from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
+from IVGU.ScheduleObject.WorkDay import WorkDay
 from SQLDB.SQLCommands.CreateCommands import CreateCommands
 from SQLDB.SQLCommands.SQLCommands import SQLCommands
 
@@ -18,6 +19,7 @@ class SQLDBB:
         self.__cur.execute(CreateCommands.create_table_places())
         self.__cur.execute(CreateCommands.create_table_lessons())
         self.__cur.execute(CreateCommands.create_table_directions())
+        self.__cur.execute(CreateCommands.create_table_subdirections())
         self.__cur.execute(CreateCommands.create_table_subgroups())
         self.__cur.execute(CreateCommands.create_table_subjects())
         self.__cur.execute(CreateCommands.create_table_teachers())
@@ -38,12 +40,15 @@ class SQLDBB:
     def add_direction_schedule(self,direction: DirectionSchedule,department_id:int):
         self.add_direction(direction.direction,department_id)
         for day in direction.schedule:
-            for lesson in direction.schedule[day].lessons:
-                    self.add_lesson(lesson)
+            self.add_workday(day)
+
+    def add_workday(self,workday: WorkDay):
+        for lesson in workday.lessons:
+            self.add_lesson(lesson)
+            self.add_subgroup(lesson.type_subject)
 
     def add_lesson(self,lesson: Lesson):
         self.add_subject(lesson)
-        self.add_subgroup(lesson.type_subject)
         for teacher_place in lesson.teacher_places:
             self.add_teacher_place(teacher_place)
 
@@ -52,6 +57,9 @@ class SQLDBB:
 
     def add_direction(self,direction: str, department_id: int):
         self.__cur.execute(SQLCommands.add_direction(direction, department_id))
+
+    def add_subdirection(self, subdirection: str, direction_id: int):
+        self.__cur.execute((SQLCommands.add_subdirection(subdirection,direction_id)))
 
     def add_department(self, id_of_department: int, name:str, id_of_institute: int):
         self.__cur.execute(SQLCommands.add_department(id_of_department, name,id_of_institute))

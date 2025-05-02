@@ -99,6 +99,18 @@ class SQLCommands:
                 SELECT 1 FROM Directions WHERE name = '{name}'
                 )"""
 
+    def get_direction_from_subdirection(self):
+        pass
+
+    @staticmethod
+    def add_subdirection(name: str, id_direction: int):
+        return  f"""
+                INSERT INTO SubDirections (name,direction)
+                SELECT '{name}',{id_direction}
+                WHERE NOT EXISTS (
+                SELECT 1 FROM SubDirections WHERE name = '{name}'
+                )"""
+
     @staticmethod
     def add_level(id:int,name:str):
         return  f"""
@@ -118,12 +130,12 @@ class SQLCommands:
                 )"""
 
     @staticmethod
-    def add_group(course:int,subgroup_id:int,level_id:int,direction_id:int):
+    def add_group(course:int, subgroup_id:int, level_id:int, subdirection_id:int):
         return  f"""
-                INSERT INTO Groups (course,subgroup,level,direction)
-                SELECT {course},{subgroup_id},{level_id},{direction_id}
+                INSERT INTO Groups (course,subgroup,level,subdirection)
+                SELECT {course},{subgroup_id},{level_id},{subdirection_id}
                 WHERE NOT EXISTS (
-                SELECT 1 FROM Directions WHERE course = {course}, subgroup = {subgroup_id}, level = {level_id}, direction = {direction_id}
+                SELECT 1 FROM Directions WHERE course = {course}, subgroup = {subgroup_id}, level = {level_id}, subdirection = {subdirection_id}
                 )"""
 
     @staticmethod
