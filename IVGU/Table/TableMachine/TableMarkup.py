@@ -19,7 +19,7 @@ class TableMarkup:
             self.__insert_indicator_around(lessons, "$lesson")
 
     def __add_indicator_of_teacher_place(self):
-        all_teacher_places = self.table.select(".white-space-nowrap i")
+        all_teacher_places = self.table.select(".white-space-nowrap i:first-child")
         for teachers_place in all_teacher_places:
             self.__insert_indicator_around(teachers_place, "$teacher")
 
