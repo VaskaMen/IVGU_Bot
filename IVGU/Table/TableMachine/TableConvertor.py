@@ -1,30 +1,60 @@
-from bs4 import BeautifulSoup, ResultSet, Tag
+from bs4 import BeautifulSoup, ResultSet, Tag, ElementFilter
 from pandas import Index
 
 from IVGU.Table.TableMachine.Constructors import Constructors
 
 
-
-
 class TableConvertor(Constructors):
-    def split_directions(self,table:str) -> BeautifulSoup:
-        directions = self.__get_table_head_directions(table)
-        splitted_directions = self.tags_splitter(directions)
+    table: BeautifulSoup
 
-        bs = BeautifulSoup(table, 'html.parser')
-        tr = bs.select('thead tr')
+    def __init__(self, table: str):
+        super()
+        self.table = BeautifulSoup(table, 'html.parser')
+
+    def set_new_table(self, table: str):
+        self.table = BeautifulSoup(table, 'html.parser')
+
+    def split_subdirections(self):
+        subdirections = self.__get_table_head_subdirections()
+        splitted_subdirections = self.__tags_splitter_by_colspan(subdirections)
+        tr = self.table.select('thead tr')
         tr[2].clear()
-        self.insert_tags(tr[2], splitted_directions)
-        return bs
+        self.__insert_tags(tr[2], splitted_subdirections)
+        return
 
-    @staticmethod
-    def __get_table_head_directions(table: str) -> ResultSet[Tag]:
-        tr = BeautifulSoup(table, 'html.parser').select('thead tr')
-        th = BeautifulSoup(str(tr[2]), 'html.parser').select('th')
+    def split_directions(self):
+        directions = self.__get_table_head_directions()
+
+        splitted_directions: ResultSet[Tag] = ResultSet(None)
+        for direction in directions:
+            data_index: int = int(direction.get('data-idx'))
+            direction_spilt_count = self.__count_data_index(data_index) - 1
+            splitted_directions.extend(self.__tags_splitter(direction, direction_spilt_count))
+        tr = self.table.select('thead tr')
+        tr[1].clear()
+        self.__insert_tags(tr[1], splitted_directions)
+        return
+
+    def __count_data_index(self, index: int):
+        return len(self.table.select(f'thead th[data-idx="{index}"]'))
+
+    def __get_table_head_directions(self) -> ResultSet[Tag]:
+        tr = self.table.select('thead tr')
+        th = tr[1].select('th')
+        return th
+
+    def __get_table_head_subdirections(self) -> ResultSet[Tag]:
+        tr = self.table.select('thead tr')
+        th = tr[2].select('th')
+        return th
+
+    def __get_table_head_group(self) -> ResultSet[Tag]:
+        tr = self.table.select('thead tr')
+        th = tr[3].select('th')
         return th
 
     @staticmethod
-    def tags_splitter(td: ResultSet[Tag]) -> ResultSet[Tag]:
+    def __tags_splitter_by_colspan(td: ResultSet[Tag]) -> ResultSet[Tag]:
         for id,elem in enumerate(td):
             colspan = elem.get("colspan")
             if colspan is not None:
@@ -34,19 +64,15 @@ class TableConvertor(Constructors):
         return td
 
     @staticmethod
-    def insert_tags(tag_to_insert: Tag, tags: ResultSet[Tag]):
+    def __tags_splitter(td: Tag, times: int, ) -> ResultSet[Tag]:
+        new_tds: ResultSet[Tag] = ResultSet(None)
+        for i in range(times):
+            new_tds.insert(i, td)
+        return new_tds
+
+    @staticmethod
+    def __insert_tags(tag_to_insert: Tag, tags: ResultSet[Tag]):
         for tag in tags:
             copy = tag.copy_self()
             copy.append(tag.text)
             tag_to_insert.append(copy)
-
-
-    @staticmethod
-    def get_all_directions(keys: Index) -> list[str]:
-        all_directions = []
-        for key in keys:
-            if "Направление" in key[0]:
-                all_directions.append(key[0])
-        return all_directions
-
-

@@ -61,7 +61,7 @@ class Constructors(LineConvertor):
             lines = table.get(tablehead)
             sorted_lines = self.lines_sorted_by_dates(lines)
             workdays = self.get_workdays(timecodes,self.get_subgroup(tablehead),sorted_lines)
-            direction_schedule = DirectionSchedule(self.get_subdirection(tablehead),workdays)
+            direction_schedule = DirectionSchedule(self.get_direction(tablehead), self.get_subdirection(tablehead),workdays)
             list_direction_schedule.append(direction_schedule)
         return list_direction_schedule
 
@@ -78,3 +78,7 @@ class Constructors(LineConvertor):
     @staticmethod
     def get_subdirection(key_subgroup) -> str:
         return key_subgroup[1]
+
+    @staticmethod
+    def get_direction(key_subgroup) -> str:
+        return key_subgroup[0]

@@ -1,10 +1,11 @@
+from pandas.plotting import table
+
 from IVGU.IVGUPage import IVGUPage
 from IVGU.IVGUConverter import IVGUConverter
 from IVGU.Table.Table import Table
 
 
-class APIIVGU(IVGUPage, IVGUConverter,Table):
-
+class APIIVGU(IVGUPage, IVGUConverter, Table):
     def get_schedule(self,department:int,
                         training_form: int,
                         level: int,

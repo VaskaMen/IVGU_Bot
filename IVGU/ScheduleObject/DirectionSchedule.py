@@ -5,6 +5,7 @@ from IVGU.ScheduleObject.WorkDay import WorkDay
 @dataclass
 class DirectionSchedule:
     direction: str
+    subdirection: str
     schedule: list[WorkDay]
 
     def __eq__(self, other):
