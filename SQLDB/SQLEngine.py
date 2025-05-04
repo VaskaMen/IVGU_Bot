@@ -8,7 +8,7 @@ from datetime import date
 
 class SQLEngine:
     def __init__(self):
-        self.__con = sqlite3.connect("lesson.db")
+        self.__con = sqlite3.connect("Schedules.db")
         self.__cur = self.__con.cursor()
         self.__cur.execute(CreateCommands.create_table_levels())
         self.__cur.execute(CreateCommands.create_table_institutes())
@@ -22,6 +22,7 @@ class SQLEngine:
         self.__cur.execute(CreateCommands.create_table_subjects())
         self.__cur.execute(CreateCommands.create_table_teachers())
         self.__cur.execute(CreateCommands.create_table_teachers_lesson())
+        self.__cur.execute(CreateCommands.create_table_types())
         self.__con.commit()
         self.__cur.execute(SQLCommands.add_level(1,"Бакалавриат"))
         self.__cur.execute(SQLCommands.add_level(2,"Магистратура"))
@@ -59,9 +60,13 @@ class SQLEngine:
 
     def add_direction(self, direction: str, department_id: int):
         self.__cur.execute(SQLCommands.add_direction(direction, department_id))
+        self.__cur.execute(SQLCommands.find_direction_id(direction,department_id))
+        return self.__cur.fetchone()[0]
 
     def add_subdirection(self, subdirection: str, direction_id: int):
         self.__cur.execute((SQLCommands.add_subdirection(subdirection, direction_id)))
+        self.__cur.execute(SQLCommands.find_subdirection_id(subdirection,direction_id))
+        return self.__cur.fetchone()[0]
 
     def add_department(self, id_of_department: int, name: str, id_of_institute: int):
         self.__cur.execute(SQLCommands.add_department(id_of_department, name, id_of_institute))
@@ -71,10 +76,20 @@ class SQLEngine:
 
     def add_lesson(self, lesson: Lesson, date_: date, subgroup: int):
         subject = self._add_subject(lesson)
-        self.__cur.execute(SQLCommands.add_lesson(subject, lesson.time, lesson.type_subject, str(date_), subgroup))
-        self.__cur.execute(SQLCommands.find_id_lesson(subject, lesson.time, lesson.type_subject, str(date_), subgroup))
+        type_for_lesson = self.add_type(lesson.type_subject)
+        self.__cur.execute(SQLCommands.add_lesson(subject, lesson.time, type_for_lesson, str(date_), subgroup))
+        self.__cur.execute(SQLCommands.find_id_lesson(subject, lesson.time, type_for_lesson, str(date_), subgroup))
         return self.__cur.fetchone()[0]
 
+    def add_group(self, course: int, subgroup: int, level: int, subdirection: int):
+        self.__cur.execute(SQLCommands.add_group(course, subgroup,level,subdirection))
+        self.__cur.execute(SQLCommands.find_id_group(course,subgroup,level,subdirection))
+        return self.__cur.fetchone()[0]
+
+    def add_type(self, name: str) -> int:
+        self.__cur.execute(SQLCommands.add_type(name))
+        self.__cur.execute(SQLCommands.find_type_id_by_name(name))
+        return self.__cur.fetchone()[0]
 
     def commit(self):
         self.__con.commit()

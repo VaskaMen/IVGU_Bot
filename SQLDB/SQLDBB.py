@@ -1,4 +1,3 @@
-
 from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 
 from IVGU.ScheduleObject.WorkDay import WorkDay
@@ -7,13 +6,14 @@ from SQLDB.SQLEngine import SQLEngine
 
 class SQLDBB(SQLEngine):
 
-    def add_direction_schedule(self,direction: DirectionSchedule,department_id:int):
-        self.add_direction(direction.direction,department_id)
+    def add_direction_schedule(self,direction: DirectionSchedule, department_id: int):
+        direction_id = self.add_direction(direction.direction,department_id)
+        self.add_subdirection(direction.subdirection,direction_id)
         for day in direction.schedule:
             self.add_workday(day)
         self.commit()
 
-    def add_workday(self,workday: WorkDay):
+    def add_workday(self, workday: WorkDay):
         subgroup = self.add_subgroup(workday.subgroup)
         for lesson in workday.lessons:
             if str(lesson.name) != 'None':

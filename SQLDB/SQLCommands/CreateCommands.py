@@ -95,13 +95,22 @@ class CreateCommands:
         """
 
     @staticmethod
+    def create_table_types() -> str:
+        return """create table if not exists Types
+        (
+        id integer primary key autoincrement,
+        name text
+        ) 
+        """
+
+    @staticmethod
     def create_table_lessons() -> str:
         return """create table if not exists Lessons
         (
         id integer primary key autoincrement,
         subject integer,
         time text,
-        type text,
+        type int,
         [date] date,
         [group] integer
         ) 

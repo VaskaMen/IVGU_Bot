@@ -112,8 +112,11 @@ class SQLCommands:
                 SELECT 1 FROM Directions WHERE name = '{name}'
                 )"""
 
-    def get_direction_from_subdirection(self):
-        pass
+    @staticmethod
+    def find_direction_id(name: str, id_department: int):
+        return  f"""SELECT id FROM Directions WHERE 
+                name = '{name}' AND
+                department = {id_department}"""
 
     @staticmethod
     def add_subdirection(name: str, id_direction: int):
@@ -122,6 +125,12 @@ class SQLCommands:
                 WHERE NOT EXISTS (
                 SELECT 1 FROM SubDirections WHERE name = '{name}'
                 )"""
+
+    @staticmethod
+    def find_subdirection_id(name: str, id_direction: int):
+        return f"""SELECT id FROM SubDirections WHERE 
+            name = '{name}' AND
+            direction = {id_direction}"""
 
     @staticmethod
     def add_level(id:int,name:str):
@@ -155,7 +164,19 @@ class SQLCommands:
                 )"""
 
     @staticmethod
-    def add_lesson(subject_id:int, time:str, type:str, date:str, group_id: int) -> str:
+    def add_type(name: str):
+        return f"""INSERT INTO Types (name)
+                SELECT '{name}'
+                WHERE NOT EXISTS (
+                SELECT 1 FROM Types WHERE name = '{name}'
+                )"""
+
+    @staticmethod
+    def find_type_id_by_name(name: str) -> str:
+        return f"""select * from Types where name = '{name}'"""
+
+    @staticmethod
+    def add_lesson(subject_id: int, time: str, type: int, date: str, group_id: int) -> str:
         return f"""insert into Lessons(
             subject,
             time,
@@ -179,10 +200,18 @@ class SQLCommands:
                 )
             """
     @staticmethod
-    def find_id_lesson(subject_id:int, time:str, type:str, date:str, group_id: int) -> str:
+    def find_id_lesson(subject_id: int, time: str, type: int, date: str, group_id: int) -> str:
         return f"""SELECT id FROM Lessons WHERE 
             subject = {subject_id} AND
             time = '{time}' AND
-            type = '{type}' AND
+            type = {type} AND
             [date] = '{date}' AND
             [group] = {group_id}"""
+
+    @staticmethod
+    def find_id_group(course_id: int, subgroup_id: int, level_id: int, subdirection_id: int):
+        return f"""SELECT id FROM Groups WHERE 
+            course = {course_id} AND
+            subgroup = {subgroup_id} AND
+            level = {level_id} AND
+            subdirection = {subdirection_id}"""
