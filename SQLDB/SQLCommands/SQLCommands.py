@@ -156,7 +156,7 @@ class SQLCommands:
         return  f"""INSERT INTO Groups (course,subgroup,level,subdirection)
                 SELECT {course},{subgroup_id},{level_id},{subdirection_id}
                 WHERE NOT EXISTS (
-                SELECT 1 FROM Directions WHERE
+                SELECT 1 FROM Groups WHERE
                  course = {course} AND
                  subgroup = {subgroup_id} AND
                  level = {level_id} AND

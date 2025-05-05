@@ -1,5 +1,5 @@
-from bs4 import BeautifulSoup, ResultSet, Tag, ElementFilter
-from pandas import Index
+from bs4 import BeautifulSoup, ResultSet, Tag
+
 
 from IVGU.Table.TableMachine.Constructors import Constructors
 

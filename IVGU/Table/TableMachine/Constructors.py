@@ -75,8 +75,11 @@ class Constructors(LineConvertor):
 
     @staticmethod
     def get_subgroup(key_subgroup) -> str:
-        if len(key_subgroup) > 2:
-            return key_subgroup[-1]
+        if key_subgroup[1] != key_subgroup[2]:
+            if "$" in key_subgroup[-1]:
+                return key_subgroup[-2]
+            else:
+                return key_subgroup[-1]
         else:
             return "Без подгрупп"
 

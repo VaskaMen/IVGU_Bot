@@ -28,3 +28,13 @@ class APIIVGU(IVGUPage, IVGUConverter, Table):
         page = self._get_page_of_list_schedule(department)
         all_links = self._get_schedule_links_from_page(page)
         return all_links
+
+    def get_course_from_link(self,link: str):
+        return self.__link_splitter(link)[-2]
+
+    def get_level_from_link(self,link: str):
+        return self.__link_splitter(link)[-3]
+
+    @staticmethod
+    def __link_splitter(link: str):
+        return link.split("/")
