@@ -17,10 +17,28 @@ class TableConvertor(Constructors):
     def split_subdirections(self):
         subdirections = self.__get_table_head_subdirections()
         splitted_subdirections = self.__tags_splitter_by_colspan(subdirections)
+        splitted_subdirections = self.__tags_splitter_by_rowspan(splitted_subdirections)
         tr = self.table.select('thead tr')
         tr[2].clear()
         self.__insert_tags(tr[2], splitted_subdirections)
         return
+
+    def duplicate_last_tr(self):
+        list_tr = self.table.select("thead tr")
+        thead = self.table.select("thead")[0]
+        if len(list_tr) < 4:
+            self.__insert_tag(thead,list_tr[-1])
+
+
+    @staticmethod
+    def __tags_splitter_by_rowspan(tr: ResultSet[Tag]) -> ResultSet[Tag]:
+        for id, elem in enumerate(tr):
+            rowspan = elem.get("rowspan")
+            if rowspan is not None:
+                elem["rowspan"] = "0"
+                for i in range(int(rowspan) - 1):
+                    tr.insert(id + i, elem)
+        return tr
 
     def split_directions(self):
         directions = self.__get_table_head_directions()
@@ -70,9 +88,12 @@ class TableConvertor(Constructors):
             new_tds.insert(i, td)
         return new_tds
 
-    @staticmethod
-    def __insert_tags(tag_to_insert: Tag, tags: ResultSet[Tag]):
+    def __insert_tags(self, tag_to_insert: Tag, tags: ResultSet[Tag]):
         for tag in tags:
-            copy = tag.copy_self()
-            copy.append(tag.text)
-            tag_to_insert.append(copy)
+            self.__insert_tag(tag_to_insert,tag)
+
+    @staticmethod
+    def __insert_tag(tag_to_insert: Tag, tag: Tag):
+        copy = tag.copy_self()
+        copy.append(tag.text)
+        tag_to_insert.append(copy)

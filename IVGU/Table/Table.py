@@ -36,6 +36,7 @@ class Table:
     def __prepare_table(self) -> StringIO:
         self.__tbc.split_subdirections()
         self.__tbc.split_directions()
+        self.__tbc.duplicate_last_tr()
         tbmark = TableMarkup(str(self.__tbc.table))
         tbmark.table_markup()
         srtio = StringIO(tbmark.table.prettify())
