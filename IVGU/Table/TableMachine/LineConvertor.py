@@ -16,7 +16,10 @@ class LineConvertor:
 
     def _get_type_of_subject(self, line: str) -> str:
         lesson = self.__get_raw_lesson_from_line(line)
-        return lesson.replace(")","(").split("(")[1]
+        lesson = lesson.replace(")","(").split("(")
+        if lesson[-2] == "По выбору":
+            return lesson[-4]
+        return lesson[-2]
 
     def _get_name_of_lesson(self, line: str) -> str:
         lesson = self.__get_raw_lesson_from_line(line)
