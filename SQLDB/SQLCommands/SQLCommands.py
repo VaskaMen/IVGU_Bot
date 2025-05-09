@@ -109,7 +109,7 @@ class SQLCommands:
         return  f"""INSERT INTO Directions (name,department)
                 SELECT '{name}',{id_department}
                 WHERE NOT EXISTS (
-                SELECT 1 FROM Directions WHERE name = '{name}'
+                SELECT 1 FROM Directions WHERE name = '{name}' and department = {id_department}
                 )"""
 
     @staticmethod
