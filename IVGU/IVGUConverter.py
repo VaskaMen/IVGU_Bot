@@ -15,7 +15,7 @@ class IVGUConverter:
     def __get_departments_from_tags(self, tags: ResultSet[Tag]) -> dict[str, str]:
         all_departments: dict[str, str] = {}
         for tag in tags:
-            key = tag.text
+            key = tag.text.replace("\n", "")
             all_departments[key] = self.__get_number_of_department(tag)
         return all_departments
 

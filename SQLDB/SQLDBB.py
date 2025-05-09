@@ -8,6 +8,7 @@ class SQLDBB(SQLEngine):
 
     def add_direction_schedule(self,direction: DirectionSchedule, department_id: int, course: int, level:int):
         direction_id = self.add_direction(direction.direction,department_id)
+        self.commit()
         id_subdirection = self.add_subdirection(direction.subdirection,direction_id)
         for day in direction.schedule:
             self.add_workday(day,course,level,id_subdirection)
