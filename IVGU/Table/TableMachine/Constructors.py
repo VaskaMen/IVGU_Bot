@@ -57,7 +57,7 @@ class Constructors(LineConvertor):
         return converted_date
 
     def get_direction_schedules(self, timecodes:dict[str,str],table: DataFrame) -> list[DirectionSchedule]:
-        tablehadders:Index = table.keys()
+        tablehadders: Index = table.keys()
         list_direction_schedule = []
         for tablehead in tablehadders:
             lines = table.get(tablehead)
