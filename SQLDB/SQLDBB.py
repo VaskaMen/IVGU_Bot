@@ -1,3 +1,5 @@
+from typing import Any
+
 from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 
 from IVGU.ScheduleObject.WorkDay import WorkDay
@@ -8,7 +10,6 @@ class SQLDBB(SQLEngine):
 
     def add_direction_schedule(self,direction: DirectionSchedule, department_id: int, course: int, level:int):
         direction_id = self.add_direction(direction.direction,department_id)
-        self.commit()
         id_subdirection = self.add_subdirection(direction.subdirection,direction_id)
         for day in direction.schedule:
             self.add_workday(day,course,level,id_subdirection)
@@ -20,3 +21,15 @@ class SQLDBB(SQLEngine):
             if str(lesson.name) != 'None':
                 lesson_id = self.add_lesson(lesson, workday.date, subgroup)
                 self._add_many_teacher_place(lesson_id, lesson.teacher_places)
+
+    def get_list_institutes(self) -> list[str]:
+        list_tuple = self._get_list_institutes()
+        return self.__add_any_in_list(list_tuple)
+
+    @staticmethod
+    def __add_any_in_list(list_of_tuple: list[tuple[Any]]):
+        list_of_any = []
+        for tuplee in list_of_tuple:
+            sm_str = tuplee[0]
+            list_of_any.append(sm_str)
+        return list_of_any

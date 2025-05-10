@@ -6,8 +6,6 @@ from telebot import types
 from telebot.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ForceReply
 
 from User import User
-from JsonDB.UserDB import UserDB
-from JsonDB.WorkDaysDB import WorkDaysDB
 from IVGU.ScheduleObject.WorkDay import WorkDay
 
 week = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]

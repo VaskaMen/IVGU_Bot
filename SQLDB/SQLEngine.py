@@ -1,4 +1,4 @@
-import sqlite3
+from duckdb import duckdb
 
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
@@ -8,7 +8,7 @@ from datetime import date
 
 class SQLEngine:
     def __init__(self):
-        self.__con = sqlite3.connect("Schedules.db")
+        self.__con = duckdb.connect("Schedules.db")
         self.__cur = self.__con.cursor()
         self.__cur.execute(CreateCommands.create_table_levels())
         self.__cur.execute(CreateCommands.create_table_institutes())
@@ -90,6 +90,10 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.add_type(name))
         self.__cur.execute(SQLCommands.find_type_id_by_name(name))
         return self.__cur.fetchone()[0]
+
+    def _get_list_institutes(self) -> list[tuple[str]]:
+        self.__cur.execute(SQLCommands.select_all_institutes())
+        return self.__cur.fetchall()
 
     def commit(self):
         self.__con.commit()

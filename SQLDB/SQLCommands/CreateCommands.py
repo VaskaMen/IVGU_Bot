@@ -126,3 +126,12 @@ class CreateCommands:
         lesson integer
         ) 
         """
+
+    @staticmethod
+    def create_table_users() -> str:
+        return """create table if not exists Users
+        (
+        id integer primary key,
+        [group] integer
+        )
+        """
