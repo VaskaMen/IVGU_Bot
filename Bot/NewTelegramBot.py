@@ -20,8 +20,8 @@ bot.add_custom_filter(custom_filters.TextMatchFilter())
 bot.setup_middleware(StateMiddleware(bot))
 
 @bot.message_handler(commands=['start'])
-def start(message: types.Message):
-    bot.set_state(message.from_user.id, RegisterState.institute)
+def start(message: types.Message, state: StateContext):
+    state.set(RegisterState.institute)
     institutes = sql.get_list_institutes()
     bot.send_message(
         message.chat.id,
@@ -29,18 +29,37 @@ def start(message: types.Message):
     )
     bot.send_message(
         message.from_user.id,
-        text=BotText.insert_instityte,
+        text=BotText.insert_institute,
         reply_markup=BotCreator.create_text_buttons(institutes)
     )
 
 @bot.message_handler(state = RegisterState.institute)
 def handle_institute(message, state: StateContext):
     state.add_data(institute = message.text)
+    state.set(RegisterState.department)
+
     with state.data() as data:
         institute = data.get("institute")
-        bot.send_message(
-            message.from_user.id,
-            f"Вы ввели институт: {institute}"
-        )
+    departments = sql.get_list_departments(institute)
+
+    bot.send_message(
+        message.from_user.id,
+        text=BotText.insert_department,
+        reply_markup=BotCreator.create_text_buttons(departments)
+    )
+
+@bot.message_handler(state = RegisterState.department)
+def handle_department(message, state: StateContext):
+    state.add_data(department = message.text)
+    state.set(RegisterState.direction)
+
+    with state.data() as data:
+        department = data.get("department")
+
+    bot.send_message(
+        message.from_user.id,
+        text=BotText.insert_direction
+    )
+
 
 bot.polling(none_stop=True, interval=0)

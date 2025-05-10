@@ -7,5 +7,5 @@ sql = SQLDBB()
 #
 # print(api.get_departments(116))
 
-list =sql._get_list_institutes()
-print(list[0][0])
+list =sql._get_list_institute_departments("Институт гуманитарных наук")
+print(list)

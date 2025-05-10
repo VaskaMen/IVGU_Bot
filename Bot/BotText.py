@@ -5,4 +5,8 @@ class BotText:
            Для этого вызови команду:\n/subscribe_updates\n
        """
 
-    insert_instityte = """Введите институт:"""
+    insert_institute = """Введите институт:"""
+
+    insert_department = """Введите кафедру:"""
+
+    insert_direction = """Введите направление:"""

@@ -25,7 +25,8 @@ class ScheduleCollector(SQLDBB):
     def __get_schedules_for_link(self, link: str, all_departments: dict[str, str], department: str):
         course = self.api.get_course_from_link(link)
         level = self.api.get_level_from_link(link)
+        form = self.api.get_form_grom_link(link)
         page = self.api.get_page(link)
         schedules = self.api.get_schedules_from_page(page)
         for schedule in schedules:
-            self.add_direction_schedule(schedule, int(all_departments[department]), course, level)
+            self.add_direction_schedule(schedule, int(all_departments[department]), int(form), int(course), int(level))

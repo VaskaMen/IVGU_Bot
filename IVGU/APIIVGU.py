@@ -29,11 +29,14 @@ class APIIVGU(IVGUPage, IVGUConverter, Table):
         all_links = self._get_schedule_links_from_page(page)
         return all_links
 
-    def get_course_from_link(self,link: str):
+    def get_course_from_link(self,link: str) -> str:
         return self.__link_splitter(link)[-2]
 
-    def get_level_from_link(self,link: str):
+    def get_level_from_link(self,link: str) -> str:
         return self.__link_splitter(link)[-3]
+
+    def get_form_grom_link(self, link) -> str:
+        return self.__link_splitter(link)[-4]
 
     @staticmethod
     def __link_splitter(link: str):

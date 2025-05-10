@@ -20,7 +20,7 @@ class IVGUConverter:
         return all_departments
 
     @staticmethod
-    def __get_number_of_department(tag:Tag) -> str:
+    def __get_number_of_department(tag: Tag) -> str:
         number = tag.get("href").split('/')[-1]
         return number
 

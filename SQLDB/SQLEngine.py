@@ -12,6 +12,7 @@ class SQLEngine:
         self.__cur.execute(CreateCommands.create_table_levels())
         self.__cur.execute(CreateCommands.create_table_institutes())
         self.__cur.execute(CreateCommands.create_table_departments())
+        self.__cur.execute(CreateCommands.create_table_forms())
         self.__cur.execute(CreateCommands.create_table_groups())
         self.__cur.execute(CreateCommands.create_table_places())
         self.__cur.execute(CreateCommands.create_table_lessons())
@@ -26,6 +27,9 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.add_level(1,"Бакалавриат"))
         self.__cur.execute(SQLCommands.add_level(2,"Магистратура"))
         self.__cur.execute(SQLCommands.add_level(3,"Специалитет"))
+        self.__cur.execute(SQLCommands.add_form(6,'Очная Форма обучения'))
+        self.__cur.execute(SQLCommands.add_form(8,'Очно-заочная Форма обучения'))
+        self.__cur.execute(SQLCommands.add_form(7,'Заочная Форма обучения'))
         self.__con.commit()
 
     def _add_subject(self, lesson: Lesson) -> int:
@@ -80,9 +84,9 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.find_id_lesson(subject, lesson.time, type_for_lesson, str(date_), subgroup))
         return self.__cur.fetchone()[0]
 
-    def add_group(self, course: int, subgroup: int, level: int, subdirection: int):
-        self.__cur.execute(SQLCommands.add_group(course, subgroup,level,subdirection))
-        self.__cur.execute(SQLCommands.find_id_group(course,subgroup,level,subdirection))
+    def add_group(self, course: int, subgroup: int, level: int,form: int, subdirection: int):
+        self.__cur.execute(SQLCommands.add_group(course, subgroup, level, form, subdirection))
+        self.__cur.execute(SQLCommands.find_id_group(course, subgroup, level, form, subdirection))
         return self.__cur.fetchone()[0]
 
     def add_type(self, name: str) -> int:
@@ -92,6 +96,10 @@ class SQLEngine:
 
     def _get_list_institutes(self) -> list[tuple[str]]:
         self.__cur.execute(SQLCommands.select_all_institutes())
+        return self.__cur.fetchall()
+
+    def _get_list_institute_departments(self, institute: str):
+        self.__cur.execute(SQLCommands.select_all_institute_departments(institute))
         return self.__cur.fetchall()
 
     def commit(self):

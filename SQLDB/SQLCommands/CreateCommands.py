@@ -45,6 +45,15 @@ class CreateCommands:
         """
 
     @staticmethod
+    def create_table_forms() -> str:
+        return """create table if not exists Forms
+        (
+        id integer primary key,
+        name text
+        )
+        """
+
+    @staticmethod
     def create_table_levels() -> str:
         return """create table if not exists Levels
         (
@@ -90,6 +99,7 @@ class CreateCommands:
         course integer,
         subgroup integer,
         level integer,
+        form integer,
         subdirection integer
         )
         """

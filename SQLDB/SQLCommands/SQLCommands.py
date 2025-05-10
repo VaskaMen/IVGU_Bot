@@ -133,11 +133,19 @@ class SQLCommands:
             direction = {id_direction}"""
 
     @staticmethod
-    def add_level(id: int, name:str) -> str:
+    def add_level(id: int, name: str) -> str:
         return  f"""INSERT INTO Levels (id,name)
                 SELECT {id},'{name}'
                 WHERE NOT EXISTS (
                 SELECT 1 FROM Levels WHERE id = {id}
+                )"""
+
+    @staticmethod
+    def add_form(id: int, name: str) ->str:
+        return f"""INSERT INTO Forms (id,name)
+                SELECT {id},'{name}'
+                WHERE NOT EXISTS (
+                SELECT 1 FROM Forms WHERE id = {id}
                 )"""
 
     @staticmethod
@@ -152,14 +160,15 @@ class SQLCommands:
         return f"""SELECT id FROM Subgroups WHERE name = '{name}'"""
 
     @staticmethod
-    def add_group(course: int, subgroup_id: int, level_id: int, subdirection_id: int) -> str:
-        return  f"""INSERT INTO Groups (course,subgroup,level,subdirection)
-                SELECT {course},{subgroup_id},{level_id},{subdirection_id}
+    def add_group(course: int, subgroup_id: int, level_id: int,form_id: int, subdirection_id: int) -> str:
+        return  f"""INSERT INTO Groups (course,subgroup,level,form,subdirection)
+                SELECT {course},{subgroup_id},{level_id},{form_id},{subdirection_id}
                 WHERE NOT EXISTS (
                 SELECT 1 FROM Groups WHERE
                  course = {course} AND
                  subgroup = {subgroup_id} AND
                  level = {level_id} AND
+                 form = {form_id} AND
                  subdirection = {subdirection_id}
                 )"""
 
@@ -209,11 +218,12 @@ class SQLCommands:
             [group] = {group_id}"""
 
     @staticmethod
-    def find_id_group(course_id: int, subgroup_id: int, level_id: int, subdirection_id: int) -> str:
+    def find_id_group(course_id: int, subgroup_id: int, level_id: int,form_id: int, subdirection_id: int) -> str:
         return f"""SELECT id FROM Groups WHERE 
             course = {course_id} AND
             subgroup = {subgroup_id} AND
             level = {level_id} AND
+            form = {form_id} AND
             subdirection = {subdirection_id}"""
 
     @staticmethod
@@ -234,3 +244,19 @@ class SQLCommands:
     @staticmethod
     def select_all_institutes():
         return f"""SELECT Institutes.name from Institutes"""
+
+    @staticmethod
+    def select_all_institute_departments(institute: str):
+        return f"""SELECT 
+        Departments.name
+        
+        from Departments
+
+        LEFT JOIN Institutes
+        on Departments.institute = Institutes.id
+
+        where Institutes.name like '{institute}'"""
+
+    @staticmethod
+    def select_all_department_directions(department: str):
+        return f""""""
