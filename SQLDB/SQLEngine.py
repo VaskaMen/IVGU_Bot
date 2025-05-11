@@ -23,10 +23,12 @@ class SQLEngine:
         self.__cur.execute(CreateCommands.create_table_teachers())
         self.__cur.execute(CreateCommands.create_table_teachers_lesson())
         self.__cur.execute(CreateCommands.create_table_types())
+        self.__cur.execute(CreateCommands.create_table_users())
         self.__con.commit()
         self.__cur.execute(SQLCommands.add_level(1,"Бакалавриат"))
         self.__cur.execute(SQLCommands.add_level(2,"Магистратура"))
         self.__cur.execute(SQLCommands.add_level(3,"Специалитет"))
+        self.__cur.execute(SQLCommands.add_level(4,"ДОП"))
         self.__cur.execute(SQLCommands.add_form(6,'Очная Форма обучения'))
         self.__cur.execute(SQLCommands.add_form(8,'Очно-заочная Форма обучения'))
         self.__cur.execute(SQLCommands.add_form(7,'Заочная Форма обучения'))
@@ -101,6 +103,37 @@ class SQLEngine:
     def _get_list_institute_departments(self, institute: str):
         self.__cur.execute(SQLCommands.select_all_institute_departments(institute))
         return self.__cur.fetchall()
+
+    def _get_list_department_forms(self, department: str):
+        self.__cur.execute(SQLCommands.select_all_department_forms(department))
+        return self.__cur.fetchall()
+
+    def _get_list_department_form_levels(self,department: str, form: str):
+        self.__cur.execute(SQLCommands.select_all_department_form_levels(department,form))
+        return self.__cur.fetchall()
+
+    def _get_list_courses(self, department: str, form: str, level: str):
+        self.__cur.execute(SQLCommands.select_all_courses(department,form,level))
+        return self.__cur.fetchall()
+
+    def _get_list_directions(self, department: str, form: str, level: str, course: str|int):
+        self.__cur.execute(SQLCommands.get_directions(department, form, level, course))
+        return self.__cur.fetchall()
+
+    def _get_list_subdirections(self, department: str, form: str, level: str, course: str|int, direction: str):
+        self.__cur.execute(SQLCommands.get_subdirections(department, form, level, course, direction))
+        return self.__cur.fetchall()
+
+    def _get_list_subgroups(self, department: str, form: str, level: str, course: str|int, direction: str, subdirection: str):
+        self.__cur.execute(SQLCommands.get_subgroups(department, form, level, course, direction, subdirection))
+        return self.__cur.fetchall()
+
+    def _get_group_id(self, department: str, form: str, level: str, course: str|int, direction: str, subdirection: str, subgroup: str):
+        self.__cur.execute(SQLCommands.get_group_id(department, form, level, course, direction, subdirection,subgroup))
+        return self.__cur.fetchone()
+
+    def add_user(self,user_id: int,group_id: int):
+        return self.__cur.execute(SQLCommands.add_user(user_id, group_id))
 
     def commit(self):
         self.__con.commit()

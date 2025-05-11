@@ -30,6 +30,34 @@ class SQLDBB(SQLEngine):
         list_tuple = self._get_list_institute_departments(institute)
         return self.__add_any_in_list(list_tuple)
 
+    def get_list_department_forms(self, department: str) -> list[str]:
+        list_tuple = self._get_list_department_forms(department)
+        return self.__add_any_in_list(list_tuple)
+
+    def get_list_department_form_levels(self,department: str, form: str):
+        list_tuple = self._get_list_department_form_levels(department, form)
+        return self.__add_any_in_list(list_tuple)
+
+    def get_list_courses(self, department: str, form: str, level: str):
+        list_tuple = self._get_list_courses(department, form, level)
+        return self.__add_any_in_list(list_tuple)
+
+    def get_list_directions(self, department: str, form: str, level: str, course: str|int):
+        list_tuple = self._get_list_directions(department,form,level,course)
+        return self.__add_any_in_list(list_tuple)
+
+    def get_list_subdirections(self, department: str, form: str, level: str, course: str|int, direction: str):
+        list_tuple = self._get_list_subdirections(department, form, level, course, direction)
+        return self.__add_any_in_list(list_tuple)
+
+    def get_list_subgroups(self, department: str, form: str, level: str, course: str|int, direction: str, subdirection: str):
+        list_tuple = self._get_list_subgroups(department, form, level, course, direction,subdirection)
+        return self.__add_any_in_list(list_tuple)
+
+    def get_group_id(self, department: str, form: str, level: str, course: str|int, direction: str, subdirection: str, subgroup: str):
+        return self._get_group_id(department, form, level, course, direction, subdirection, subgroup)[0]
+
+
     @staticmethod
     def __add_any_in_list(list_of_tuple: list[tuple[Any]]):
         list_of_any = []

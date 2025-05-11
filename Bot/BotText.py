@@ -9,4 +9,25 @@ class BotText:
 
     insert_department = """Введите кафедру:"""
 
+    insert_form = """Введите форму обучения:"""
+
+    insert_level = """Введите степень обучения:"""
+
+    insert_course = """Введите курс обучения:"""
+
     insert_direction = """Введите направление:"""
+
+    insert_subdirection = """Введите поднаправление:"""
+
+    insert_subgroup = """Ведите подгруппу:"""
+
+    @staticmethod
+    def print_all(institute: str,
+                department: str,
+                form: str,
+                level: str,
+                course: str,
+                direction: str,
+                subdirection: str,
+                subgroup: str):
+        return f"""Институт: {institute}\nКафедра: {department}\nФорма обучения: {form}\nСтепень обучения: {level}\nКурс: {course}\nНаправление: {direction}\nПоднаправление: {subdirection}\nПодгруппа: {subgroup}"""

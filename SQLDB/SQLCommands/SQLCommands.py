@@ -258,5 +258,214 @@ class SQLCommands:
         where Institutes.name like '{institute}'"""
 
     @staticmethod
-    def select_all_department_directions(department: str):
-        return f""""""
+    def select_all_department_forms(department: str):
+        return f"""SELECT 
+        Forms.name
+        
+        from Groups
+    
+        LEFT JOIN SubDirections
+        on Groups.subdirection = SubDirections.id
+    
+        LEFT JOIN Directions
+        on SubDirections.direction = Directions.id
+    
+        LEFT JOIN Forms
+        on Groups.form = Forms.id
+    
+        LEFT JOIN Departments
+        on Directions.department = Departments.id
+    
+        where departments.name like '{department}'
+    
+        group by Forms.name"""
+
+    @staticmethod
+    def select_all_department_form_levels(department: str, form: str):
+        return f"""SELECT 
+        Levels.name
+
+        from Groups
+        
+        LEFT JOIN Levels
+        on Groups.level = Levels.id
+        
+        LEFT JOIN SubDirections
+        on Groups.subdirection = SubDirections.id
+        
+        LEFT JOIN Directions
+        on SubDirections.direction = Directions.id
+        
+        LEFT JOIN Forms
+        on Groups.form = Forms.id
+        
+        LEFT JOIN Departments
+        on Directions.department = Departments.id
+        
+        where departments.name like '{department}' AND
+        Forms.name like '{form}'
+        
+        group by Levels.name"""
+
+    @staticmethod
+    def select_all_courses(department: str, form: str, level: str):
+        return f"""SELECT 
+        Groups.course
+
+        from Groups
+        
+        LEFT JOIN Levels
+        on Groups.level = Levels.id
+        
+        LEFT JOIN SubDirections
+        on Groups.subdirection = SubDirections.id
+        
+        LEFT JOIN Directions
+        on SubDirections.direction = Directions.id
+        
+        LEFT JOIN Forms
+        on Groups.form = Forms.id
+        
+        LEFT JOIN Departments
+        on Directions.department = Departments.id
+        
+        WHERE Departments.name like '{department}' AND
+        Forms.name like '{form}' AND
+        Levels.name like '{level}'
+        
+        group by Groups.course"""
+
+    @staticmethod
+    def get_directions(department: str, form: str, level: str, course: str | int):
+        return f"""SELECT 
+        Directions.name
+
+        from Groups
+        
+        
+        LEFT JOIN Levels
+        on Groups.level = Levels.id
+        
+        LEFT JOIN SubDirections
+        on Groups.subdirection = SubDirections.id
+        
+        LEFT JOIN Directions
+        on SubDirections.direction = Directions.id
+        
+        LEFT JOIN Forms
+        on Groups.form = Forms.id
+        
+        LEFT JOIN Departments
+        on Directions.department = Departments.id
+        
+        WHERE departments.name like '{department}' AND
+        Forms.name like '{form}' AND
+        Levels.name like '{level}' AND
+        Groups.course like {course}
+        
+        group by Directions.name"""
+
+    @staticmethod
+    def get_subdirections(department: str, form: str, level: str, course: str | int, direction: str):
+        return f"""SELECT 
+            Subdirections.name
+
+            from Groups
+
+
+            LEFT JOIN Levels
+            on Groups.level = Levels.id
+
+            LEFT JOIN SubDirections
+            on Groups.subdirection = SubDirections.id
+
+            LEFT JOIN Directions
+            on SubDirections.direction = Directions.id
+
+            LEFT JOIN Forms
+            on Groups.form = Forms.id
+
+            LEFT JOIN Departments
+            on Directions.department = Departments.id
+
+            WHERE departments.name like '{department}' AND
+            Forms.name like '{form}' AND
+            Levels.name like '{level}' AND
+            Groups.course like {course} AND
+            Directions.name like '%{direction}%'
+
+            group by Subdirections.name"""
+
+    @staticmethod
+    def get_subgroups(department: str, form: str, level: str, course: str | int,direction: str, subdirection: str):
+        return f"""SELECT 
+        Subgroups.name as "Подгруппа"
+
+        from Groups
+        
+        LEFT JOIN Subgroups
+        on Groups.subgroup = Subgroups.id
+        
+        LEFT JOIN Levels
+        on Groups.level = Levels.id
+        
+        LEFT JOIN SubDirections
+        on Groups.subdirection = SubDirections.id
+        
+        LEFT JOIN Directions
+        on SubDirections.direction = Directions.id
+        
+        LEFT JOIN Forms
+        on Groups.form = Forms.id
+        
+        LEFT JOIN Departments
+        on Directions.department = Departments.id
+        
+        WHERE departments.name like '{department}' AND
+        Forms.name like '{form}' AND
+        Levels.name like '{level}' AND
+        Groups.course like {course} AND
+        Directions.name like '%{direction}%' AND
+        Subdirections.name like '%{subdirection}%'
+        
+        group by Subgroups.name"""
+
+    @staticmethod
+    def get_group_id(department: str, form: str, level: str, course: str | int,direction: str, subdirection: str, subgroup: str):
+        return f"""SELECT 
+        Groups.id
+
+        from Groups
+        
+        LEFT JOIN Subgroups
+        on Groups.subgroup = Subgroups.id
+        
+        LEFT JOIN Levels
+        on Groups.level = Levels.id
+        
+        LEFT JOIN SubDirections
+        on Groups.subdirection = SubDirections.id
+        
+        LEFT JOIN Directions
+        on SubDirections.direction = Directions.id
+        
+        LEFT JOIN Forms
+        on Groups.form = Forms.id
+        
+        LEFT JOIN Departments
+        on Directions.department = Departments.id
+        
+        WHERE departments.name like '{department}' AND
+        Forms.name like '{form}' AND
+        Levels.name like '{level}' AND
+        Groups.course like {course} AND
+        Directions.name like '%{direction}%' AND
+        Subdirections.name like '%{subdirection}%' AND
+        Subgroups.name like '{subgroup}'
+        
+        group by Groups.id"""
+
+    @staticmethod
+    def add_user(id_user: int, group_id) -> str:
+        return f"""INSERT INTO Users (id,[group])
+                    SELECT {id_user}, {group_id}"""
