@@ -79,11 +79,11 @@ class SQLEngine:
     def add_institute(self, id_of_institute: int, name: str):
         self.__cur.execute(SQLCommands.add_institute(id_of_institute, name))
 
-    def add_lesson(self, lesson: Lesson, date_: date, subgroup: int):
+    def add_lesson(self, lesson: Lesson, date_: date, group: int):
         subject = self._add_subject(lesson)
         type_for_lesson = self.add_type(lesson.type_subject)
-        self.__cur.execute(SQLCommands.add_lesson(subject, lesson.time, type_for_lesson, str(date_), subgroup))
-        self.__cur.execute(SQLCommands.find_id_lesson(subject, lesson.time, type_for_lesson, str(date_), subgroup))
+        self.__cur.execute(SQLCommands.add_lesson(subject, lesson.time, type_for_lesson, str(date_), group))
+        self.__cur.execute(SQLCommands.find_id_lesson(subject, lesson.time, type_for_lesson, str(date_), group))
         return self.__cur.fetchone()[0]
 
     def add_group(self, course: int, subgroup: int, level: int,form: int, subdirection: int):
@@ -132,8 +132,15 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.get_group_id(department, form, level, course, direction, subdirection,subgroup))
         return self.__cur.fetchone()
 
-    def add_user(self,user_id: int,group_id: int):
-        return self.__cur.execute(SQLCommands.add_user(user_id, group_id))
+    def _insert_user(self, user_id: int, group_id: int):
+        return self.__cur.execute(SQLCommands.insert_user(user_id, group_id))
+
+    def _update_user(self, user_id: int, group_id: int):
+        self.__cur.execute(SQLCommands.update_user(user_id,group_id))
+
+    def user_select(self, user_id: int):
+        self.__cur.execute(SQLCommands.user_select(user_id))
+        return self.__cur.fetchone()
 
     def commit(self):
         self.__con.commit()

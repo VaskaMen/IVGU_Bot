@@ -1,8 +1,11 @@
+from datetime import datetime, timedelta
+
 import telebot
-from telebot import StateMemoryStorage, custom_filters, types
+from telebot import StateMemoryStorage, custom_filters
 from telebot.states.sync import StateContext, StateMiddleware
 
 from Bot.BotCreator import BotCreator
+from Bot.BotFunctions import BotFunctions
 from Bot.BotText import BotText
 from Bot.RegisterState import RegisterState
 from SQLDB.SQLDBB import SQLDBB
@@ -11,6 +14,7 @@ key = "7665754490:AAH7ugdV42S3Vxlm6sUZjnY2GwKh800xRRM"
 
 week = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
 sql = SQLDBB()
+botfun = BotFunctions()
 
 state_storage = StateMemoryStorage()
 bot = telebot.TeleBot(key,state_storage= state_storage, use_class_middlewares=True)
@@ -20,13 +24,30 @@ bot.add_custom_filter(custom_filters.TextMatchFilter())
 bot.setup_middleware(StateMiddleware(bot))
 
 @bot.message_handler(commands=['start'])
-def start(message: types.Message, state: StateContext):
-    state.set(RegisterState.institute)
-    institutes = sql.get_list_institutes()
+def start(message, state: StateContext):
+    if sql.user_select(message.chat.id) is not None:
+        state.set(RegisterState.done)
+    else:
+        state.set(RegisterState.start_registration)
+        startmsg = ["Начать"]
+        bot.send_message(
+            message.chat.id,
+            text=BotText.start_text,
+            reply_markup=BotCreator.create_text_buttons(startmsg))
+
+@bot.message_handler(commands=['register'])
+def start_registration(message, state: StateContext):
+    state.set(RegisterState.start_registration)
+    registermsg = ["Начать регистрацию"]
     bot.send_message(
         message.chat.id,
-        text=BotText.start_text
-    )
+        text=BotText.register_text,
+        reply_markup=BotCreator.create_text_buttons(registermsg))
+
+@bot.message_handler(state = RegisterState.start_registration)
+def handle_start_registration(message, state: StateContext):
+    state.set(RegisterState.institute)
+    institutes = sql.get_list_institutes()
     bot.send_message(
         message.from_user.id,
         text=BotText.insert_institute,
@@ -153,7 +174,7 @@ def handle_subgroup(message, state: StateContext):
     )
 
 @bot.message_handler(state = RegisterState.save)
-def handle_direction(message, state: StateContext):
+def handle_group_id(message, state: StateContext):
     state.add_data(subgroup = message.text)
     state.set(RegisterState.done)
 
@@ -168,12 +189,26 @@ def handle_direction(message, state: StateContext):
         subgroup = data.get("subgroup")
 
     group_id = sql.get_group_id(department, form, level, course, direction, subdirection,subgroup)
-    sql.add_user(message.from_user.id,group_id)
+    sql.set_user(message.from_user.id,group_id)
 
     bot.send_message(
         message.from_user.id,
         text=BotText.print_all(institute,department, form, level, course, direction,subdirection, subgroup)
     )
-    
+
+# @bot.message_handler(commands=['schedule'])
+# def handle_schedule(message):
+@bot.message_handler(content_types=['text'])
+def text(message):
+    print(f"{datetime.now()} Send message to {message.from_user.id}")
+    if message.text == "Сегодня":
+        pass
+    elif message.text == "Завтра":
+        d = datetime.now().date() + timedelta(days=1)
+
+    elif botfun.check_date_format(message.text):
+        d = botfun.convert_str_to_date(message.text)
+        work_day = self.get_work_day_date(d)
+        self.send_work_day(message.from_user.id, work_day)
 
 bot.polling(none_stop=True, interval=0)

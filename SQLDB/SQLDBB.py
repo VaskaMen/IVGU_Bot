@@ -16,10 +16,10 @@ class SQLDBB(SQLEngine):
 
     def add_workday(self, workday: WorkDay,course: int, level: int, form: int,id_subdirection: int):
         subgroup = self.add_subgroup(workday.subgroup)
-        self.add_group(course,subgroup,level,form,id_subdirection)
+        group = self.add_group(course,subgroup,level,form,id_subdirection)
         for lesson in workday.lessons:
             if str(lesson.name) != 'None':
-                lesson_id = self.add_lesson(lesson, workday.date, subgroup)
+                lesson_id = self.add_lesson(lesson, workday.date, group)
                 self._add_many_teacher_place(lesson_id, lesson.teacher_places)
 
     def get_list_institutes(self) -> list[str]:
@@ -57,6 +57,11 @@ class SQLDBB(SQLEngine):
     def get_group_id(self, department: str, form: str, level: str, course: str|int, direction: str, subdirection: str, subgroup: str):
         return self._get_group_id(department, form, level, course, direction, subdirection, subgroup)[0]
 
+    def set_user(self, user_id: int, group_id:int):
+        if self.user_select(user_id) is None:
+            self._insert_user(user_id, group_id)
+        else:
+            self._update_user(user_id, group_id)
 
     @staticmethod
     def __add_any_in_list(list_of_tuple: list[tuple[Any]]):

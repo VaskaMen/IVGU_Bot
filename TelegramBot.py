@@ -159,7 +159,7 @@ class IvguBot:
             elif message.text == "Завтра":
                 d = datetime.now().date() + timedelta(days=1)
                 self.send_work_day(message.from_user.id, self.get_work_day_date(d))
-            if self.check_date_format(message.text):
+            elif self.check_date_format(message.text):
                 d = self.convert_str_to_date(message.text)
                 work_day = self.get_work_day_date(d)
                 self.send_work_day(message.from_user.id, work_day)

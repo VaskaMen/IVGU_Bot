@@ -227,21 +227,6 @@ class SQLCommands:
             subdirection = {subdirection_id}"""
 
     @staticmethod
-    def add_user(user_id: int, group_id: int) -> str:
-        return f"""insert into Users(
-            id,
-            [group]
-        )
-         SELECT
-            {user_id},
-            {group_id}  
-         WHERE NOT EXISTS (
-            SELECT 1 FROM Users WHERE 
-            id = {user_id} AND
-            [group] = {group_id}
-                )
-            """
-    @staticmethod
     def select_all_institutes():
         return f"""SELECT Institutes.name from Institutes"""
 
@@ -466,6 +451,14 @@ class SQLCommands:
         group by Groups.id"""
 
     @staticmethod
-    def add_user(id_user: int, group_id) -> str:
+    def insert_user(id_user: int, group_id: int) -> str:
         return f"""INSERT INTO Users (id,[group])
                     SELECT {id_user}, {group_id}"""
+
+    @staticmethod
+    def update_user(id_user: int, group_id: int) -> str:
+        return f"""Update Users set [group] = {group_id} where id = {id_user}"""
+
+    @staticmethod
+    def user_select(id_user: int):
+        return f"""Select * from Users where users.id = {id_user}"""
