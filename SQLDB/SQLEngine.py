@@ -82,9 +82,29 @@ class SQLEngine:
     def add_lesson(self, lesson: Lesson, date_: date, group: int):
         subject = self._add_subject(lesson)
         type_for_lesson = self.add_type(lesson.type_subject)
-        self.__cur.execute(SQLCommands.add_lesson(subject, lesson.time, type_for_lesson, str(date_), group))
-        self.__cur.execute(SQLCommands.find_id_lesson(subject, lesson.time, type_for_lesson, str(date_), group))
+        lesson_time = lesson.time
+        start_time = self.__get_start_time(lesson_time)
+        end_time = self.__get_end_time(lesson_time)
+        self.__cur.execute(SQLCommands.add_lesson(subject, start_time, end_time, type_for_lesson, str(date_), group))
+        self.__cur.execute(SQLCommands.find_id_lesson(subject, start_time, end_time, type_for_lesson, str(date_), group))
         return self.__cur.fetchone()[0]
+
+
+    def __get_start_time(self,time: str):
+        return self.__time_slicer(time,0)
+
+    def __get_end_time(self,time: str):
+       return self.__time_slicer(time,1)
+
+    @staticmethod
+    def __time_slicer(time: str, cif: int) -> str:
+        null = "0"
+        time_sliced = time.split("-")[cif].strip()
+        if len(time_sliced) < 5:
+            con = null + time_sliced
+            return con
+        else:
+            return time_sliced
 
     def add_group(self, course: int, subgroup: int, level: int,form: int, subdirection: int):
         self.__cur.execute(SQLCommands.add_group(course, subgroup, level, form, subdirection))
@@ -141,6 +161,14 @@ class SQLEngine:
     def user_select(self, user_id: int):
         self.__cur.execute(SQLCommands.user_select(user_id))
         return self.__cur.fetchone()
+
+    def  get_workday(self, group_id: int, date: str):
+        self.__cur.execute(SQLCommands.get_workday(group_id, date))
+        return self.__cur.fetchall()
+
+    def get_teachers_of_lesson(self, lesson_id: int):
+        self.__cur.execute(SQLCommands.get_teachers_of_lesson(lesson_id))
+        return self.__cur.fetchall()
 
     def commit(self):
         self.__con.commit()

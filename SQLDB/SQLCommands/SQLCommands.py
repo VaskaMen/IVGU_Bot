@@ -185,34 +185,38 @@ class SQLCommands:
         return f"""select * from Types where name = '{name}'"""
 
     @staticmethod
-    def add_lesson(subject_id: int, time: str, type: int, date: str, group_id: int) -> str:
+    def add_lesson(subject_id: int, time_start: str,time_end: str, type: int, date: str, group_id: int) -> str:
         return f"""insert into Lessons(
             subject,
-            time,
+            time_start,
+            time_end,
             type,
             date,
             [group]
         )
          SELECT
             {subject_id},
-            '{time}',
+            '{time_start}',
+            '{time_end}',
             '{type}',
             '{date}',
             {group_id}  
          WHERE NOT EXISTS (
             SELECT 1 FROM Lessons WHERE 
             subject = {subject_id} AND
-            time = '{time}' AND
+            time_start = '{time_start}' AND
+            time_end = '{time_end}' AND
             type = '{type}' AND
             [date] = {date} AND
             [group] = {group_id}
                 )
             """
     @staticmethod
-    def find_id_lesson(subject_id: int, time: str, type: int, date: str, group_id: int) -> str:
+    def find_id_lesson(subject_id: int, time_start: str, time_end:str, type: int, date: str, group_id: int) -> str:
         return f"""SELECT id FROM Lessons WHERE 
             subject = {subject_id} AND
-            time = '{time}' AND
+            time_start = '{time_start}' AND
+            time_end = '{time_end}' AND
             type = {type} AND
             [date] = '{date}' AND
             [group] = {group_id}"""
@@ -462,3 +466,47 @@ class SQLCommands:
     @staticmethod
     def user_select(id_user: int):
         return f"""Select * from Users where users.id = {id_user}"""
+
+    @staticmethod
+    def get_workday(group_id: int, date: str):
+        return f"""select
+        Subjects.name as "Предмет",
+        Lessons.time_start,
+        Lessons.time_end,
+        Types.name as "Тип",
+        Lessons.date
+
+        from TeachersLesson
+        
+        left join Lessons
+        on TeachersLesson.lesson = Lessons.id
+        
+        Left Join Subjects
+        on Lessons.subject = Subjects.id
+        
+        Left Join Types
+        on Lessons.type = Types.id
+        
+        where Lessons.[group] like {group_id} AND
+        Lessons.date like "{date}"
+        
+        group by Lessons.time_start"""
+
+    @staticmethod
+    def get_teachers_of_lesson(lesson_id: int):
+        return f"""select
+        Teachers.name,
+        Places.place
+        
+        from TeachersLesson
+        
+        left join Places
+        on TeachersLesson.place = Places.id
+        
+        left join Teachers
+        on TeachersLesson.teacher = Teachers.id
+        
+        left join Lessons
+        on TeachersLesson.lesson = Lessons.id
+        
+        where Lessons.id like {lesson_id}"""

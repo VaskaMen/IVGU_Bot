@@ -119,7 +119,8 @@ class CreateCommands:
         (
         id integer primary key autoincrement,
         subject integer,
-        time text,
+        time_start text,
+        time_end text,
         type int,
         [date] date,
         [group] integer

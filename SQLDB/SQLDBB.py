@@ -4,6 +4,8 @@ from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 
 from IVGU.ScheduleObject.WorkDay import WorkDay
 from SQLDB.SQLEngine import SQLEngine
+from SQLDB.SQLLesson import SQLLesson
+from SQLDB.SQLTeacherPlace import SQLTeacherPlace
 
 
 class SQLDBB(SQLEngine):
@@ -70,3 +72,24 @@ class SQLDBB(SQLEngine):
             sm_str = tuplee[0]
             list_of_any.append(sm_str)
         return list_of_any
+
+    def get_sql_workday(self, date: str, group_id: int, lesson_id: int):
+        workday = self.get_workday(group_id, date)
+        list_teach_place = self.get_list_teacher_place(self.get_teachers_of_lesson(lesson_id))
+        sqlworkday = []
+        for lesson in workday:
+             sqllesson = SQLLesson(subject_name=lesson[0],
+                      time_start=lesson[1],
+                      time_end=lesson[2],
+                      type_name=lesson[3],
+                      date=lesson[4],
+                      teach_places=list_teach_place)
+             sqlworkday.append(sqllesson)
+        return sqlworkday
+
+    @staticmethod
+    def get_list_teacher_place(teachers) -> list[SQLTeacherPlace]:
+        list_teacher_place = []
+        for tuple in teachers:
+           list_teacher_place.append(SQLTeacherPlace(tuple[0], tuple[1]))
+        return list_teacher_place
