@@ -200,15 +200,20 @@ def handle_group_id(message, state: StateContext):
 # def handle_schedule(message):
 @bot.message_handler(content_types=['text'])
 def text(message):
+    group_id = sql.user_select(message.from_user.id)[0]
     print(f"{datetime.now()} Send message to {message.from_user.id}")
     if message.text == "Сегодня":
-        pass
+        date = str(datetime.now().date())
+        workday = str(sql.get_sql_workday(group_id, date))
+        bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
     elif message.text == "Завтра":
-        d = datetime.now().date() + timedelta(days=1)
+        date = datetime.now().date() + timedelta(days=1)
+        workday = str(sql.get_sql_workday(group_id, str(date)))
+        bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
 
-    elif botfun.check_date_format(message.text):
-        d = botfun.convert_str_to_date(message.text)
-        work_day = self.get_work_day_date(d)
-        self.send_work_day(message.from_user.id, work_day)
+    # elif botfun.check_date_format(message.text):
+    #     date = botfun.convert_str_to_date(message.text)
+    #     work_day = self.get_work_day_date(date)
+    #     self.send_work_day(message.from_user.id, work_day)
 
 bot.polling(none_stop=True, interval=0)

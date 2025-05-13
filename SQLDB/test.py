@@ -16,6 +16,5 @@ sql = SQLDBB()
 #                         "Без подгрупп")
 # print(list)
 
-smt = sql.user_select(1)
-if smt is None:
-    print(1234)
+new_list = sql.get_sql_workday(9,'2025-05-14')
+print(new_list)

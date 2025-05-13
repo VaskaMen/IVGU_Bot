@@ -1,4 +1,4 @@
-from SQLDB.SQLTeacherPlace import SQLTeacherPlace
+from SQLDB.SQLObjects.SQLTeacherPlace import SQLTeacherPlace
 
 
 class SQLLesson:

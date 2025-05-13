@@ -460,12 +460,16 @@ class SQLCommands:
                     SELECT {id_user}, {group_id}"""
 
     @staticmethod
+    def find_group_id(user_id: int):
+        return
+
+    @staticmethod
     def update_user(id_user: int, group_id: int) -> str:
         return f"""Update Users set [group] = {group_id} where id = {id_user}"""
 
     @staticmethod
     def user_select(id_user: int):
-        return f"""Select * from Users where users.id = {id_user}"""
+        return f"""Select [group] from Users where users.id = {id_user}"""
 
     @staticmethod
     def get_workday(group_id: int, date: str):
@@ -474,7 +478,8 @@ class SQLCommands:
         Lessons.time_start,
         Lessons.time_end,
         Types.name as "Тип",
-        Lessons.date
+        Lessons.date,
+        Lessons.id
 
         from TeachersLesson
         
