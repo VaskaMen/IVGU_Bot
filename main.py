@@ -1,44 +1,53 @@
+import threading
 import time
 from datetime import datetime
 
 import schedule
 
-import Seecret
-from IVGU.IVGUPage import IVGUPage
-from IVGU.ScheduleObject.WorkDay import WorkDay
-from IVGU.SubjectConvertor import SubjectConvertor
-from JsonDB.WorkDaysDB import WorkDaysDB
+import seecret
+from IVGU.APIIVGU import APIIVGU
+from SQLDB.SQLDBB import SQLDBB
+from ScheduleCollector import ScheduleCollector
+from TelegramBot import IvguBot
+from seecret import email, password
+
+sql = SQLDBB()
+ivgu_bot = IvguBot(seecret.token, sql)
+api = APIIVGU(email,password)
+schedcoll = ScheduleCollector(api)
+
+def run_bot():
+    while True:
+        try:
+            ivgu_bot.bot.polling(none_stop=True, interval=0)
+        except Exception as ex:
+            print(ex)
 
 
-def update_sche():
-    ivgu = IVGUPage()
-    ivgu.login(Seecret.IVGU_LOGIN, Seecret.IVGU_PASSWORD)
+def update_schedule():
+    t1 = datetime.now()
+    print(f"Обновление распинсание {t1}")
+    schedcoll.get_schedules_for_uni_number(2)
+    schedcoll.commit()
+    t2 = datetime.now()
+    print(f"Обновление распинсание занело {t2 - t1}")
 
-    el = ivgu.get_schedule_lines(ivgu._get_schedule_page())
-    sc = SubjectConvertor()
-    work_days: list[WorkDay] = list()
 
-    for i in el:
-        d = datetime.strptime(i["data-date"], '%Y-%m-%d').date()
-
-        title = i['title']
-
-        work_days.append(
-            WorkDay(
-                lessons=sc.get_lessons(title),
-                date=d
-            )
-        )
-
-    print(work_days[len(work_days)-1].date)
-    jdb = WorkDaysDB('workDays.json')
-    jdb.add_new_work_days(work_days=work_days)
-
-update_sche()
-schedule.every(10).minutes.do(update_sche)
-while True:
-    try:
+def start_schedule():
+    while True:
         schedule.run_pending()
         time.sleep(10)
-    except Exception as ex:
-        print(ex)
+
+schedule.every(5).minutes.do(update_schedule)
+
+threads = []
+bot_thread_run = threading.Thread(target=run_bot)
+schedule_collector_thread = threading.Thread(target=start_schedule)
+
+threads.append(bot_thread_run)
+threads.append(schedule_collector_thread)
+
+for t in threads:
+    t.start()
+for t in threads:
+    t.join()
