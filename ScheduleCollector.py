@@ -2,21 +2,22 @@ from IVGU.APIIVGU import APIIVGU
 from SQLDB.SQLDBB import SQLDBB
 
 
-class ScheduleCollector(SQLDBB):
-    def __init__(self, api: APIIVGU):
+class ScheduleCollector():
+    def __init__(self, api: APIIVGU, sql: SQLDBB):
         super().__init__()
         self.api = api
+        self.sql = sql
 
     def get_schedules_for_uni_number(self,uni_number: int):
         institutes = self.api.get_institutes(uni_number)
         for institute in institutes:
-            self.add_institute(int(institutes[institute]), institute)
+            self.sql.add_institute(int(institutes[institute]), institute)
             self.get_schedules_for_institute(int(institutes[institute]))
 
     def get_schedules_for_institute(self, institute: int):
         all_departments = self.api.get_departments(institute)
         for department in all_departments:
-            self.add_department(int(all_departments[department]),department,institute)
+            self.sql.add_department(int(all_departments[department]),department,institute)
             self.__get_schedules_for_department(all_departments, department)
 
     def __get_schedules_for_department(self, all_departments: dict[str, str], department: str):
@@ -31,4 +32,4 @@ class ScheduleCollector(SQLDBB):
         page = self.api.get_page(link)
         schedules = self.api.get_schedules_from_page(page)
         for schedule in schedules:
-            self.add_direction_schedule(schedule, int(all_departments[department]), int(form), int(course), int(level))
+            self.sql.add_direction_schedule(schedule, int(all_departments[department]), int(form), int(course), int(level))

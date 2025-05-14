@@ -9,7 +9,6 @@ from Bot.DateFunctions import DateFunctions
 from Bot.BotText import BotText
 from Bot.RegisterState import RegisterState
 from SQLDB.SQLDBB import SQLDBB
-from seecret import token
 
 class IvguBot:
 

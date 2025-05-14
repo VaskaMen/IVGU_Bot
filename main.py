@@ -14,7 +14,7 @@ from seecret import email, password
 sql = SQLDBB()
 ivgu_bot = IvguBot(seecret.token, sql)
 api = APIIVGU(email,password)
-schedcoll = ScheduleCollector(api)
+schedcoll = ScheduleCollector(api, sql)
 
 def run_bot():
     while True:
@@ -26,11 +26,11 @@ def run_bot():
 
 def update_schedule():
     t1 = datetime.now()
-    print(f"Обновление распинсание {t1}")
+    print(f"Обновление расписание {t1}")
     schedcoll.get_schedules_for_uni_number(2)
-    schedcoll.commit()
+    sql.commit()
     t2 = datetime.now()
-    print(f"Обновление распинсание занело {t2 - t1}")
+    print(f"Обновление расписание заняло {t2 - t1}")
 
 
 def start_schedule():
