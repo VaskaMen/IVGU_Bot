@@ -515,3 +515,15 @@ class SQLCommands:
         on TeachersLesson.lesson = Lessons.id
         
         where Lessons.id like {lesson_id}"""
+
+    @staticmethod
+    def get_dates_after_date(group_id: int, date: str):
+        return f"""select
+        Lessons.date
+    
+        from Lessons
+        
+        where Lessons.[group] like {group_id} AND
+        Lessons.date >= "{date}"
+        
+        group by lessons.date"""

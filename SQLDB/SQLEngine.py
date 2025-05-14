@@ -170,5 +170,10 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.get_teachers_of_lesson(lesson_id))
         return self.__cur.fetchall()
 
+    def _get_all_dates_after_date(self,group_id: int, date: str):
+        self.__cur.execute(SQLCommands.get_dates_after_date(group_id, date))
+        return self.__cur.fetchall()
+
+
     def commit(self):
         self.__con.commit()

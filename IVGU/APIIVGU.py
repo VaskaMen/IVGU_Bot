@@ -1,5 +1,3 @@
-from pandas.plotting import table
-
 from IVGU.IVGUPage import IVGUPage
 from IVGU.IVGUConverter import IVGUConverter
 from IVGU.Table.Table import Table

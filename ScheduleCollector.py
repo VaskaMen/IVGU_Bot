@@ -3,7 +3,9 @@ from SQLDB.SQLDBB import SQLDBB
 
 
 class ScheduleCollector(SQLDBB):
-    api = APIIVGU("miha2204n@gmail.com", "8azr25pb")
+    def __init__(self, api: APIIVGU):
+        super().__init__()
+        self.api = api
 
     def get_schedules_for_uni_number(self,uni_number: int):
         institutes = self.api.get_institutes(uni_number)

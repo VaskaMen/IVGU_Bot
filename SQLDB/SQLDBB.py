@@ -111,3 +111,15 @@ class SQLDBB(SQLEngine):
         for tuple in teachers:
            list_teacher_place.append(SQLTeacherPlace(tuple[0], tuple[1]))
         return list_teacher_place
+
+    def get_actual_dates(self,group_id:int , date: str) -> list[str]:
+        dates = self._get_all_dates_after_date(group_id, date)
+        return self.__add_any_in_list(dates)
+
+    @staticmethod
+    def get_only_actual_days(days: list[SQLWorkDay]) -> list[SQLWorkDay]:
+        actual_days: list[SQLWorkDay] = list()
+        for i in days:
+            if i.date >= datetime.now().date():
+                actual_days.append(i)
+        return actual_days

@@ -1,165 +1,239 @@
-import re
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 
 import telebot
-from telebot import types
-from telebot.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, ForceReply
+from telebot import StateMemoryStorage, custom_filters
+from telebot.states.sync import StateContext, StateMiddleware
 
-from User import User
-from IVGU.ScheduleObject.WorkDay import WorkDay
+from Bot.BotCreator import BotCreator
+from Bot.DateFunctions import DateFunctions
+from Bot.BotText import BotText
+from Bot.RegisterState import RegisterState
+from SQLDB.SQLDBB import SQLDBB
+from seecret import token
 
-week = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+key = token
 
-class IvguBot:
-    work_days_DB = WorkDaysDB("workDays.json")
-    users_DB = UserDB("users.json")
-    changes: list[WorkDay] = list()
+sql = SQLDBB()
+datefun = DateFunctions()
 
-    work_days: list[WorkDay] = list()
-    users: list[User] = list()
+state_storage = StateMemoryStorage()
+bot = telebot.TeleBot(key,state_storage= state_storage, use_class_middlewares=True)
+bot.add_custom_filter(custom_filters.StateFilter(bot))
+bot.add_custom_filter(custom_filters.IsDigitFilter())
+bot.add_custom_filter(custom_filters.TextMatchFilter())
+bot.setup_middleware(StateMiddleware(bot))
 
-    def __init__(self, key: str):
-        self.bot = telebot.TeleBot(key)
-        self.__load_work_days()
-        self.register_massage_handler()
+@bot.message_handler(commands=['start'])
+def start(message, state: StateContext):
+    if sql.user_select(message.chat.id) is not None:
+        state.set(RegisterState.done)
+    else:
+        state.set(RegisterState.start_registration)
+        startmsg = ["Начать"]
+        bot.send_message(
+            message.chat.id,
+            text=BotText.start_text,
+            reply_markup=BotCreator.create_text_buttons(startmsg))
 
-    def __load_work_days(self):
-        self.work_days = self.work_days_DB.get_work_days()
+@bot.message_handler(commands=['register'])
+def start_registration(message, state: StateContext):
+    state.set(RegisterState.start_registration)
+    registermsg = ["Начать регистрацию"]
+    bot.send_message(
+        message.chat.id,
+        text=BotText.register_text,
+        reply_markup=BotCreator.create_text_buttons(registermsg))
 
-    def convert_str_to_date(self, s: str) -> date:
-        return datetime.strptime(s.split(' ')[0], '%Y-%m-%d').date()
+@bot.message_handler(state = RegisterState.start_registration)
+def handle_start_registration(message, state: StateContext):
+    state.set(RegisterState.institute)
+    institutes = sql.get_list_institutes()
+    bot.send_message(
+        message.from_user.id,
+        text=BotText.insert_institute,
+        reply_markup=BotCreator.create_text_buttons(institutes,1)
+    )
 
-    def update_work_days(self):
-        new_days = self.work_days_DB.get_work_days()
-        self.changes = self.work_days_DB.get_diferens_work_days(new_days, self.work_days)
-        self.changes = self.get_only_actual_days(self.changes)
-        self.work_days = new_days
-        self.send_notification()
-        self.changes.clear()
+@bot.message_handler(state = RegisterState.institute)
+def handle_institute(message, state: StateContext):
+    state.add_data(institute = message.text)
+    state.set(RegisterState.form)
 
-    def send_notification(self):
-        self.users = self.users_DB.get_all_users()
-        if len(self.changes) != 0:
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            day_chaged_str = ""
+    with state.data() as data:
+        institute = data.get("institute")
+    departments = sql.get_list_departments(institute)
 
-            for day in self.changes:
-                btn = types.KeyboardButton(f"{day.date} {week[day.date.weekday()]}")
-                markup.add(btn)
-                day_chaged_str += f"{day.date} \n"
+    bot.send_message(
+        message.from_user.id,
+        text=BotText.insert_department,
+        reply_markup=BotCreator.create_text_buttons(departments,1)
+    )
 
-            self.send_message_for_all_get_changes_users(f"Появилось новое расписание\n {day_chaged_str}", markup=markup)
+@bot.message_handler(state = RegisterState.form)
+def handle_form(message, state: StateContext):
+    state.add_data(department = message.text)
+    state.set(RegisterState.level)
 
-    def send_message_for_all_get_changes_users(self, text:str, markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply | None = None):
-        for user in self.users:
-            if user.get_changes:
-                self.bot.send_message(user.id, text, parse_mode='Markdown', reply_markup=markup)
+    with state.data() as data:
+        department = data.get("department")
+    forms = sql.get_list_department_forms(department)
 
-    def get_only_actual_days(self, days: list[WorkDay]) -> list[WorkDay]:
-        actual_days: list[WorkDay] = list()
-        for i in days:
-            if i.date >= datetime.now().date():
-                actual_days.append(i)
-        return actual_days
+    bot.send_message(
+        message.from_user.id,
+        text=BotText.insert_form,
+        reply_markup=BotCreator.create_text_buttons(forms)
+    )
 
-    def get_passed_days(self, count:int, days: list[WorkDay]) -> list[WorkDay]:
-        passed_days: list[WorkDay] = list()
+@bot.message_handler(state = RegisterState.level)
+def handle_form(message, state: StateContext):
+    state.add_data(form = message.text)
+    state.set(RegisterState.course)
 
-        for day in days:
-            if day.date < datetime.now().date():
-                passed_days.append(day)
+    with state.data() as data:
+        department = data.get("department")
+        form = data.get("form")
+    levels = sql.get_list_department_form_levels(department,form)
 
-        return passed_days[-count:]
+    bot.send_message(
+        message.from_user.id,
+        text=BotText.insert_level,
+        reply_markup=BotCreator.create_text_buttons(levels)
+    )
 
-    def check_date_format(self, s: str):
-        if re.compile(r'\d\d\d\d-\d\d-\d\d').match(s):
-            return True
-        else:
-            return False
+@bot.message_handler(state = RegisterState.course)
+def handle_course(message, state: StateContext):
+    state.add_data(level = message.text)
+    state.set(RegisterState.direction)
 
-    def get_work_day_date(self, d: date) -> WorkDay | None:
-        for day in self.work_days:
-            if day.date == d:
-                return day
-        return None
+    with state.data() as data:
+        department = data.get("department")
+        form = data.get("form")
+        level = data.get("level")
+    courses = sql.get_list_courses(department, form, level)
 
-    def send_work_day(self, user_id, work_day: WorkDay):
-        self.bot.send_message(user_id, str(work_day),parse_mode='Markdown')
+    bot.send_message(
+        message.from_user.id,
+        text=BotText.insert_course,
+        reply_markup=BotCreator.create_text_buttons(courses)
+    )
 
-    def register_massage_handler(self):
-        @self.bot.message_handler(commands=['start'])
-        def start(message):
-            self.bot.send_message(message.from_user.id, """
-                Тут ты можешь получить расписание с сайта https://uni.ivanovo.ac.ru/ для группы Прикладной информатики в цифровой экономике\n
-                Расписание проверяется каждые 30 минут. При желание ты можешь подписаться на рассылку уведомлений при изменении в расписани. 
-                Для этого вызови команду:\n/subscribe_updates\n
-            """)
+@bot.message_handler(state = RegisterState.direction)
+def handle_direction(message, state: StateContext):
+    state.add_data(course = message.text)
+    state.set(RegisterState.subdirection)
 
-        @self.bot.message_handler(commands = ['schedule'])
-        def actual(message):
-            print(f"{datetime.now()} Send message to {message.from_user.id}")
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            btn1 = types.KeyboardButton("Сегодня")
-            btn2 = types.KeyboardButton('Завтра')
-            markup.add(btn1, btn2)
-            self.bot.send_message(message.from_user.id, "На какой день вы хотите увидеть расписание", reply_markup=markup)
+    with state.data() as data:
+        department = data.get("department")
+        form = data.get("form")
+        level = data.get("level")
+        course = data.get("course")
+    directions = sql.get_list_directions(department, form, level, course)
 
+    bot.send_message(
+        message.from_user.id,
+        text=BotText.insert_direction,
+        reply_markup=BotCreator.create_text_buttons(directions,1)
+    )
+@bot.message_handler(state = RegisterState.subdirection)
+def handle_direction(message, state: StateContext):
+    state.add_data(direction = message.text)
+    state.set(RegisterState.subgroup)
 
-        @self.bot.message_handler(commands = ['schedule_all'])
-        def schedule_all_actual(message):
-            print(f"{datetime.now()} Send message to {message.from_user.id}")
-            markup = types.ReplyKeyboardMarkup()
-            actual = self.get_only_actual_days(self.work_days)
+    with state.data() as data:
+        department = data.get("department")
+        form = data.get("form")
+        level = data.get("level")
+        course = data.get("course")
+        direction = data.get("direction")
+    subdirections = sql.get_list_subdirections(department, form, level, course, direction[:134])
 
-            for day in actual:
-                btn = types.KeyboardButton(f"{day.date} {week[day.date.weekday()]}")
-                markup.add(btn)
+    bot.send_message(
+        message.from_user.id,
+        text=BotText.insert_subdirection,
+        reply_markup=BotCreator.create_text_buttons(subdirections)
+    )
 
-            self.bot.send_message(message.from_user.id, "На какой день вы хотите увидеть расписание", reply_markup=markup)
+@bot.message_handler(state = RegisterState.subgroup)
+def handle_subgroup(message, state: StateContext):
+    state.add_data(subdirection = message.text)
+    state.set(RegisterState.save)
 
-        @self.bot.message_handler(commands=['schedule_history'])
-        def schedule_history(message):
-            print(f"{datetime.now()} Send message to {message.from_user.id}")
-            markup = types.ReplyKeyboardMarkup()
-            last = self.get_passed_days(30, self.work_days)
+    with state.data() as data:
+        department = data.get("department")
+        form = data.get("form")
+        level = data.get("level")
+        course = data.get("course")
+        direction = data.get("direction")
+        subdirection = data.get("subdirection")
+    subgroups = sql.get_list_subgroups(department, form, level, course, direction[:134],subdirection[:134])
+    bot.send_message(
+        message.from_user.id,
+        text=BotText.insert_subgroup,
+        reply_markup=BotCreator.create_text_buttons(subgroups)
+    )
 
-            for day in last:
-                btn = types.KeyboardButton(f"{day.date} {week[day.date.weekday()]}")
-                markup.add(btn)
+@bot.message_handler(state = RegisterState.save)
+def handle_group_id(message, state: StateContext):
+    state.add_data(subgroup = message.text)
+    state.set(RegisterState.done)
 
-            self.bot.send_message(message.from_user.id, "На какой день вы хотите увидеть расписание",
-                                  reply_markup=markup)
+    with state.data() as data:
+        institute = data.get("institute")
+        department = data.get("department")
+        form = data.get("form")
+        level = data.get("level")
+        course = data.get("course")
+        direction = str(data.get("direction")).replace('…','')
+        subdirection = str(data.get("subdirection")).replace('…','')
+        subgroup = data.get("subgroup")
+    group_id = sql.get_group_id(department, form, level, course, direction, subdirection,subgroup)
+    sql.set_user(message.from_user.id,group_id)
 
-        @self.bot.message_handler(commands= ['subscribe_updates'])
-        def subscribe_updates(message):
-            self.bot.send_message(message.from_user.id, "Теперь вы будете получать уведомления при изменении в расписании. \nЧтобы отписаться от рассылки вызовете команду \n/unsubscribe_updates")
-            self.users_DB.add_new_user(
-                User(
-                    message.from_user.id,
-                    True
-                )
-            )
+    shchedules = ["Сегодня","Завтра"]
 
-        @self.bot.message_handler(commands=['unsubscribe_updates'])
-        def unsubscribe_updates(message):
-            self.bot.send_message(message.from_user.id, "Вы отписались от уведомлений при изменении расписания. \nЧтобы подписаться на рассылку вызовете команду \n/subscribe_updates ")
+    bot.send_message(
+        message.from_user.id,
+        text=BotText.print_all(institute,department, form, level, course, direction,subdirection, subgroup)
+    )
 
-            self.users_DB.add_new_user(
-                User(
-                    message.from_user.id,
-                    False
-                )
-            )
+    bot.send_message(message.from_user.id,
+                     BotText.text_after_registration,
+                     reply_markup=BotCreator.create_text_buttons(shchedules))
 
-        @self.bot.message_handler(content_types=['text'])
-        def text(message):
-            print(f"{datetime.now()} Send message to {message.from_user.id}")
-            if message.text == "Сегодня":
-                self.send_work_day(message.from_user.id, self.get_work_day_date(datetime.now().date()))
-            elif message.text == "Завтра":
-                d = datetime.now().date() + timedelta(days=1)
-                self.send_work_day(message.from_user.id, self.get_work_day_date(d))
-            elif self.check_date_format(message.text):
-                d = self.convert_str_to_date(message.text)
-                work_day = self.get_work_day_date(d)
-                self.send_work_day(message.from_user.id, work_day)
+@bot.message_handler(commands=['schedule'])
+def handle_schedule(message):
+    shchedules = ["Сегодня","Завтра"]
+    bot.send_message(message.from_user.id,
+                     BotText.schedule_option,
+                     reply_markup=BotCreator.create_text_buttons(shchedules))
+
+@bot.message_handler(commands=['all_schedules'])
+def handle_all_schedules(message):
+    group_id = sql.user_select(message.from_user.id)[0]
+    date = str(datetime.now().date())
+    dates = sql.get_actual_dates(group_id, date)
+    reworked_dates = datefun.get_actual_dates(dates)
+
+    bot.send_message(message.from_user.id,
+                     BotText.schedule_option,
+                     reply_markup=BotCreator.create_text_buttons(reworked_dates,1))
+
+@bot.message_handler(content_types=['text'])
+def text(message):
+    group_id = sql.user_select(message.from_user.id)[0]
+    print(f"{datetime.now()} Send message to {message.from_user.id}")
+    if message.text == "Сегодня":
+        date = str(datetime.now().date())
+        workday = str(sql.get_sql_workday(group_id, date))
+        bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
+    elif message.text == "Завтра":
+        date = datetime.now().date() + timedelta(days=1)
+        workday = str(sql.get_sql_workday(group_id, str(date)))
+        bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
+
+    elif datefun.check_date_format(message.text):
+        date = datefun.convert_str_to_date(message.text)
+        workday = sql.get_sql_workday(group_id, str(date))
+        bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
+
+bot.polling(none_stop=True, interval=0)
