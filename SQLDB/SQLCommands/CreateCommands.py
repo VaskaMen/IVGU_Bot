@@ -143,6 +143,7 @@ class CreateCommands:
         return """create table if not exists Users
         (
         id BIGINT primary key,
-        "group" integer
+        "group" integer,
+        teacher_id integer
         )
         """

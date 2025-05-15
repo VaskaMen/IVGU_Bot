@@ -45,7 +45,7 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.add_form(6,'Очная Форма обучения'))
         self.__cur.execute(SQLCommands.add_form(8,'Очно-заочная Форма обучения'))
         self.__cur.execute(SQLCommands.add_form(7,'Заочная Форма обучения'))
-        self.__con.commit()
+        self.__cur.execute(SQLCommands.add_group(-1,-1,-1,-1,-1))
 
     def _add_subject(self, lesson: Lesson) -> int:
         self.__cur.execute(SQLCommands.add_subject(lesson.name))
@@ -165,11 +165,11 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.get_group_id(department, form, level, course, direction, subdirection,subgroup))
         return self.__cur.fetchone()
 
-    def _insert_user(self, user_id: int, group_id: int):
-        return self.__cur.execute(SQLCommands.insert_user(user_id, group_id))
+    def _insert_user(self, user_id: int, group_id: int, teacher_id: int = 0):
+        return self.__cur.execute(SQLCommands.insert_user(user_id, group_id, teacher_id))
 
-    def _update_user(self, user_id: int, group_id: int):
-        self.__cur.execute(SQLCommands.update_user(user_id,group_id))
+    def _update_user(self, user_id: int, group_id: int, teacher_id: int = 0):
+        self.__cur.execute(SQLCommands.update_user(user_id, group_id, teacher_id))
 
     def user_select(self, user_id: int):
         self.__cur.execute(SQLCommands.user_select(user_id))
@@ -177,6 +177,10 @@ class SQLEngine:
 
     def  _get_workday(self, group_id: int, date: str):
         self.__cur.execute(SQLCommands.get_workday(group_id, date))
+        return self.__cur.fetchall()
+
+    def _get_teachers_workday(self,teachers_id: int, date: str):
+        self.__cur.execute(SQLCommands.get_teachers_workday(date,teachers_id))
         return self.__cur.fetchall()
 
     def _get_teachers_of_lesson(self, lesson_id: int):
@@ -187,6 +191,24 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.get_dates_after_date(group_id, date))
         return self.__cur.fetchall()
 
+    def _get_all_teachers_date_after_date(self, teacher_id: int, date: str):
+        self.__cur.execute(SQLCommands.get_teacher_dates_after_date(teacher_id,date))
+        return self.__cur.fetchall()
+
+    def get_teacher_id(self, teacher_name: str):
+        self.__cur.execute(SQLCommands.find_teacher_id_by_name(teacher_name))
+        return self.__cur.fetchone()
+
+    def get_teachers_group(self):
+        self.__cur.execute(SQLCommands.find_teachers_group())
+        return self.__cur.fetchone()
+
+    def get_users_teacher_id(self, user_id: int):
+        self.__cur.execute(SQLCommands.find_user_teacher_id(user_id))
+        return self.__cur.fetchone()
+
+    def update_if_teach_to_student(self, user_id: int):
+        self.__cur.execute(SQLCommands.update_if_teach_to_student(user_id))
 
     def commit(self):
         self.__con.commit()

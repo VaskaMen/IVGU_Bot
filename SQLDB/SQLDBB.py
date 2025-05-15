@@ -61,11 +61,11 @@ class SQLDBB(SQLEngine):
     def get_group_id(self, department: str, form: str, level: str, course: str|int, direction: str, subdirection: str, subgroup: str):
         return self._get_group_id(department, form, level, course, direction, subdirection, subgroup)[0]
 
-    def set_user(self, user_id: int, group_id:int):
+    def set_user(self, user_id: int, group_id:int, teacher_id: int = 0):
         if self.user_select(user_id) is None:
-            self._insert_user(user_id, group_id)
+            self._insert_user(user_id, group_id, teacher_id)
         else:
-            self._update_user(user_id, group_id)
+            self._update_user(user_id, group_id, teacher_id)
 
     @staticmethod
     def __add_any_in_list(list_of_tuple: list[tuple[Any]]):
@@ -81,6 +81,18 @@ class SQLDBB(SQLEngine):
 
     def __get_list_sqllessons(self, group_id: int, date: str):
         workday = self._get_workday(group_id, date)
+        sqllessons = []
+        for lesson in workday:
+            sqllesson = self.__lesson_tuple_into_sqllesson(lesson)
+            sqllessons.append(sqllesson)
+        return sqllessons
+
+    def get_teacher_sqlworkday(self, teachers_id: int, date: str):
+        sqllessons = self.__get_list_sqllessons_teacher(teachers_id,date)
+        return SQLWorkDay(sqllessons,self.convert_str_to_date(date))
+
+    def __get_list_sqllessons_teacher(self, teacher_id: int, date: str):
+        workday = self._get_teachers_workday(teacher_id,date)
         sqllessons = []
         for lesson in workday:
             sqllesson = self.__lesson_tuple_into_sqllesson(lesson)
@@ -115,4 +127,8 @@ class SQLDBB(SQLEngine):
 
     def get_actual_dates(self,group_id:int , date: str) -> list[str]:
         dates = self._get_all_dates_after_date(group_id, date)
+        return self.__add_any_in_list(dates)
+
+    def get_actual_teacher_dates(self, teacher_id: int, date: str):
+        dates = self._get_all_teachers_date_after_date(teacher_id,date)
         return self.__add_any_in_list(dates)

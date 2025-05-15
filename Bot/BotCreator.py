@@ -10,3 +10,7 @@ class BotCreator:
         buttons = [types.InlineKeyboardButton(str(text),callback_data = str(text)) for text in texts]
         keyboard.add(*buttons)
         return keyboard
+
+    def create_today_or_tomorrow(self):
+        schedules = ["Сегодня", "Завтра"]
+        return self.create_text_buttons(schedules)

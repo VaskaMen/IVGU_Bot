@@ -13,3 +13,7 @@ class RegisterState(StatesGroup):
     subgroup = State()
     save = State()
     done = State()
+    start_pre_registration = State()
+    teacher = State()
+    reregister_first= State()
+    reregister_second = State()

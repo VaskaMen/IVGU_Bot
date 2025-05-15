@@ -455,17 +455,13 @@ class SQLCommands:
         group by Groups.id"""
 
     @staticmethod
-    def insert_user(id_user: int, group_id: int) -> str:
-        return f"""INSERT INTO Users (id,"group")
-                    SELECT {id_user}, {group_id}"""
+    def insert_user(id_user: int, group_id: int, teacher_id: int = 0) -> str:
+        return f"""INSERT INTO Users (id,"group",teacher_id)
+                    SELECT {id_user}, {group_id}, {teacher_id}"""
 
     @staticmethod
-    def find_group_id(user_id: int):
-        return
-
-    @staticmethod
-    def update_user(id_user: int, group_id: int) -> str:
-        return f"""Update Users set "group" = {group_id} where id = {id_user}"""
+    def update_user(id_user: int, group_id: int, teacher_id: int = 0) -> str:
+        return f"""Update Users set "group" = {group_id}, teacher_id = {teacher_id}  where id = {id_user}"""
 
     @staticmethod
     def user_select(id_user: int):
@@ -525,6 +521,25 @@ class SQLCommands:
         where Lessons.id = {lesson_id}"""
 
     @staticmethod
+    def get_teacher_of_lesson(lesson_id: int,teacher_id: int):
+        return f"""select
+        Teachers.name,
+        Places.place
+        
+        from TeachersLesson
+        
+        left join Places
+        on TeachersLesson.place = Places.id
+        
+        left join Teachers
+        on TeachersLesson.teacher = Teachers.id
+        
+        left join Lessons
+        on TeachersLesson.lesson = Lessons.id
+        
+        where Lessons.id = {lesson_id} and Teachers.id = {teacher_id}"""
+
+    @staticmethod
     def get_dates_after_date(group_id: int, date: str):
         return f"""select
         Lessons.date
@@ -536,3 +551,74 @@ class SQLCommands:
         
         group by lessons.date
         order by Lessons.date"""
+
+    @staticmethod
+    def get_teacher_dates_after_date(teacher_id: int, date: str):
+        return f"""select	
+		
+        Lessons.date
+    
+        from teacherslesson
+
+		left join teachers
+		on Teacherslesson.teacher = Teachers.id
+
+		left join lessons
+		on teacherslesson.lesson = Lessons.id
+        
+        where teachers.id = {teacher_id} AND
+        Lessons.date >= '{date}'
+        
+        group by lessons.date
+        order by Lessons.date"""
+
+    @staticmethod
+    def find_teacher_id_by_name(teacher_name: str):
+        return f"""select Teachers.id
+        from Teachers
+        where Teachers.name like '%{teacher_name}%'"""
+
+    @staticmethod
+    def find_teachers_group():
+        return f"""select Groups.id
+        from Groups
+        where Groups.course = -1"""
+
+    @staticmethod
+    def find_user_teacher_id(user_id: int):
+        return f"""select teacher_id
+        from Users 
+        where Users.id = {user_id}"""
+
+    @staticmethod
+    def update_if_teach_to_student(user_id: int):
+        return f'''Update Users set "teacher_id" = 0 where id = {user_id}'''
+
+    @staticmethod
+    def get_teachers_workday(date: str, teachers_id: int):
+        return f"""select 
+        max(Subjects.name) as "Предмет",
+        max(Lessons.time_start) as "Начало",
+        max(Lessons.time_end) as "Конец",
+        max(Types.name) as "Тип",
+        max(Lessons.date) as "Дата",
+        max(Lessons.id) as "id"
+        
+        
+        from TeachersLesson
+        
+        left join Lessons
+        on TeachersLesson.lesson = Lessons.id
+        
+        left join Teachers
+        on TeachersLesson.teacher = Teachers.id
+        
+        Left Join Subjects
+        on Lessons.subject = Subjects.id
+        
+        Left Join Types
+        on Lessons.type = Types.id
+        
+        where Lessons.date = '{date}' and Teachers.id = {teachers_id}
+        group by Lessons.time_start
+        order by Lessons.time_start"""

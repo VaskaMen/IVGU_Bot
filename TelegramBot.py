@@ -15,6 +15,7 @@ class IvguBot:
     def __init__(self, token: str, sqldb: SQLDBB):
         self.datefun = DateFunctions()
         self.sql = sqldb
+        self.botcreate = BotCreator()
 
         state_storage = StateMemoryStorage()
         self.bot = telebot.TeleBot(token, state_storage= state_storage, use_class_middlewares=True)
@@ -34,21 +35,90 @@ class IvguBot:
             if self.sql.user_select(message.chat.id) is not None:
                 state.set(RegisterState.done)
             else:
-                state.set(RegisterState.start_registration)
-                startmsg = ["Начать"]
+                state.set(RegisterState.start_pre_registration)
                 self.bot.send_message(
                     message.chat.id,
                     text=BotText.start_text,
-                    reply_markup=BotCreator.create_text_buttons(startmsg))
+                    )
+                choice = ["Да","Нет"]
+                self.bot.send_message(
+                    message.chat.id,
+                    text=BotText.start_choice,
+                    reply_markup=BotCreator.create_text_buttons(choice)
+                )
+
+        @self.bot.message_handler(state=RegisterState.start_pre_registration)
+        def pre_registration(message, state: StateContext):
+            if message.text == "Нет":
+                start_str = ["Начать"]
+                state.set(RegisterState.start_registration)
+                self.bot.send_message(message.from_user.id,
+                                      BotText.start_student,
+                                      reply_markup=BotCreator.create_text_buttons(start_str)
+                                      )
+            elif message.text == "Да":
+                state.set(RegisterState.teacher)
+                self.bot.send_message(message.from_user.id,BotText.teacher_insert)
+
+        @self.bot.message_handler(state=RegisterState.teacher)
+        def add_teacher(message, state: StateContext):
+            teacher = message.text
+            teacher_id = self.sql.get_teacher_id(teacher)
+            if teacher_id is not None:
+                group_id = self.sql.get_teachers_group()[0]
+                teacher_id = teacher_id[0]
+                self.sql.set_user(message.from_user.id,group_id, teacher_id)
+                self.bot.send_message(message.from_user.id,
+                                      BotText.teacher_correct,
+                                      reply_markup=self.botcreate.create_today_or_tomorrow())
+                self.sql.commit()
+                state.set(RegisterState.done)
+            else:
+                self.bot.send_message(message.from_user.id,BotText.teacher_error)
 
         @self.bot.message_handler(commands=['register'])
         def start_registration(message, state: StateContext):
-            state.set(RegisterState.start_registration)
+            state.set(RegisterState.reregister_first)
             registermsg = ["Начать регистрацию"]
             self.bot.send_message(
                 message.chat.id,
                 text=BotText.register_text,
                 reply_markup=BotCreator.create_text_buttons(registermsg))
+
+        @self.bot.message_handler(state=RegisterState.reregister_first)
+        def reregister(message, state: StateContext):
+            state.set(RegisterState.reregister_second)
+            choice = ["Да", "Нет"]
+            self.bot.send_message(
+                message.chat.id,
+                text=BotText.start_choice,
+                reply_markup=BotCreator.create_text_buttons(choice)
+            )
+
+        @self.bot.message_handler(state = RegisterState.reregister_second)
+        def reregister_second(message, state: StateContext):
+            teacher_id = self.sql.get_users_teacher_id(message.from_user.id)[0]
+            if message.text == "Нет" and teacher_id == 0:
+                start_str = ["Начать"]
+                state.set(RegisterState.start_registration)
+                self.bot.send_message(message.from_user.id,
+                                      BotText.start_student,
+                                      reply_markup=BotCreator.create_text_buttons(start_str)
+                                      )
+            elif message.text == "Нет" and teacher_id != 0:
+                self.sql.update_if_teach_to_student(message.from_user.id)
+                start_str = ["Начать"]
+                state.set(RegisterState.start_registration)
+                self.bot.send_message(message.from_user.id,
+                                      BotText.start_student,
+                                      reply_markup=BotCreator.create_text_buttons(start_str)
+                                      )
+            elif message.text == "Да" and teacher_id == 0:
+                state.set(RegisterState.teacher)
+                self.bot.send_message(message.from_user.id,BotText.teacher_insert)
+            elif message.text == "Да" and teacher_id != 0:
+                state.set(RegisterState.teacher)
+                self.bot.send_message(message.from_user.id, BotText.teacher_insert)
 
         @self.bot.message_handler(state = RegisterState.start_registration)
         def handle_start_registration(message, state: StateContext):
@@ -194,9 +264,8 @@ class IvguBot:
                 subgroup = data.get("subgroup")
             group_id = self.sql.get_group_id(department, form, level, course, direction, subdirection,subgroup)
 
-            self.sql.set_user(message.from_user.id,group_id)
+            self.sql.set_user(message.from_user.id, group_id)
             self.sql.commit()
-            shchedules = ["Сегодня","Завтра"]
 
             self.bot.send_message(
                 message.from_user.id,
@@ -205,40 +274,67 @@ class IvguBot:
 
             self.bot.send_message(message.from_user.id,
                              BotText.text_after_registration,
-                             reply_markup=BotCreator.create_text_buttons(shchedules))
+                             reply_markup=self.botcreate.create_today_or_tomorrow())
 
         @self.bot.message_handler(commands=['schedule'])
         def handle_schedule(message):
-            shchedules = ["Сегодня","Завтра"]
             self.bot.send_message(message.from_user.id,
                              BotText.schedule_option,
-                             reply_markup=BotCreator.create_text_buttons(shchedules))
+                             reply_markup=self.botcreate.create_today_or_tomorrow())
 
         @self.bot.message_handler(commands=['all_schedules'])
         def handle_all_schedules(message):
-            group_id = self.sql.user_select(message.from_user.id)[0]
-            date = str(datetime.now().date())
-            dates = self.sql.get_actual_dates(group_id, date)
-            reworked_dates = self.datefun.get_actual_dates(dates)
+            teacher_id = self.sql.get_users_teacher_id(message.from_user.id)[0]
+            if teacher_id == 0:
+                group_id = self.sql.user_select(message.from_user.id)[0]
+                date = str(datetime.now().date())
+                dates = self.sql.get_actual_dates(group_id, date)
+                reworked_dates = self.datefun.get_actual_dates(dates)
 
-            self.bot.send_message(message.from_user.id,
-                             BotText.schedule_option,
-                             reply_markup=BotCreator.create_text_buttons(reworked_dates,1))
+                self.bot.send_message(message.from_user.id,
+                                 BotText.schedule_option,
+                                 reply_markup=BotCreator.create_text_buttons(reworked_dates,1))
+
+            elif teacher_id != 0:
+                date = str(datetime.now().date())
+                dates = self.sql.get_actual_teacher_dates(teacher_id, date)
+                reworked_dates = self.datefun.get_actual_dates(dates)
+
+                self.bot.send_message(message.from_user.id,
+                                 BotText.schedule_option,
+                                 reply_markup=BotCreator.create_text_buttons(reworked_dates,1))
 
         @self.bot.message_handler(content_types=['text'])
         def text(message):
+            teacher_id = self.sql.get_users_teacher_id(message.from_user.id)[0]
             group_id = self.sql.user_select(message.from_user.id)[0]
             print(f"{datetime.now()} Send message to {message.from_user.id}")
-            if message.text == "Сегодня":
+            if message.text == "Сегодня" and teacher_id == 0:
                 date = str(datetime.now().date())
                 workday = self.sql.get_sql_workday(group_id, date)
                 self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
-            elif message.text == "Завтра":
+
+            elif message.text == "Сегодня" and teacher_id != 0:
+                date = str(datetime.now().date())
+                workday = self.sql.get_teacher_sqlworkday(teacher_id,date)
+                self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
+
+            elif message.text == "Завтра" and teacher_id == 0:
                 date = datetime.now().date() + timedelta(days=1)
                 workday = str(self.sql.get_sql_workday(group_id, str(date)))
                 self.bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
-            elif self.datefun.check_date_format(message.text):
+
+            elif message.text == "Завтра" and teacher_id != 0:
+                date = datetime.now().date() + timedelta(days=1)
+                workday = str(self.sql.get_teacher_sqlworkday(teacher_id, str(date)))
+                self.bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
+
+            elif self.datefun.check_date_format(message.text) and teacher_id == 0:
                 date = self.datefun.convert_str_to_date(message.text)
                 workday = self.sql.get_sql_workday(group_id, str(date))
                 self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
 
+            elif self.datefun.check_date_format(message.text) and teacher_id != 0:
+                date = self.datefun.convert_str_to_date(message.text)
+                workday = self.sql.get_teacher_sqlworkday(teacher_id, str(date))
+                self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
