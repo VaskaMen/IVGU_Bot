@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 
 import telebot
@@ -178,11 +179,11 @@ class IvguBot:
                 reply_markup=BotCreator.create_text_buttons(subgroups)
             )
 
+
         @self.bot.message_handler(state = RegisterState.save)
         def handle_group_id(message, state: StateContext):
             state.add_data(subgroup = message.text)
             state.set(RegisterState.done)
-
             with state.data() as data:
                 institute = data.get("institute")
                 department = data.get("department")
@@ -193,8 +194,9 @@ class IvguBot:
                 subdirection = str(data.get("subdirection")).replace('…','')
                 subgroup = data.get("subgroup")
             group_id = self.sql.get_group_id(department, form, level, course, direction, subdirection,subgroup)
-            self.sql.set_user(message.from_user.id,group_id)
 
+            self.sql.set_user(message.from_user.id,group_id)
+            self.sql.commit()
             shchedules = ["Сегодня","Завтра"]
 
             self.bot.send_message(
@@ -230,8 +232,8 @@ class IvguBot:
             print(f"{datetime.now()} Send message to {message.from_user.id}")
             if message.text == "Сегодня":
                 date = str(datetime.now().date())
-                workday = str(self.sql.get_sql_workday(group_id, date))
-                self.bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
+                workday = self.sql.get_sql_workday(group_id, date)
+                self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
             elif message.text == "Завтра":
                 date = datetime.now().date() + timedelta(days=1)
                 workday = str(self.sql.get_sql_workday(group_id, str(date)))

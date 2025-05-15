@@ -192,7 +192,7 @@ class SQLCommands:
             time_end,
             type,
             date,
-            [group]
+            "group"
         )
          SELECT
             {subject_id},
@@ -207,8 +207,8 @@ class SQLCommands:
             time_start = '{time_start}' AND
             time_end = '{time_end}' AND
             type = '{type}' AND
-            [date] = {date} AND
-            [group] = {group_id}
+            "date" = '{date}' AND
+            "group" = {group_id}
                 )
             """
     @staticmethod
@@ -218,8 +218,8 @@ class SQLCommands:
             time_start = '{time_start}' AND
             time_end = '{time_end}' AND
             type = {type} AND
-            [date] = '{date}' AND
-            [group] = {group_id}"""
+            "date" = '{date}' AND
+            "group" = {group_id}"""
 
     @staticmethod
     def find_id_group(course_id: int, subgroup_id: int, level_id: int,form_id: int, subdirection_id: int) -> str:
@@ -350,7 +350,7 @@ class SQLCommands:
         WHERE departments.name like '{department}' AND
         Forms.name like '{form}' AND
         Levels.name like '{level}' AND
-        Groups.course like {course}
+        Groups.course = {course}
         
         group by Directions.name"""
 
@@ -380,7 +380,7 @@ class SQLCommands:
             WHERE departments.name like '{department}' AND
             Forms.name like '{form}' AND
             Levels.name like '{level}' AND
-            Groups.course like {course} AND
+            Groups.course = {course} AND
             Directions.name like '%{direction}%'
 
             group by Subdirections.name"""
@@ -413,7 +413,7 @@ class SQLCommands:
         WHERE departments.name like '{department}' AND
         Forms.name like '{form}' AND
         Levels.name like '{level}' AND
-        Groups.course like {course} AND
+        Groups.course = {course} AND
         Directions.name like '%{direction}%' AND
         Subdirections.name like '%{subdirection}%'
         
@@ -447,7 +447,7 @@ class SQLCommands:
         WHERE departments.name like '{department}' AND
         Forms.name like '{form}' AND
         Levels.name like '{level}' AND
-        Groups.course like {course} AND
+        Groups.course = {course} AND
         Directions.name like '%{direction}%' AND
         Subdirections.name like '%{subdirection}%' AND
         Subgroups.name like '{subgroup}'
@@ -456,7 +456,7 @@ class SQLCommands:
 
     @staticmethod
     def insert_user(id_user: int, group_id: int) -> str:
-        return f"""INSERT INTO Users (id,[group])
+        return f"""INSERT INTO Users (id,"group")
                     SELECT {id_user}, {group_id}"""
 
     @staticmethod
@@ -465,11 +465,11 @@ class SQLCommands:
 
     @staticmethod
     def update_user(id_user: int, group_id: int) -> str:
-        return f"""Update Users set [group] = {group_id} where id = {id_user}"""
+        return f"""Update Users set "group" = {group_id} where id = {id_user}"""
 
     @staticmethod
     def user_select(id_user: int):
-        return f"""Select [group] from Users where users.id = {id_user}"""
+        return f"""Select "group" from Users where users.id = {id_user}"""
 
     @staticmethod
     def get_workday(group_id: int, date: str):
@@ -492,10 +492,18 @@ class SQLCommands:
         Left Join Types
         on Lessons.type = Types.id
         
-        where Lessons.[group] like {group_id} AND
-        Lessons.date like "{date}"
+        where Lessons."group" = {group_id} AND
+        Lessons.date = '{date}'
         
-        group by Lessons.time_start"""
+        group by Subjects.name,
+                Lessons.time_start,
+                Lessons.time_end,
+                Types.name,
+                Lessons.date,
+                Lessons.id
+                
+        order by Lessons.time_start
+        """
 
     @staticmethod
     def get_teachers_of_lesson(lesson_id: int):
@@ -514,7 +522,7 @@ class SQLCommands:
         left join Lessons
         on TeachersLesson.lesson = Lessons.id
         
-        where Lessons.id like {lesson_id}"""
+        where Lessons.id = {lesson_id}"""
 
     @staticmethod
     def get_dates_after_date(group_id: int, date: str):
@@ -523,7 +531,7 @@ class SQLCommands:
     
         from Lessons
         
-        where Lessons.[group] like {group_id} AND
-        Lessons.date >= "{date}"
+        where Lessons."group" = {group_id} AND
+        Lessons.date >= '{date}'
         
         group by lessons.date"""

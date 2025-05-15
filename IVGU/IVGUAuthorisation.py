@@ -7,17 +7,17 @@ class IVGUAuthorisation:
     __csrf: str = ""
 
     def __init__(self,email: str,password: str):
-        self.__csrf = self.__get_csrf()
         self.login(email,password)
 
     def __get_csrf(self) -> str:
-        r = self._session.get("https://uni.ivanovo.ac.ru", headers={
+        self._session.get("https://uni.ivanovo.ac.ru", headers={
             'User-Agent': self.__user_agent_val
         })
         _csrf = self._session.cookies.get('csrf', domain="uni.ivanovo.ac.ru")
         return _csrf
 
     def login(self, email: str, password:str):
+        self.__csrf = self.__get_csrf()
         h = {
             "csrf": self.__csrf,
             "email": email,

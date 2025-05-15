@@ -3,7 +3,7 @@ class CreateCommands:
     def create_table_subjects() -> str:
         return """create table if not exists Subjects
         (
-        id integer primary key autoincrement,
+        id serial primary key,
         name text
         )
         """
@@ -11,7 +11,7 @@ class CreateCommands:
     def create_table_teachers() -> str:
         return """create table if not exists Teachers
         (
-        id integer primary key autoincrement,
+        id serial primary key,
         name text
         )
         """
@@ -20,7 +20,7 @@ class CreateCommands:
     def create_table_places() -> str:
         return """create table if not exists Places
         (
-        id integer primary key autoincrement,
+        id serial primary key,
         place text
         )
         """
@@ -66,7 +66,7 @@ class CreateCommands:
     def create_table_subgroups() -> str:
         return """create table if not exists Subgroups
         (
-        id integer primary key autoincrement,
+        id serial primary key,
         name text
         )
         """
@@ -75,7 +75,7 @@ class CreateCommands:
     def create_table_directions() -> str:
         return """create table if not exists Directions
         (
-        id integer primary key autoincrement,
+        id serial primary key,
         name text,
         department int
         )
@@ -85,7 +85,7 @@ class CreateCommands:
     def create_table_subdirections() -> str:
         return """create table if not exists SubDirections
         (
-        id integer primary key autoincrement,
+        id serial primary key,
         name text,
         direction int
         )
@@ -95,7 +95,7 @@ class CreateCommands:
     def create_table_groups() -> str:
         return """create table if not exists Groups
         (
-        id integer primary key autoincrement,
+        id serial primary key,
         course integer,
         subgroup integer,
         level integer,
@@ -108,7 +108,7 @@ class CreateCommands:
     def create_table_types() -> str:
         return """create table if not exists Types
         (
-        id integer primary key autoincrement,
+        id serial primary key,
         name text
         ) 
         """
@@ -117,13 +117,13 @@ class CreateCommands:
     def create_table_lessons() -> str:
         return """create table if not exists Lessons
         (
-        id integer primary key autoincrement,
+        id serial primary key,
         subject integer,
-        time_start text,
-        time_end text,
+        time_start time,
+        time_end time,
         type int,
-        [date] date,
-        [group] integer
+        "date" date,
+        "group" integer
         ) 
         """
 
@@ -131,7 +131,7 @@ class CreateCommands:
     def create_table_teachers_lesson() -> str:
         return """create table if not exists TeachersLesson
         (
-        id integer primary key autoincrement,
+        id serial primary key,
         teacher integer,
         place integer,
         lesson integer
@@ -142,7 +142,7 @@ class CreateCommands:
     def create_table_users() -> str:
         return """create table if not exists Users
         (
-        id integer primary key,
-        [group] integer
+        id BIGINT primary key,
+        "group" integer
         )
         """
