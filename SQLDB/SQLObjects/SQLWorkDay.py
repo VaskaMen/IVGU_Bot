@@ -13,7 +13,7 @@ class SQLWorkDay:
         if len(self.lessons) != 0:
             res = f"***{self.date} {week[self.date.weekday()]}***\n\n"
             for lesson in self.lessons:
-                time = f"{lesson.time_start} - {lesson.time_end}"
+                time = f"{str(lesson.time_start)[:-3]} - {str(lesson.time_end)[:-3]}"
                 res += f"⌚  ***{time}*** \n📘  {lesson.subject_name} \n🔹  ___{lesson.type_name}___ \n"
                 for teacher_place in lesson.teach_places:
                     res += f"👨‍🏫  {teacher_place.teacher} \n🚪  ***{teacher_place.place}***\n"

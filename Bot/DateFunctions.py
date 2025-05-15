@@ -56,7 +56,7 @@ class DateFunctions:
         date_obj = datetime(int(year), month, int(day))
         return date_obj.date()
 
-    def get_actual_dates(self,dates: list[str]) -> list[str]:
+    def get_actual_dates(self,dates: list[date]) -> list[str]:
         actual_dates = []
         month_mapping = {
             "01": "января",
@@ -74,8 +74,9 @@ class DateFunctions:
         }
         week = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
         for date in dates:
-            weekday = week[self.convert_date_str_to_date(date).weekday()]
-            splitted = date.split('-')
+            str_date = str(date)
+            weekday = week[self.convert_date_str_to_date(str_date).weekday()]
+            splitted = str_date.split('-')
             day = int(splitted[2])
             month = month_mapping[splitted[1]]
             year = splitted[0]

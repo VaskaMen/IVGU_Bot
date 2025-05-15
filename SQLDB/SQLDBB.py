@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, time
 from typing import Any
 
 from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
@@ -87,7 +87,7 @@ class SQLDBB(SQLEngine):
             sqllessons.append(sqllesson)
         return sqllessons
 
-    def __lesson_tuple_into_sqllesson(self, lesson: tuple[str,str,str,str,str,int]):
+    def __lesson_tuple_into_sqllesson(self, lesson: tuple[str,time,time,str,date,int]):
         lesson_id = lesson[5]
         list_teach_place = self.get_teacher_places(lesson_id)
         sqllesson = SQLLesson(subject_name=lesson[0],
@@ -98,7 +98,8 @@ class SQLDBB(SQLEngine):
                               teach_places=list_teach_place)
         return sqllesson
 
-    def convert_str_to_date(self, s: str) -> date:
+    @staticmethod
+    def convert_str_to_date(s: str) -> date:
         return datetime.strptime(s.split(' ')[0], '%Y-%m-%d').date()
 
 
@@ -115,11 +116,3 @@ class SQLDBB(SQLEngine):
     def get_actual_dates(self,group_id:int , date: str) -> list[str]:
         dates = self._get_all_dates_after_date(group_id, date)
         return self.__add_any_in_list(dates)
-
-    @staticmethod
-    def get_only_actual_days(days: list[SQLWorkDay]) -> list[SQLWorkDay]:
-        actual_days: list[SQLWorkDay] = list()
-        for i in days:
-            if i.date >= datetime.now().date():
-                actual_days.append(i)
-        return actual_days

@@ -27,7 +27,7 @@ def run_bot():
 def update_schedule():
     try:
         api.login(email, password)
-        time.sleep(10)
+        time.sleep(20)
         t1 = datetime.now()
         print(f"Обновление расписание {t1}")
         schedcoll.get_schedules_for_uni_number(2)

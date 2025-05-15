@@ -4,8 +4,8 @@ from SQLDB.SQLObjects.SQLTeacherPlace import SQLTeacherPlace
 
 class SQLLesson:
     def __init__(self, subject_name: str,
-                 time_start: str,
-                 time_end: str,
+                 time_start: datetime.time,
+                 time_end: datetime.time,
                  type_name: str,
                  date: datetime.date,
                  teach_places: list[SQLTeacherPlace]):

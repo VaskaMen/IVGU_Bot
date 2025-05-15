@@ -67,12 +67,6 @@ class Constructors(LineConvertor):
             list_direction_schedule.append(direction_schedule)
         return list_direction_schedule
 
-    def get_all_subgroups(self, keys_subgroups: Index) -> list[str]:
-        all_subgroups = []
-        for key in keys_subgroups:
-            all_subgroups.append(self.get_subgroup(key))
-        return all_subgroups
-
     @staticmethod
     def get_subgroup(key_subgroup) -> str:
         if len(key_subgroup)<3:

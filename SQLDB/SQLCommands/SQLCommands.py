@@ -534,4 +534,5 @@ class SQLCommands:
         where Lessons."group" = {group_id} AND
         Lessons.date >= '{date}'
         
-        group by lessons.date"""
+        group by lessons.date
+        order by Lessons.date"""

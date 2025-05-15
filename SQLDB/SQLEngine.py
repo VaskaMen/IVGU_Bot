@@ -1,5 +1,3 @@
-import sqlite3
-
 import psycopg2
 
 from IVGU.ScheduleObject.Lesson import Lesson
@@ -21,6 +19,7 @@ class SQLEngine:
             client_encoding='UTF-8',
 
         )
+        self.__con.autocommit = True
 
         self.__cur = self.__con.cursor()
         self.__cur.execute(CreateCommands.create_table_levels())

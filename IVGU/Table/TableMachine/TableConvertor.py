@@ -47,11 +47,6 @@ class TableConvertor(Constructors):
         th = tr[2].select('th')
         return th
 
-    def __get_table_head_group(self) -> ResultSet[Tag]:
-        tr = self.table.select('thead tr')
-        th = tr[3].select('th')
-        return th
-
     @staticmethod
     def __tags_splitter_by_colspan(td: ResultSet[Tag]) -> ResultSet[Tag]:
         for id,elem in enumerate(td):
