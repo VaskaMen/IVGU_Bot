@@ -4,7 +4,8 @@ from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 from SQLDB.SQLCommands.CreateCommands import CreateCommands
 from SQLDB.SQLCommands.SQLCommands import SQLCommands
-from datetime import date
+from datetime import date, datetime
+
 
 class SQLEngine:
     def __init__(self):
@@ -16,10 +17,10 @@ class SQLEngine:
             user="postgres",
             password="admin",
             port=5432,
-            client_encoding='UTF-8',
+            client_encoding='UTF-8'
 
         )
-        self.__con.autocommit = True
+        # self.__con.autocommit = True
 
         self.__cur = self.__con.cursor()
         self.__cur.execute(CreateCommands.create_table_levels())
@@ -37,6 +38,8 @@ class SQLEngine:
         self.__cur.execute(CreateCommands.create_table_teachers_lesson())
         self.__cur.execute(CreateCommands.create_table_types())
         self.__cur.execute(CreateCommands.create_table_users())
+        self.__cur.execute(CreateCommands.create_table_lessons_workday())
+        self.__cur.execute(CreateCommands.create_table_workday())
         self.__con.commit()
         self.__cur.execute(SQLCommands.add_level(1,"Бакалавриат"))
         self.__cur.execute(SQLCommands.add_level(2,"Магистратура"))
@@ -92,14 +95,14 @@ class SQLEngine:
     def add_institute(self, id_of_institute: int, name: str):
         self.__cur.execute(SQLCommands.add_institute(id_of_institute, name))
 
-    def add_lesson(self, lesson: Lesson, date_: date, group: int):
+    def add_lesson(self, lesson: Lesson):
         subject = self._add_subject(lesson)
         type_for_lesson = self.add_type(lesson.type_subject)
         lesson_time = lesson.time
         start_time = self.__get_start_time(lesson_time)
         end_time = self.__get_end_time(lesson_time)
-        self.__cur.execute(SQLCommands.add_lesson(subject, start_time, end_time, type_for_lesson, str(date_), group))
-        self.__cur.execute(SQLCommands.find_id_lesson(subject, start_time, end_time, type_for_lesson, str(date_), group))
+        self.__cur.execute(SQLCommands.add_lesson(subject, start_time, end_time, type_for_lesson))
+        self.__cur.execute(SQLCommands.find_id_lesson(subject, start_time, end_time, type_for_lesson))
         return self.__cur.fetchone()[0]
 
 
@@ -209,6 +212,18 @@ class SQLEngine:
 
     def update_if_teach_to_student(self, user_id: int):
         self.__cur.execute(SQLCommands.update_if_teach_to_student(user_id))
+
+    def insert_workday(self, date: datetime.date, group_id: int):
+        self.__cur.execute(SQLCommands.add_workday(date, group_id))
+        self.__cur.execute(SQLCommands.find_workday(date, group_id))
+        return self.__cur.fetchone()[0]
+
+    def find_work_day(self, date: datetime.date, group_id: int):
+        self.__cur.execute(SQLCommands.find_workday(date, group_id))
+        return self.__cur.fetchone()
+
+    def add_workday_lessons(self, workday_id: int, lesson_id: int,):
+        self.__cur.execute(SQLCommands.add_workday_lessons(lesson_id, workday_id))
 
     def commit(self):
         self.__con.commit()

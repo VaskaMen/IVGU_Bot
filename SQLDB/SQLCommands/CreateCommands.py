@@ -122,14 +122,13 @@ class CreateCommands:
         time_start time,
         time_end time,
         type int,
-        "date" date,
-        "group" integer
+        teachers_place integer 
         ) 
         """
 
     @staticmethod
     def create_table_teachers_lesson() -> str:
-        return """create table if not exists TeachersLesson
+        return """create table if not exists TeachersPlace
         (
         id serial primary key,
         teacher integer,
@@ -147,3 +146,24 @@ class CreateCommands:
         teacher_id integer
         )
         """
+
+    @staticmethod
+    def create_table_lessons_workday() -> str:
+        return """create table if not exists WorkdayLessons
+           (
+           id serial primary key,
+           lessons integer,
+           workday integer
+           )
+           """
+
+    @staticmethod
+    def create_table_workday() -> str:
+        return """create table if not exists Workday
+             (
+             id serial primary key,
+             "date" date,
+             insert_date timestamp,
+             "group" integer
+             )
+             """

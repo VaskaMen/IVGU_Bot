@@ -14,17 +14,16 @@ schedcoll = ScheduleCollector(api, sql)
 
 
 def update_schedule():
-    try:
+    # try:
         api.login(email, password)
-        time.sleep(20)
         t1 = datetime.now()
         print(f"Обновление расписание {t1}")
         schedcoll.get_schedules_for_uni_number(2)
         sql.commit()
         t2 = datetime.now()
         print(f"Обновление расписание заняло {t2 - t1}")
-    except Exception as ex:
-        print(ex)
+    # except Exception as ex:
+    #     print(ex)
 
 # update_schedule()
 # schedule.every(3).minutes.do(update_schedule)

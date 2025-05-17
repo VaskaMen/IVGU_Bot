@@ -2,6 +2,7 @@ from datetime import datetime, date, time
 from typing import Any
 
 from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
+from IVGU.ScheduleObject.Lesson import Lesson
 
 from IVGU.ScheduleObject.WorkDay import WorkDay
 from SQLDB.SQLEngine import SQLEngine
@@ -21,9 +22,20 @@ class SQLDBB(SQLEngine):
     def add_workday(self, workday: WorkDay,course: int, level: int, form: int,id_subdirection: int):
         subgroup = self.add_subgroup(workday.subgroup)
         group = self.add_group(course,subgroup,level,form,id_subdirection)
-        for lesson in workday.lessons:
+
+        workday_db = self.find_work_day(workday.date, group)
+
+        if workday_db is None:
+            workday_id = self.insert_workday(workday.date, group)
+            self.add_lessons(workday_id, workday.lessons)
+        else:
+            pass
+
+    def add_lessons(self, workday_id: int, lessons: list[Lesson]):
+        for lesson in lessons:
             if str(lesson.name) != 'None':
-                lesson_id = self.add_lesson(lesson, workday.date, group)
+                lesson_id = self.add_lesson(lesson)
+                self.add_workday_lessons(workday_id, lesson_id)
                 self._add_many_teacher_place(lesson_id, lesson.teacher_places)
 
     def get_list_institutes(self) -> list[str]:

@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 class SQLCommands:
 
     @staticmethod
@@ -42,15 +45,15 @@ class SQLCommands:
 
     @staticmethod
     def add_teachers_of_lesson(teacher_id: int, lesson_id: int, place_id: int) -> str:
-        return  f"""INSERT INTO TeachersLesson (teacher,lesson,place)
+        return  f"""INSERT INTO TeachersPlace (teacher,lesson,place)
                 SELECT {teacher_id},{lesson_id},{place_id}
                 WHERE NOT EXISTS (
-                SELECT 1 FROM TeachersLesson WHERE teacher = {teacher_id} AND lesson = {lesson_id} AND place ={place_id}
+                SELECT 1 FROM TeachersPlace WHERE teacher = {teacher_id} AND lesson = {lesson_id} AND place ={place_id}
                 )"""
 
     @staticmethod
     def find_id_teachers_of_lesson_by_ids(teacher_id: int, lesson_id: int, place_id: int) -> str:
-        return f"""SELECT id FROM TeachersLesson WHERE 
+        return f"""SELECT id FROM TeachersPlace WHERE 
                     teacher = {teacher_id} AND
                     lesson = {lesson_id} AND
                     place ={place_id}
@@ -58,7 +61,7 @@ class SQLCommands:
 
     @staticmethod
     def find_teacher_of_lesson_by_lesson_id(lesson_id: int) -> str:
-        return f"""select * from TeachersLesson where lesson = {lesson_id}"""
+        return f"""select * from TeachersPlace where lesson = {lesson_id}"""
 
     @staticmethod
     def add_place(place: str) -> str:
@@ -185,41 +188,36 @@ class SQLCommands:
         return f"""select * from Types where name = '{name}'"""
 
     @staticmethod
-    def add_lesson(subject_id: int, time_start: str,time_end: str, type: int, date: str, group_id: int) -> str:
+    def add_lesson(subject_id: int, time_start: str,time_end: str, type: int) -> str:
         return f"""insert into Lessons(
             subject,
             time_start,
             time_end,
-            type,
-            date,
-            "group"
+            type
         )
          SELECT
             {subject_id},
             '{time_start}',
             '{time_end}',
-            '{type}',
-            '{date}',
-            {group_id}  
+            '{type}'
+            
          WHERE NOT EXISTS (
             SELECT 1 FROM Lessons WHERE 
             subject = {subject_id} AND
             time_start = '{time_start}' AND
             time_end = '{time_end}' AND
-            type = '{type}' AND
-            "date" = '{date}' AND
-            "group" = {group_id}
-                )
+            type = '{type}' 
+            )
             """
+
     @staticmethod
-    def find_id_lesson(subject_id: int, time_start: str, time_end:str, type: int, date: str, group_id: int) -> str:
+    def find_id_lesson(subject_id: int, time_start: str, time_end:str, type: int) -> str:
         return f"""SELECT id FROM Lessons WHERE 
             subject = {subject_id} AND
             time_start = '{time_start}' AND
             time_end = '{time_end}' AND
-            type = {type} AND
-            "date" = '{date}' AND
-            "group" = {group_id}"""
+            type = {type} 
+            """
 
     @staticmethod
     def find_id_group(course_id: int, subgroup_id: int, level_id: int,form_id: int, subdirection_id: int) -> str:
@@ -474,13 +472,16 @@ class SQLCommands:
         Lessons.time_start,
         Lessons.time_end,
         Types.name as "Тип",
-        Lessons.date,
+        Workday."date",
         Lessons.id
 
-        from TeachersLesson
+        from Workdaylessons
         
         left join Lessons
-        on TeachersLesson.lesson = Lessons.id
+        on Workdaylessons.lessons = Lessons.id
+
+		left join Workday
+        on Workdaylessons.workday = Workday.id
         
         Left Join Subjects
         on Lessons.subject = Subjects.id
@@ -489,13 +490,13 @@ class SQLCommands:
         on Lessons.type = Types.id
         
         where Lessons."group" = {group_id} AND
-        Lessons.date = '{date}'
+        Workday."date" = '{date}'
         
         group by Subjects.name,
                 Lessons.time_start,
                 Lessons.time_end,
                 Types.name,
-                Lessons.date,
+                Workday."date",
                 Lessons.id
                 
         order by Lessons.time_start
@@ -507,16 +508,16 @@ class SQLCommands:
         Teachers.name,
         Places.place
         
-        from TeachersLesson
+        from TeachersPlace
         
         left join Places
-        on TeachersLesson.place = Places.id
+        on TeachersPlace.place = Places.id
         
         left join Teachers
-        on TeachersLesson.teacher = Teachers.id
+        on TeachersPlace.teacher = Teachers.id
         
         left join Lessons
-        on TeachersLesson.lesson = Lessons.id
+        on TeachersPlace.lesson = Lessons.id
         
         where Lessons.id = {lesson_id}"""
 
@@ -526,16 +527,16 @@ class SQLCommands:
         Teachers.name,
         Places.place
         
-        from TeachersLesson
+        from TeachersPlace
         
         left join Places
-        on TeachersLesson.place = Places.id
+        on TeachersPlace.place = Places.id
         
         left join Teachers
-        on TeachersLesson.teacher = Teachers.id
+        on TeachersPlace.teacher = Teachers.id
         
         left join Lessons
-        on TeachersLesson.lesson = Lessons.id
+        on TeachersPlace.lesson = Lessons.id
         
         where Lessons.id = {lesson_id} and Teachers.id = {teacher_id}"""
 
@@ -558,13 +559,13 @@ class SQLCommands:
 		
         Lessons.date
     
-        from teacherslesson
+        from TeachersPlace
 
 		left join teachers
-		on Teacherslesson.teacher = Teachers.id
+		on TeachersPlace.teacher = Teachers.id
 
 		left join lessons
-		on teacherslesson.lesson = Lessons.id
+		on TeachersPlace.lesson = Lessons.id
         
         where teachers.id = {teacher_id} AND
         Lessons.date >= '{date}'
@@ -601,17 +602,15 @@ class SQLCommands:
         max(Lessons.time_start) as "Начало",
         max(Lessons.time_end) as "Конец",
         max(Types.name) as "Тип",
-        max(Lessons.date) as "Дата",
         max(Lessons.id) as "id"
         
-        
-        from TeachersLesson
+        from TeachersPlace
         
         left join Lessons
-        on TeachersLesson.lesson = Lessons.id
+        on TeachersPlace.lesson = Lessons.id
         
         left join Teachers
-        on TeachersLesson.teacher = Teachers.id
+        on TeachersPlace.teacher = Teachers.id
         
         Left Join Subjects
         on Lessons.subject = Subjects.id
@@ -622,3 +621,53 @@ class SQLCommands:
         where Lessons.date = '{date}' and Teachers.id = {teachers_id}
         group by Lessons.time_start
         order by Lessons.time_start"""
+
+    @staticmethod
+    def add_workday_lessons(lessons_id: int, workday_id: int) -> str:
+        return f"""insert into WorkdayLessons(
+              lessons,
+              workday
+            )
+             SELECT
+                {lessons_id},
+                {workday_id}
+             WHERE NOT EXISTS (
+                SELECT 1 FROM WorkdayLessons WHERE 
+                lessons = {lessons_id} AND
+                workday = {workday_id}
+                    )
+                """
+
+    @staticmethod
+    def add_workday(date: datetime.date, group_id: int):
+        return  f"""
+            insert into Workday(
+              "date",
+              insert_date,
+              "group"
+            )
+            values( 
+                '{date}',
+                NOW(),
+                {group_id}
+                )
+                """
+
+
+    @staticmethod
+    def find_workday(date: datetime.date, group_id: int):
+        return f"""select *
+        from Workday 
+        where "date" = '{date}' and "group" = {group_id} """
+
+    @staticmethod
+    def find_teacher_place(teacher_id: int, place_id: int) -> str:
+        return f"""
+             SELECT
+                id
+             from TeachersPlace
+             WHERE
+                teacher = {teacher_id} AND
+                place = {place_id}
+                    
+                """
