@@ -17,11 +17,11 @@ def update_schedule():
     # try:
         api.login(email, password)
         t1 = datetime.now()
-        print(f"Обновление расписание {t1}")
+        print(f"Обновление расписания {t1}")
         schedcoll.get_schedules_for_uni_number(2)
         sql.commit()
         t2 = datetime.now()
-        print(f"Обновление расписание заняло {t2 - t1}")
+        print(f"Обновление расписания заняло {t2 - t1}")
     # except Exception as ex:
     #     print(ex)
 

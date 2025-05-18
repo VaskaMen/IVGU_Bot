@@ -517,25 +517,6 @@ class SQLCommands:
         
         where Lessons.id = {lesson_id}"""
 
-    # @staticmethod
-    # def get_teacher_of_lesson(lesson_id: int,teacher_id: int):
-    #     return f"""select
-    #     Teachers.name,
-    #     Places.place
-    #
-    #     from TeachersPlace
-    #
-    #     left join Places
-    #     on TeachersPlace.place = Places.id
-    #
-    #     left join Teachers
-    #     on TeachersPlace.teacher = Teachers.id
-    #
-    #     left join Lessons
-    #     on TeachersPlace.lesson = Lessons.id
-    #
-    #     where Lessons.id = {lesson_id} and Teachers.id = {teacher_id}"""
-
     @staticmethod
     def get_dates_after_date(group_id: int, date: str):
         return f'''select   
@@ -557,21 +538,26 @@ class SQLCommands:
     def get_teacher_dates_after_date(teacher_id: int, date: str):
         return f"""select	
 		
-        Lessons.date
+        workday.date
     
         from TeachersPlace
+
+		left join lessons
+		on TeachersPlace.lesson = Lessons.id
+
+		LEFT join workday
+		on Lessons.workday = workday.id
 
 		left join teachers
 		on TeachersPlace.teacher = Teachers.id
 
-		left join lessons
-		on TeachersPlace.lesson = Lessons.id
+		
         
         where teachers.id = {teacher_id} AND
-        Lessons.date >= '{date}'
+        workday.date >= '{date}'
         
-        group by lessons.date
-        order by Lessons.date"""
+        group by workday.date
+        order by workday.date"""
 
     @staticmethod
     def find_teacher_id_by_name(teacher_name: str):
@@ -602,12 +588,16 @@ class SQLCommands:
         max(Lessons.time_start) as "Начало",
         max(Lessons.time_end) as "Конец",
         max(Types.name) as "Тип",
+        max(workday.date) as "Дата",
         max(Lessons.id) as "id"
         
         from TeachersPlace
         
         left join Lessons
         on TeachersPlace.lesson = Lessons.id
+
+		left join workday
+		on lessons.workday = workday.id
         
         left join Teachers
         on TeachersPlace.teacher = Teachers.id
@@ -618,7 +608,7 @@ class SQLCommands:
         Left Join Types
         on Lessons.type = Types.id
         
-        where Lessons.date = '{date}' and Teachers.id = {teachers_id}
+        where workday.date = '{date}' and Teachers.id = {teachers_id}
         group by Lessons.time_start
         order by Lessons.time_start"""
 
