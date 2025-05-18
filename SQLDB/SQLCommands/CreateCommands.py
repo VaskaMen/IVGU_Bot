@@ -121,8 +121,7 @@ class CreateCommands:
         subject integer,
         time_start time,
         time_end time,
-        type int,
-        teachers_place integer 
+        type int
         ) 
         """
 

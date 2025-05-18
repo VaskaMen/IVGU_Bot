@@ -45,7 +45,7 @@ class SQLCommands:
 
     @staticmethod
     def add_teachers_of_lesson(teacher_id: int, lesson_id: int, place_id: int) -> str:
-        return  f"""INSERT INTO TeachersPlace (teacher,lesson,place)
+        return  f"""INSERT INTO TeachersPlace (teacher, lesson, place)
                 SELECT {teacher_id},{lesson_id},{place_id}
                 WHERE NOT EXISTS (
                 SELECT 1 FROM TeachersPlace WHERE teacher = {teacher_id} AND lesson = {lesson_id} AND place ={place_id}
@@ -467,39 +467,34 @@ class SQLCommands:
 
     @staticmethod
     def get_workday(group_id: int, date: str):
-        return f"""select
-        Subjects.name as "Предмет",
-        Lessons.time_start,
-        Lessons.time_end,
-        Types.name as "Тип",
-        Workday."date",
-        Lessons.id
+        return f"""select 
 
-        from Workdaylessons
-        
-        left join Lessons
-        on Workdaylessons.lessons = Lessons.id
-
-		left join Workday
-        on Workdaylessons.workday = Workday.id
-        
-        Left Join Subjects
-        on Lessons.subject = Subjects.id
-        
-        Left Join Types
-        on Lessons.type = Types.id
-        
-        where Lessons."group" = {group_id} AND
-        Workday."date" = '{date}'
-        
-        group by Subjects.name,
-                Lessons.time_start,
-                Lessons.time_end,
-                Types.name,
-                Workday."date",
-                Lessons.id
-                
-        order by Lessons.time_start
+                    Subjects.name as "Предмет",
+                    Lessons.time_start,
+                    Lessons.time_end,
+                    Types.name as "Тип",
+                    Workday."date",
+                    Lessons.id
+                    
+                    from Workdaylessons
+                    
+                    Left join Workday
+                    ON Workdaylessons.workday = Workday.id
+                    
+                    left join Lessons 
+                    ON Workdaylessons.lessons = Lessons.id
+                    
+                    Left join Subjects
+                    ON Lessons.subject = Subjects.id
+                    
+                    left join Types
+                    ON Lessons.type = Types.id	
+                           
+                    where 
+                    Workday.group = {group_id} AND
+                    Workday.date = '{date}'
+                    
+                    order by time_start
         """
 
     @staticmethod
