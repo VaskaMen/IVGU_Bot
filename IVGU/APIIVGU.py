@@ -1,5 +1,6 @@
 from IVGU.IVGUPage import IVGUPage
 from IVGU.IVGUConverter import IVGUConverter
+from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 from IVGU.Table.Table import Table
 
 
@@ -8,7 +9,7 @@ class APIIVGU(IVGUPage, IVGUConverter, Table):
                         training_form: int,
                         level: int,
                         course: int,
-                        term: int,):
+                        term: int,) -> list[DirectionSchedule]:
         page =  self._get_schedule_page(department,training_form,level,course,term)
         return self.get_schedules_from_page(page)
 

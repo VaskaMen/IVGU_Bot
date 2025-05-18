@@ -26,7 +26,8 @@ class Constructors(LineConvertor):
         all_lessons = []
         for line in lines:
             lesson = self.get_lesson(timecodes,line)
-            all_lessons.append(lesson)
+            if lesson.name != 'None':
+                all_lessons.append(lesson)
         return all_lessons
 
     def get_list_of_teacherplace(self,line: str):

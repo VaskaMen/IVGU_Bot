@@ -629,19 +629,49 @@ class SQLCommands:
 
 
     @staticmethod
-    def find_workday(date: datetime.date, group_id: int):
+    def find_last_workday(date: datetime.date, group_id: int):
         return f"""select *
         from Workday 
-        where "date" = '{date}' and "group" = {group_id} """
+        where "date" = '{date}' and "group" = {group_id}
+		order by workday.insert_date desc limit 1"""
 
     @staticmethod
-    def find_teacher_place(teacher_id: int, place_id: int) -> str:
-        return f"""
-             SELECT
-                id
-             from TeachersPlace
-             WHERE
-                teacher = {teacher_id} AND
-                place = {place_id}
-                    
-                """
+    def find_workday_lessons(workday_id: int) -> str:
+        return f'''select
+		max(lessons.time_start) as "Время начала",
+		max(lessons.time_end) as "Время конца",
+		max(subjects.name) as "Предмет",
+		max(types.name),
+		max(lessons.id)
+		
+        from Teachersplace
+
+		left join lessons
+		on Teachersplace.lesson = lessons.id
+
+		
+		left join workday
+		on Lessons.workday = workday.id
+
+		left join subjects
+		on Lessons.subject = subjects.id
+
+		left join Types
+		on lessons.type = Types.id
+		
+        where workday.id = {workday_id}
+		group by time_end'''
+
+    @staticmethod
+    def get_date_subgroup_by_workday(workday_id: int):
+        return f"""select workday.date,
+		subgroups.name
+		from workday
+
+		left join Groups
+		on workday.group = Groups.id
+
+		left join Subgroups
+		on groups.subgroup = Subgroups.id
+		
+		where workday.id = {workday_id}"""

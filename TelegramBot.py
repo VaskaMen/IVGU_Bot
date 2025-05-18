@@ -40,7 +40,7 @@ class IvguBot:
                     message.chat.id,
                     text=BotText.start_text,
                     )
-                choice = ["Да","Нет"]
+                choice = ["Нет","Да"]
                 self.bot.send_message(
                     message.chat.id,
                     text=BotText.start_choice,
@@ -88,7 +88,7 @@ class IvguBot:
         @self.bot.message_handler(state=RegisterState.reregister_first)
         def reregister(message, state: StateContext):
             state.set(RegisterState.reregister_second)
-            choice = ["Да", "Нет"]
+            choice = ["Нет", "Да"]
             self.bot.send_message(
                 message.chat.id,
                 text=BotText.start_choice,

@@ -20,7 +20,7 @@ class SQLEngine:
             client_encoding='UTF-8'
 
         )
-        # self.__con.autocommit = True
+        self.__con.autocommit = True
 
         self.__cur = self.__con.cursor()
         self.__cur.execute(CreateCommands.create_table_levels())
@@ -214,11 +214,19 @@ class SQLEngine:
 
     def insert_workday(self, date: datetime.date, group_id: int):
         self.__cur.execute(SQLCommands.add_workday(date, group_id))
-        self.__cur.execute(SQLCommands.find_workday(date, group_id))
+        self.__cur.execute(SQLCommands.find_last_workday(date, group_id))
         return self.__cur.fetchone()[0]
 
-    def find_work_day(self, date: datetime.date, group_id: int):
-        self.__cur.execute(SQLCommands.find_workday(date, group_id))
+    def find_last_workday(self, date: datetime.date, group_id: int):
+        self.__cur.execute(SQLCommands.find_last_workday(date, group_id))
+        return self.__cur.fetchone()
+
+    def get_all_workdays_lessons(self, workday_id: int):
+        self.__cur.execute(SQLCommands.find_workday_lessons(workday_id))
+        return self.__cur.fetchall()
+
+    def get_date_and_subgroup_by_workday(self, workday_id: int):
+        self.__cur.execute(SQLCommands.get_date_subgroup_by_workday(workday_id))
         return self.__cur.fetchone()
 
     def commit(self):

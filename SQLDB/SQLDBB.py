@@ -3,6 +3,7 @@ from typing import Any
 
 from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
 from IVGU.ScheduleObject.Lesson import Lesson
+from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 
 from IVGU.ScheduleObject.WorkDay import WorkDay
 from SQLDB.SQLEngine import SQLEngine
@@ -23,13 +24,17 @@ class SQLDBB(SQLEngine):
         subgroup = self.add_subgroup(workday.subgroup)
         group = self.add_group(course,subgroup,level,form,id_subdirection)
 
-        workday_db = self.find_work_day(workday.date, group)
+        workday_db = self.find_last_workday(workday.date, group)
 
         if workday_db is None:
             workday_id = self.insert_workday(workday.date, group)
             self.add_lessons(workday_id, workday.lessons)
         else:
-            pass
+            workday_id = workday_db[0]
+            sql_workday = self.get_workday(workday_id)
+            if workday != sql_workday:
+                workday_id = self.insert_workday(workday.date, group)
+                self.add_lessons(workday_id, workday.lessons)
 
     def add_lessons(self, workday_id: int, lessons: list[Lesson]):
         for lesson in lessons:
@@ -112,7 +117,7 @@ class SQLDBB(SQLEngine):
 
     def __lesson_tuple_into_sqllesson(self, lesson: tuple[str,time,time,str,date,int]):
         lesson_id = lesson[5]
-        list_teach_place = self.get_teacher_places(lesson_id)
+        list_teach_place = self.get_sql_teacher_places(lesson_id)
         sqllesson = SQLLesson(subject_name=lesson[0],
                               time_start=lesson[1],
                               time_end=lesson[2],
@@ -126,14 +131,59 @@ class SQLDBB(SQLEngine):
         return datetime.strptime(s.split(' ')[0], '%Y-%m-%d').date()
 
 
-    def get_teacher_places(self, lesson_id: int):
-       return self.__get_list_teacher_place(self._get_teachers_of_lesson(lesson_id))
+    def get_sql_teacher_places(self, lesson_id: int):
+       return self.__get_list_sql_teacher_place(self._get_teachers_of_lesson(lesson_id))
 
     @staticmethod
-    def __get_list_teacher_place(teachers) -> list[SQLTeacherPlace]:
+    def __get_list_sql_teacher_place(teachers) -> list[SQLTeacherPlace]:
         list_teacher_place = []
         for tuple in teachers:
            list_teacher_place.append(SQLTeacherPlace(tuple[0], tuple[1]))
+        return list_teacher_place
+
+    def get_workday(self, workday_id):
+        date_and_subgroup = self.get_date_and_subgroup_by_workday(workday_id)
+        lessons = self.__get_list_lessons(workday_id)
+
+        workday = WorkDay(lessons,date_and_subgroup[0],date_and_subgroup[1])
+        return workday
+
+    def __get_list_lessons(self, workday_id: int) -> list[Lesson]:
+        lessons = self.get_all_workdays_lessons(workday_id)
+        con_lessons = []
+        for lesson in lessons:
+            lesson_ = self.__lesson_tuple_into_lesson(lesson)
+            con_lessons.append(lesson_)
+        return con_lessons
+
+    def __lesson_tuple_into_lesson(self, lesson: tuple[time, time, str, str, int]) -> Lesson:
+        lesson_id = lesson[4]
+        list_teach_place = self.__get_teachers_places(lesson_id)
+        time_start = str(lesson[0])[:-3]
+        time_start = self.__remove_zero(time_start)
+        time_end = str(lesson[1])[:-3]
+        time_end = self.__remove_zero(time_end)
+        time = time_start + ' ' + '-' + ' ' + time_end
+        lesson_ = Lesson(time=time,
+                           name=lesson[2],
+                           type_subject=lesson[3],
+                           teacher_place=list_teach_place)
+        return lesson_
+
+    @staticmethod
+    def __remove_zero(elem: str):
+        if elem[0] == '0':
+            return elem[1:]
+        return elem
+
+    def __get_teachers_places(self, lesson_id: int):
+        return self.__get_list_teacher_place(self._get_teachers_of_lesson(lesson_id))
+
+    @staticmethod
+    def __get_list_teacher_place(teachers) -> list[TeacherPlace]:
+        list_teacher_place = []
+        for tuple in teachers:
+            list_teacher_place.append(TeacherPlace(tuple[0], tuple[1]))
         return list_teacher_place
 
     def get_actual_dates(self,group_id:int , date: str) -> list[str]:
