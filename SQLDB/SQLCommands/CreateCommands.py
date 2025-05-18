@@ -121,8 +121,9 @@ class CreateCommands:
         subject integer,
         time_start time,
         time_end time,
-        type int
-        ) 
+        type int,
+        workday int
+        )   
         """
 
     @staticmethod
@@ -145,16 +146,6 @@ class CreateCommands:
         teacher_id integer
         )
         """
-
-    @staticmethod
-    def create_table_lessons_workday() -> str:
-        return """create table if not exists WorkdayLessons
-           (
-           id serial primary key,
-           lessons integer,
-           workday integer
-           )
-           """
 
     @staticmethod
     def create_table_workday() -> str:

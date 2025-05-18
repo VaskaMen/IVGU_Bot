@@ -38,7 +38,6 @@ class SQLEngine:
         self.__cur.execute(CreateCommands.create_table_teachers_lesson())
         self.__cur.execute(CreateCommands.create_table_types())
         self.__cur.execute(CreateCommands.create_table_users())
-        self.__cur.execute(CreateCommands.create_table_lessons_workday())
         self.__cur.execute(CreateCommands.create_table_workday())
         self.__con.commit()
         self.__cur.execute(SQLCommands.add_level(1,"Бакалавриат"))
@@ -95,14 +94,14 @@ class SQLEngine:
     def add_institute(self, id_of_institute: int, name: str):
         self.__cur.execute(SQLCommands.add_institute(id_of_institute, name))
 
-    def add_lesson(self, lesson: Lesson):
+    def add_lesson(self, lesson: Lesson, workday: int):
         subject = self._add_subject(lesson)
         type_for_lesson = self.add_type(lesson.type_subject)
         lesson_time = lesson.time
         start_time = self.__get_start_time(lesson_time)
         end_time = self.__get_end_time(lesson_time)
-        self.__cur.execute(SQLCommands.add_lesson(subject, start_time, end_time, type_for_lesson))
-        self.__cur.execute(SQLCommands.find_id_lesson(subject, start_time, end_time, type_for_lesson))
+        self.__cur.execute(SQLCommands.add_lesson(subject, start_time, end_time, type_for_lesson, workday))
+        self.__cur.execute(SQLCommands.find_id_lesson(subject, start_time, end_time, type_for_lesson, workday))
         return self.__cur.fetchone()[0]
 
 
@@ -221,9 +220,6 @@ class SQLEngine:
     def find_work_day(self, date: datetime.date, group_id: int):
         self.__cur.execute(SQLCommands.find_workday(date, group_id))
         return self.__cur.fetchone()
-
-    def add_workday_lessons(self, workday_id: int, lesson_id: int,):
-        self.__cur.execute(SQLCommands.add_workday_lessons(lesson_id, workday_id))
 
     def commit(self):
         self.__con.commit()

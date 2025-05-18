@@ -34,8 +34,7 @@ class SQLDBB(SQLEngine):
     def add_lessons(self, workday_id: int, lessons: list[Lesson]):
         for lesson in lessons:
             if str(lesson.name) != 'None':
-                lesson_id = self.add_lesson(lesson)
-                self.add_workday_lessons(workday_id, lesson_id)
+                lesson_id = self.add_lesson(lesson, workday_id)
                 self._add_many_teacher_place(lesson_id, lesson.teacher_places)
 
     def get_list_institutes(self) -> list[str]:

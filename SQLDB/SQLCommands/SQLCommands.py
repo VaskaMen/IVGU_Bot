@@ -188,35 +188,39 @@ class SQLCommands:
         return f"""select * from Types where name = '{name}'"""
 
     @staticmethod
-    def add_lesson(subject_id: int, time_start: str,time_end: str, type: int) -> str:
+    def add_lesson(subject_id: int, time_start: str,time_end: str, type: int, workday: int) -> str:
         return f"""insert into Lessons(
             subject,
             time_start,
             time_end,
-            type
+            type,
+            workday
         )
          SELECT
             {subject_id},
             '{time_start}',
             '{time_end}',
-            '{type}'
+            '{type}',
+            {workday}
             
          WHERE NOT EXISTS (
             SELECT 1 FROM Lessons WHERE 
             subject = {subject_id} AND
             time_start = '{time_start}' AND
             time_end = '{time_end}' AND
-            type = '{type}' 
+            type = '{type}' AND
+            workday = {workday}
             )
             """
 
     @staticmethod
-    def find_id_lesson(subject_id: int, time_start: str, time_end:str, type: int) -> str:
+    def find_id_lesson(subject_id: int, time_start: str, time_end:str, type: int, workday: int) -> str:
         return f"""SELECT id FROM Lessons WHERE 
             subject = {subject_id} AND
             time_start = '{time_start}' AND
             time_end = '{time_end}' AND
-            type = {type} 
+            type = {type}  AND
+            workday = {workday} 
             """
 
     @staticmethod
@@ -476,20 +480,17 @@ class SQLCommands:
                     Workday."date",
                     Lessons.id
                     
-                    from Workdaylessons
+                    from Lessons
                     
                     Left join Workday
-                    ON Workdaylessons.workday = Workday.id
-                    
-                    left join Lessons 
-                    ON Workdaylessons.lessons = Lessons.id
+                    ON Lessons.workday = Workday.id
                     
                     Left join Subjects
                     ON Lessons.subject = Subjects.id
                     
                     left join Types
                     ON Lessons.type = Types.id	
-                           
+                    
                     where 
                     Workday.group = {group_id} AND
                     Workday.date = '{date}'
@@ -537,13 +538,13 @@ class SQLCommands:
 
     @staticmethod
     def get_dates_after_date(group_id: int, date: str):
-        return f'''select 
+        return f'''select   
                     Workday."date"
                     
-                    from Workdaylessons
+                    from Lessons
                     
-                    Left join Workday
-                    ON Workdaylessons.workday = Workday.id
+                    left join Workday
+                    on Lessons.workday = Workday.id
                     
                     where 
                     Workday.group = {group_id} AND
@@ -620,22 +621,6 @@ class SQLCommands:
         where Lessons.date = '{date}' and Teachers.id = {teachers_id}
         group by Lessons.time_start
         order by Lessons.time_start"""
-
-    @staticmethod
-    def add_workday_lessons(lessons_id: int, workday_id: int) -> str:
-        return f"""insert into WorkdayLessons(
-              lessons,
-              workday
-            )
-             SELECT
-                {lessons_id},
-                {workday_id}
-             WHERE NOT EXISTS (
-                SELECT 1 FROM WorkdayLessons WHERE 
-                lessons = {lessons_id} AND
-                workday = {workday_id}
-                    )
-                """
 
     @staticmethod
     def add_workday(date: datetime.date, group_id: int):
