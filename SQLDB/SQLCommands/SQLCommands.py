@@ -676,3 +676,29 @@ class SQLCommands:
 		on groups.subgroup = Subgroups.id
 		
 		where workday.id = {workday_id}"""
+
+    @staticmethod
+    def get_last_insert_date_workday():
+        return f"""
+            SELECT insert_date 
+            FROM public.workday 
+            ORDER BY insert_date desc 
+            limit 1
+                """
+
+    @staticmethod
+    def get_workday_above_insert_date(above_date: datetime.date):
+        return f"""
+                SELECT * 
+                FROM public.workday 
+                where insert_date > '{above_date}'
+                """
+
+    @staticmethod
+    def get_users_with_group_id(group_id: int):
+        return  f"""
+                SELECT * 
+                FROM users
+                where users.group = {group_id}
+                """
+

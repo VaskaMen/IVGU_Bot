@@ -229,5 +229,18 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.get_date_subgroup_by_workday(workday_id))
         return self.__cur.fetchone()
 
+    def get_last_insert_date_workday(self) -> datetime:
+        self.__cur.execute(SQLCommands.get_last_insert_date_workday())
+        date_insert:datetime = self.__cur.fetchone()[0]
+        return date_insert
+
+    def get_workday_above_insert_date(self, above_date: datetime.date):
+        self.__cur.execute(SQLCommands.get_workday_above_insert_date(above_date))
+        return self.__cur.fetchall()
+
+    def get_users_with_group_id(self, group_id: int):
+        self.__cur.execute(SQLCommands.get_users_with_group_id(group_id))
+        return self.__cur.fetchall()
+
     def commit(self):
         self.__con.commit()
