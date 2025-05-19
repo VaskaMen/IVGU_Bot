@@ -1,4 +1,4 @@
-from telebot import TeleBot
+from telebot import TeleBot, types
 
 from Notify.NotifyMessage import Notify
 from Notify.NotifyTypes import NotifyTypes
@@ -20,4 +20,4 @@ class NotifySystem:
         if notify_type == NotifyTypes.Text:
             self.bot.send_message(user_id, notify.text)
         if notify_type == NotifyTypes.WorkdayChanges:
-            self.bot.send_message(user_id, notify.text, reply_markup=Notify.reply_buttons)
+            self.bot.send_message(user_id, notify.text, reply_markup=notify.reply_buttons)
