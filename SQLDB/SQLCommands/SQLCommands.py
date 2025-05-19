@@ -638,29 +638,30 @@ class SQLCommands:
     @staticmethod
     def find_workday_lessons(workday_id: int) -> str:
         return f'''select
-		max(lessons.time_start) as "Время начала",
-		max(lessons.time_end) as "Время конца",
-		max(subjects.name) as "Предмет",
-		max(types.name),
-		max(lessons.id)
-		
-        from Teachersplace
-
-		left join lessons
-		on Teachersplace.lesson = lessons.id
-
-		
-		left join workday
-		on Lessons.workday = workday.id
-
-		left join subjects
-		on Lessons.subject = subjects.id
-
-		left join Types
-		on lessons.type = Types.id
-		
-        where workday.id = {workday_id}
-		group by time_end'''
+                    max(lessons.time_start) as "Время начала",
+                    max(lessons.time_end) as "Время конца",
+                    max(subjects.name) as "Предмет",
+                    max(types.name),
+                    max(lessons.id)
+                    
+                    from Lessons
+                    
+                    left join Teachersplace
+                    on lessons.id = Teachersplace.lesson
+                    
+                    
+                    left join workday
+                    on Lessons.workday = workday.id
+                    
+                    left join subjects
+                    on Lessons.subject = subjects.id
+                    
+                    left join Types
+                    on lessons.type = Types.id
+                    
+                    where workday.id = {workday_id}
+                    group by lessons.time_start
+		'''
 
     @staticmethod
     def get_date_subgroup_by_workday(workday_id: int):
