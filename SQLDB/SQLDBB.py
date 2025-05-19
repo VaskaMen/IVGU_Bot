@@ -7,9 +7,6 @@ from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 
 from IVGU.ScheduleObject.WorkDay import WorkDay
 from SQLDB.SQLEngine import SQLEngine
-from SQLDB.SQLObjects.SQLLesson import SQLLesson
-from SQLDB.SQLObjects.SQLTeacherPlace import SQLTeacherPlace
-from SQLDB.SQLObjects.SQLWorkDay import SQLWorkDay
 
 
 class SQLDBB(SQLEngine):
@@ -25,7 +22,6 @@ class SQLDBB(SQLEngine):
         group = self.add_group(course,subgroup,level,form,id_subdirection)
 
         workday_db = self.find_last_workday(workday.date, group)
-
         if workday_db is None:
             workday_id = self.insert_workday(workday.date, group)
             self.add_lessons(workday_id, workday.lessons)
@@ -91,55 +87,9 @@ class SQLDBB(SQLEngine):
             list_of_any.append(sm_str)
         return list_of_any
 
-    def get_sql_workday(self, group_id: int, date: str):
-        sqllessons = self.__get_list_sqllessons(group_id, date)
-        return SQLWorkDay(sqllessons,self.convert_str_to_date(date))
-
-    def __get_list_sqllessons(self, group_id: int, date: str):
-        workday = self._get_workday(group_id, date)
-        sqllessons = []
-        for lesson in workday:
-            sqllesson = self.__lesson_tuple_into_sqllesson(lesson)
-            sqllessons.append(sqllesson)
-        return sqllessons
-
-    def get_teacher_sqlworkday(self, teachers_id: int, date: str):
-        sqllessons = self.__get_list_sqllessons_teacher(teachers_id,date)
-        return SQLWorkDay(sqllessons,self.convert_str_to_date(date))
-
-    def __get_list_sqllessons_teacher(self, teacher_id: int, date: str):
-        workday = self._get_teachers_workday(teacher_id,date)
-        sqllessons = []
-        for lesson in workday:
-            sqllesson = self.__lesson_tuple_into_sqllesson(lesson)
-            sqllessons.append(sqllesson)
-        return sqllessons
-
-    def __lesson_tuple_into_sqllesson(self, lesson: tuple[str,time,time,str,date,int]):
-        lesson_id = lesson[5]
-        list_teach_place = self.get_sql_teacher_places(lesson_id)
-        sqllesson = SQLLesson(subject_name=lesson[0],
-                              time_start=lesson[1],
-                              time_end=lesson[2],
-                              type_name=lesson[3],
-                              date=lesson[4],
-                              teach_places=list_teach_place)
-        return sqllesson
-
     @staticmethod
     def convert_str_to_date(s: str) -> date:
         return datetime.strptime(s.split(' ')[0], '%Y-%m-%d').date()
-
-
-    def get_sql_teacher_places(self, lesson_id: int):
-       return self.__get_list_sql_teacher_place(self._get_teachers_of_lesson(lesson_id))
-
-    @staticmethod
-    def __get_list_sql_teacher_place(teachers) -> list[SQLTeacherPlace]:
-        list_teacher_place = []
-        for tuple in teachers:
-           list_teacher_place.append(SQLTeacherPlace(tuple[0], tuple[1]))
-        return list_teacher_place
 
     def get_workday(self, workday_id):
         date_and_subgroup = self.get_date_and_subgroup_by_workday(workday_id)

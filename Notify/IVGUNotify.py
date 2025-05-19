@@ -32,11 +32,11 @@ class IVGUNotify(NotifySystem):
         new_workdays = self.sql.get_workday_above_insert_date(above_date)
         group_dates: dict[int, list[datetime]] = {}
 
-        for work_day in new_workdays:
-            group_id = work_day[-1]
+        for workday in new_workdays:
+            group_id = workday[-1]
             if group_id not in group_dates:
                 group_dates[group_id] = []
-            group_dates[group_id].append(work_day[2].date())
+            group_dates[group_id].append(workday[1])
         return  group_dates
 
 

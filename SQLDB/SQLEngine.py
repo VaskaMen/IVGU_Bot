@@ -177,12 +177,12 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.user_select(user_id))
         return self.__cur.fetchone()
 
-    def  _get_workday(self, group_id: int, date: str):
-        self.__cur.execute(SQLCommands.get_workday(group_id, date))
+    def  _get_workday(self, workday_id: int):
+        self.__cur.execute(SQLCommands.get_workday(workday_id))
         return self.__cur.fetchall()
 
-    def _get_teachers_workday(self,teachers_id: int, date: str):
-        self.__cur.execute(SQLCommands.get_teachers_workday(date,teachers_id))
+    def _get_teachers_workday(self, workday_id: int,teachers_id: int):
+        self.__cur.execute(SQLCommands.get_teachers_workday(workday_id,teachers_id))
         return self.__cur.fetchall()
 
     def _get_teachers_of_lesson(self, lesson_id: int):

@@ -466,19 +466,18 @@ class SQLCommands:
         return f"""Update Users set "group" = {group_id}, teacher_id = {teacher_id}  where id = {id_user}"""
 
     @staticmethod
-    def user_select(id_user: int):
+    def user_select(id_user: int) -> str:
         return f"""Select "group" from Users where users.id = {id_user}"""
 
     @staticmethod
-    def get_workday(group_id: int, date: str):
+    def get_workday(workday_id: int) -> str:
         return f"""select 
-
-                    Subjects.name as "Предмет",
                     Lessons.time_start,
                     Lessons.time_end,
+					Subjects.name as "Предмет",
                     Types.name as "Тип",
-                    Workday."date",
                     Lessons.id
+                    
                     
                     from Lessons
                     
@@ -491,15 +490,13 @@ class SQLCommands:
                     left join Types
                     ON Lessons.type = Types.id	
                     
-                    where 
-                    Workday.group = {group_id} AND
-                    Workday.date = '{date}'
+                    where workday.id = {workday_id}
                     
                     order by time_start
         """
 
     @staticmethod
-    def get_teachers_of_lesson(lesson_id: int):
+    def get_teachers_of_lesson(lesson_id: int) -> str:
         return f"""select
         Teachers.name,
         Places.place
@@ -518,7 +515,7 @@ class SQLCommands:
         where Lessons.id = {lesson_id}"""
 
     @staticmethod
-    def get_dates_after_date(group_id: int, date: str):
+    def get_dates_after_date(group_id: int, date: str) -> str:
         return f'''select   
                     Workday."date"
                     
@@ -535,7 +532,7 @@ class SQLCommands:
                     order by workday."date"'''
 
     @staticmethod
-    def get_teacher_dates_after_date(teacher_id: int, date: str):
+    def get_teacher_dates_after_date(teacher_id: int, date: str) -> str:
         return f"""select	
 		
         workday.date
@@ -551,8 +548,6 @@ class SQLCommands:
 		left join teachers
 		on TeachersPlace.teacher = Teachers.id
 
-		
-        
         where teachers.id = {teacher_id} AND
         workday.date >= '{date}'
         
@@ -560,29 +555,29 @@ class SQLCommands:
         order by workday.date"""
 
     @staticmethod
-    def find_teacher_id_by_name(teacher_name: str):
+    def find_teacher_id_by_name(teacher_name: str) -> str:
         return f"""select Teachers.id
         from Teachers
         where Teachers.name like '%{teacher_name}%'"""
 
     @staticmethod
-    def find_teachers_group():
+    def find_teachers_group() -> str:
         return f"""select Groups.id
         from Groups
         where Groups.course = -1"""
 
     @staticmethod
-    def find_user_teacher_id(user_id: int):
+    def find_user_teacher_id(user_id: int) -> str:
         return f"""select teacher_id
         from Users 
         where Users.id = {user_id}"""
 
     @staticmethod
-    def update_if_teach_to_student(user_id: int):
+    def update_if_teach_to_student(user_id: int) -> str:
         return f'''Update Users set "teacher_id" = 0 where id = {user_id}'''
 
     @staticmethod
-    def get_teachers_workday(date: str, teachers_id: int):
+    def get_teachers_workday(workday_id: int, teachers_id: int) -> str:
         return f"""select 
         max(Subjects.name) as "Предмет",
         max(Lessons.time_start) as "Начало",
@@ -608,12 +603,12 @@ class SQLCommands:
         Left Join Types
         on Lessons.type = Types.id
         
-        where workday.date = '{date}' and Teachers.id = {teachers_id}
+        where workday.date = {workday_id} and Teachers.id = {teachers_id}
         group by Lessons.time_start
         order by Lessons.time_start"""
 
     @staticmethod
-    def add_workday(date: datetime.date, group_id: int):
+    def add_workday(date: datetime.date, group_id: int) -> str:
         return  f"""
             insert into Workday(
               "date",
@@ -629,7 +624,7 @@ class SQLCommands:
 
 
     @staticmethod
-    def find_last_workday(date: datetime.date, group_id: int):
+    def find_last_workday(date: datetime.date, group_id: int) -> str:
         return f"""select *
         from Workday 
         where "date" = '{date}' and "group" = {group_id}
@@ -664,7 +659,7 @@ class SQLCommands:
 		'''
 
     @staticmethod
-    def get_date_subgroup_by_workday(workday_id: int):
+    def get_date_subgroup_by_workday(workday_id: int) -> str:
         return f"""select workday.date,
 		subgroups.name
 		from workday
@@ -678,7 +673,7 @@ class SQLCommands:
 		where workday.id = {workday_id}"""
 
     @staticmethod
-    def get_last_insert_date_workday():
+    def get_last_insert_date_workday() -> str:
         return f"""
             SELECT insert_date 
             FROM public.workday 
@@ -687,15 +682,16 @@ class SQLCommands:
                 """
 
     @staticmethod
-    def get_workday_above_insert_date(above_date: datetime.date):
+    def get_workday_above_insert_date(above_date: datetime.date) -> str:
         return f"""
-                SELECT * 
+                SELECT max(workday.id), max(workday.date), max(workday.insert_date), max(workday.group)
                 FROM public.workday 
                 where insert_date > '{above_date}'
+                group by workday.date
                 """
 
     @staticmethod
-    def get_users_with_group_id(group_id: int):
+    def get_users_with_group_id(group_id: int) -> str:
         return  f"""
                 SELECT * 
                 FROM users

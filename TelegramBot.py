@@ -311,30 +311,33 @@ class IvguBot:
             print(f"{datetime.now()} Send message to {message.from_user.id}")
             if message.text == "Сегодня" and teacher_id == 0:
                 date = str(datetime.now().date())
-                workday = self.sql.get_sql_workday(group_id, date)
+                workday_id = self.sql.find_last_workday(date,group_id)[0]
+                workday = self.sql.get_workday(workday_id)
                 self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
 
-            elif message.text == "Сегодня" and teacher_id != 0:
-                date = str(datetime.now().date())
-                workday = self.sql.get_teacher_sqlworkday(teacher_id,date)
-                self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
+            # elif message.text == "Сегодня" and teacher_id != 0:
+            #     date = str(datetime.now().date())
+            #     workday = self.sql.get_teacher_sqlworkday(teacher_id,date)
+            #     self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
 
             elif message.text == "Завтра" and teacher_id == 0:
                 date = datetime.now().date() + timedelta(days=1)
-                workday = str(self.sql.get_sql_workday(group_id, str(date)))
+                workday_id = self.sql.find_last_workday(date,group_id)[0]
+                workday = str(self.sql.get_workday(workday_id))
                 self.bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
 
-            elif message.text == "Завтра" and teacher_id != 0:
-                date = datetime.now().date() + timedelta(days=1)
-                workday = str(self.sql.get_teacher_sqlworkday(teacher_id, str(date)))
-                self.bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
+            # elif message.text == "Завтра" and teacher_id != 0:
+            #     date = datetime.now().date() + timedelta(days=1)
+            #     workday = str(self.sql.get_teacher_sqlworkday(teacher_id, str(date)))
+            #     self.bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
 
             elif self.datefun.check_date_format(message.text) and teacher_id == 0:
                 date = self.datefun.convert_str_to_date(message.text)
-                workday = self.sql.get_sql_workday(group_id, str(date))
+                workday_id = self.sql.find_last_workday(date,group_id)[0]
+                workday = self.sql.get_workday(workday_id)
                 self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
 
-            elif self.datefun.check_date_format(message.text) and teacher_id != 0:
-                date = self.datefun.convert_str_to_date(message.text)
-                workday = self.sql.get_teacher_sqlworkday(teacher_id, str(date))
-                self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
+            # elif self.datefun.check_date_format(message.text) and teacher_id != 0:
+            #     date = self.datefun.convert_str_to_date(message.text)
+            #     workday = self.sql.get_teacher_sqlworkday(teacher_id, str(date))
+            #     self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
