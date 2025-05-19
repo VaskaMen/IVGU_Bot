@@ -16,14 +16,6 @@ class SQLCommands:
         """
 
     @staticmethod
-    def find_subject_by_name(name: str) -> str:
-        return f"""select * from Subjects where name = '{name}'"""
-
-    @staticmethod
-    def find_subject_by_id(id: int) -> str:
-        return f"""select * from Subjects where id = {id}"""
-
-    @staticmethod
     def add_teacher(name: str) -> str:
         return  f"""INSERT INTO Teachers (name)
                 SELECT '{name}'
@@ -34,14 +26,6 @@ class SQLCommands:
     @staticmethod
     def find_id_teacher(name: str) -> str:
         return f"""SELECT id FROM Teachers WHERE name = '{name}'"""
-
-    @staticmethod
-    def find_teacher_by_name(name: str) -> str:
-        return f"""select * from Teachers where name = '{name}'"""
-
-    @staticmethod
-    def find_teacher_by_id(id: int) -> str:
-        return f"""select * from Teachers where id = {id}"""
 
     @staticmethod
     def add_teachers_of_lesson(teacher_id: int, lesson_id: int, place_id: int) -> str:
@@ -71,17 +55,10 @@ class SQLCommands:
                 SELECT 1 FROM Places WHERE place = '{place}'
                 )"""
 
-    @staticmethod
-    def find_place_by_place(place: str) -> str:
-        return f"""select * from Places where place = '{place}'"""
 
     @staticmethod
     def find_place_id(place: str) -> str:
         return f"""select id from Places where place = '{place}'"""
-
-    @staticmethod
-    def find_place_by_id(id: int) -> str:
-        return f"""select * from Places where id = {id}"""
 
     @staticmethod
     def add_department(id_of_dep: int, name: str, institute_id: int) -> str:
@@ -91,13 +68,7 @@ class SQLCommands:
                 SELECT 1 FROM Departments WHERE id = {id_of_dep}
                 )"""
 
-    @staticmethod
-    def find_department_by_number(number: str) -> str:
-        return f"""select * from Departments where number = '{number}'"""
 
-    @staticmethod
-    def find_department_by_id(id: int) -> str:
-        return f"""select * from Departments where id = {id}"""
 
     @staticmethod
     def add_institute(id_institute: int,name: str) -> str:
@@ -458,42 +429,20 @@ class SQLCommands:
 
     @staticmethod
     def insert_user(id_user: int, group_id: int, teacher_id: int = 0) -> str:
-        return f"""INSERT INTO Users (id,"group",teacher_id)
-                    SELECT {id_user}, {group_id}, {teacher_id}"""
+        return f"""INSERT INTO Users (id,"group",teacher_id, update)
+                    SELECT {id_user}, {group_id}, {teacher_id}, {False}"""
 
     @staticmethod
     def update_user(id_user: int, group_id: int, teacher_id: int = 0) -> str:
         return f"""Update Users set "group" = {group_id}, teacher_id = {teacher_id}  where id = {id_user}"""
 
     @staticmethod
-    def user_select(id_user: int) -> str:
-        return f"""Select "group" from Users where users.id = {id_user}"""
+    def update_schedule_user(update: bool, id_user: int,):
+        return f"""Update Users set update = {update} where id = {id_user}"""
 
     @staticmethod
-    def get_workday(workday_id: int) -> str:
-        return f"""select 
-                    Lessons.time_start,
-                    Lessons.time_end,
-					Subjects.name as "Предмет",
-                    Types.name as "Тип",
-                    Lessons.id
-                    
-                    
-                    from Lessons
-                    
-                    Left join Workday
-                    ON Lessons.workday = Workday.id
-                    
-                    Left join Subjects
-                    ON Lessons.subject = Subjects.id
-                    
-                    left join Types
-                    ON Lessons.type = Types.id	
-                    
-                    where workday.id = {workday_id}
-                    
-                    order by time_start
-        """
+    def user_select(id_user: int) -> str:
+        return f"""Select "group" from Users where users.id = {id_user}"""
 
     @staticmethod
     def get_teachers_of_lesson(lesson_id: int) -> str:
@@ -549,6 +498,7 @@ class SQLCommands:
 		on TeachersPlace.teacher = Teachers.id
 
         where teachers.id = {teacher_id} AND
+        workday.id in (select max(workday.id) from workday group by "date", workday.group) AND
         workday.date >= '{date}'
         
         group by workday.date
@@ -577,35 +527,33 @@ class SQLCommands:
         return f'''Update Users set "teacher_id" = 0 where id = {user_id}'''
 
     @staticmethod
-    def get_teachers_workday(workday_id: int, teachers_id: int) -> str:
-        return f"""select 
-        max(Subjects.name) as "Предмет",
-        max(Lessons.time_start) as "Начало",
-        max(Lessons.time_end) as "Конец",
-        max(Types.name) as "Тип",
-        max(workday.date) as "Дата",
-        max(Lessons.id) as "id"
+    def get_teachers_workday(date: str, teacher_id: int) -> str:
+        return f"""select
+        lessons.time_start as "Время начала",
+        lessons.time_end as "Время конца",
+        max(subjects.name) as "Предмет",
+        max(types.name) as "Тип",
+        max(lessons.id) as "id lesson"
         
-        from TeachersPlace
+        from Lessons
         
-        left join Lessons
-        on TeachersPlace.lesson = Lessons.id
-
-		left join workday
-		on lessons.workday = workday.id
+        left join Teachersplace
+        on lessons.id = Teachersplace.lesson
         
-        left join Teachers
-        on TeachersPlace.teacher = Teachers.id
+        left join workday
+        on Lessons.workday = workday.id
         
-        Left Join Subjects
-        on Lessons.subject = Subjects.id
+        left join subjects
+        on Lessons.subject = subjects.id
         
-        Left Join Types
-        on Lessons.type = Types.id
+        left join Types
+        on lessons.type = Types.id
         
-        where workday.date = {workday_id} and Teachers.id = {teachers_id}
-        group by Lessons.time_start
-        order by Lessons.time_start"""
+        where teachersplace.teacher = {teacher_id} and 
+        workday.id in (select max(workday.id) from workday group by "date", workday.group) and
+        workday.date = '{date}'
+        group by lessons.time_start, lessons.time_end, workday.date
+        order by workday.date, lessons.time_start"""
 
     @staticmethod
     def add_workday(date: datetime.date, group_id: int) -> str:
@@ -691,10 +639,11 @@ class SQLCommands:
                 """
 
     @staticmethod
-    def get_users_with_group_id(group_id: int) -> str:
+    def get_users_for_update_schedule(group_id: int) -> str:
         return  f"""
                 SELECT * 
                 FROM users
-                where users.group = {group_id}
+                where users.group = {group_id} AND
+                users.update = {True}
                 """
 

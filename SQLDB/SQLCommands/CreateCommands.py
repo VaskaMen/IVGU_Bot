@@ -143,7 +143,8 @@ class CreateCommands:
         (
         id BIGINT primary key,
         "group" integer,
-        teacher_id integer
+        teacher_id integer,
+        update bool
         )
         """
 

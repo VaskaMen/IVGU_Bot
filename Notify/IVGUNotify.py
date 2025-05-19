@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import datetime
 
 from telebot import TeleBot
 
@@ -18,6 +18,7 @@ class IVGUNotify(NotifySystem):
     def __init__(self,sql: SQLDBB, bot: TeleBot):
         super().__init__(bot)
         self.sql = sql
+        self.above_date = datetime.now().date()
 
     def notify_workday_changes(self):
         changes = self.workday_changes_for_group()
@@ -25,11 +26,8 @@ class IVGUNotify(NotifySystem):
         self.send_users_notify()
 
     def workday_changes_for_group(self) -> dict[int, list[datetime]]:
-        above_date = self.sql.get_last_insert_date_workday()
-        # for test
-        above_date = above_date - timedelta(seconds=220)
-
-        new_workdays = self.sql.get_workday_above_insert_date(above_date)
+        new_workdays = self.sql.get_workday_above_insert_date(self.above_date)
+        self.above_date = self.sql.get_last_insert_date_workday()
         group_dates: dict[int, list[datetime]] = {}
 
         for workday in new_workdays:
@@ -48,7 +46,7 @@ class IVGUNotify(NotifySystem):
             notify.set_reply_buttons(buttons)
             self.set_users_notify_from_group_id(group_id, notify)
 
-    def set_users_notify_from_group_id(self, group_id:int, notify: Notify):
+    def set_users_notify_from_group_id(self, group_id: int, notify: Notify):
         users = self.sql.get_users_with_group_id(group_id)
         for user in users:
             user_id = user[0]

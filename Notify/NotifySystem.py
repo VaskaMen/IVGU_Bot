@@ -1,4 +1,4 @@
-from telebot import TeleBot, types
+from telebot import TeleBot
 
 from Notify.NotifyMessage import Notify
 from Notify.NotifyTypes import NotifyTypes

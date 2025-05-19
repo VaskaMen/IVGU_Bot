@@ -6,6 +6,7 @@ import schedule
 
 import seecret
 from IVGU.APIIVGU import APIIVGU
+from Notify.IVGUNotify import IVGUNotify
 from SQLDB.SQLDBB import SQLDBB
 from ScheduleCollector import ScheduleCollector
 from TelegramBot import IvguBot
@@ -15,6 +16,7 @@ sql = SQLDBB()
 ivgu_bot = IvguBot(seecret.token, sql)
 api = APIIVGU(email,password)
 schedcoll = ScheduleCollector(api, sql)
+infs = IVGUNotify(sql, ivgu_bot.bot)
 
 def run_bot():
     while True:
@@ -29,11 +31,12 @@ def update_schedule():
         api.login(email, password)
         time.sleep(20)
         t1 = datetime.now()
-        print(f"Обновление расписание {t1}")
+        print(f"Обновление расписания {t1}")
         schedcoll.get_schedules_for_uni_number(2)
         sql.commit()
         t2 = datetime.now()
-        print(f"Обновление расписание заняло {t2 - t1}")
+        print(f"Обновление расписания заняло {t2 - t1}")
+        infs.notify_workday_changes()
     except Exception as ex:
         print(ex)
 
@@ -43,7 +46,7 @@ def start_schedule():
         schedule.run_pending()
         time.sleep(10)
 
-schedule.every(3).minutes.do(update_schedule)
+schedule.every(30).minutes.do(update_schedule)
 
 threads = []
 bot_thread_run = threading.Thread(target=run_bot)

@@ -1,4 +1,3 @@
-import time
 from datetime import datetime
 
 import schedule
@@ -14,7 +13,7 @@ schedcoll = ScheduleCollector(api, sql)
 
 
 def update_schedule():
-    # try:
+    try:
         api.login(email, password)
         t1 = datetime.now()
         print(f"Обновление расписания {t1}")
@@ -22,13 +21,11 @@ def update_schedule():
         sql.commit()
         t2 = datetime.now()
         print(f"Обновление расписания заняло {t2 - t1}")
-    # except Exception as ex:
-    #     print(ex)
+    except Exception as ex:
+        print(ex)
 
-# update_schedule()
-# schedule.every(3).minutes.do(update_schedule)
+update_schedule()
+schedule.every(3).minutes.do(update_schedule)
 
 while True:
     update_schedule()
-    # time.sleep()
-

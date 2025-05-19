@@ -1,5 +1,3 @@
-import time
-
 from IVGU.APIIVGU import APIIVGU
 from SQLDB.SQLDBB import SQLDBB
 

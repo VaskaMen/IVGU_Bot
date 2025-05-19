@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup, ResultSet, Tag
+from bs4 import BeautifulSoup, Tag
 
 
 class Cell:

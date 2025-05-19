@@ -78,6 +78,7 @@ class IvguBot:
 
         @self.bot.message_handler(commands=['register'])
         def start_registration(message, state: StateContext):
+            self.sql.update_schedule_user(False, message.chat.id)
             state.set(RegisterState.reregister_first)
             registermsg = ["Начать регистрацию"]
             self.bot.send_message(
@@ -304,6 +305,22 @@ class IvguBot:
                                  BotText.schedule_option,
                                  reply_markup=BotCreator.create_text_buttons(reworked_dates,1))
 
+        @self.bot.message_handler(commands=['subscribe_updates'])
+        def handle_update_schedule(message):
+            update = True
+            self.sql.update_schedule_user(update,message.from_user.id)
+
+            self.bot.send_message(message.from_user.id,
+                                  BotText.update_true)
+
+        @self.bot.message_handler(commands=['unsubscribe_updates'])
+        def handle_update_schedule(message):
+            update = False
+            self.sql.update_schedule_user(update, message.from_user.id)
+
+            self.bot.send_message(message.from_user.id,
+                                  BotText.update_false)
+
         @self.bot.message_handler(content_types=['text'])
         def text(message):
             teacher_id = self.sql.get_users_teacher_id(message.from_user.id)[0]
@@ -315,10 +332,10 @@ class IvguBot:
                 workday = self.sql.get_workday(workday_id)
                 self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
 
-            # elif message.text == "Сегодня" and teacher_id != 0:
-            #     date = str(datetime.now().date())
-            #     workday = self.sql.get_teacher_sqlworkday(teacher_id,date)
-            #     self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
+            elif message.text == "Сегодня" and teacher_id != 0:
+                date = datetime.now().date()
+                workday = self.sql.get_teachers_workday(date, teacher_id)
+                self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
 
             elif message.text == "Завтра" and teacher_id == 0:
                 date = datetime.now().date() + timedelta(days=1)
@@ -326,10 +343,10 @@ class IvguBot:
                 workday = str(self.sql.get_workday(workday_id))
                 self.bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
 
-            # elif message.text == "Завтра" and teacher_id != 0:
-            #     date = datetime.now().date() + timedelta(days=1)
-            #     workday = str(self.sql.get_teacher_sqlworkday(teacher_id, str(date)))
-            #     self.bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
+            elif message.text == "Завтра" and teacher_id != 0:
+                date = datetime.now().date() + timedelta(days=1)
+                workday = str(self.sql.get_teachers_workday(date, teacher_id))
+                self.bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
 
             elif self.datefun.check_date_format(message.text) and teacher_id == 0:
                 date = self.datefun.convert_str_to_date(message.text)
@@ -337,7 +354,7 @@ class IvguBot:
                 workday = self.sql.get_workday(workday_id)
                 self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
 
-            # elif self.datefun.check_date_format(message.text) and teacher_id != 0:
-            #     date = self.datefun.convert_str_to_date(message.text)
-            #     workday = self.sql.get_teacher_sqlworkday(teacher_id, str(date))
-            #     self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
+            elif self.datefun.check_date_format(message.text) and teacher_id != 0:
+                date = self.datefun.convert_str_to_date(message.text)
+                workday = str(self.sql.get_teachers_workday(date, teacher_id))
+                self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')

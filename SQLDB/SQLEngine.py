@@ -1,16 +1,16 @@
+from typing import Any
+
 import psycopg2
 
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
 from SQLDB.SQLCommands.CreateCommands import CreateCommands
 from SQLDB.SQLCommands.SQLCommands import SQLCommands
-from datetime import date, datetime
+from datetime import datetime
 
 
 class SQLEngine:
     def __init__(self):
-        # self.__con = sqlite3.connect("Schedules.db", check_same_thread=False, isolation_level=None)
-
         self.__con = psycopg2.connect(
             host="localhost",
             database="Ivgu",
@@ -131,7 +131,7 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.find_type_id_by_name(name))
         return self.__cur.fetchone()[0]
 
-    def _get_list_institutes(self) -> list[tuple[str]]:
+    def _get_list_institutes(self) -> list[tuple[Any, ...]]:
         self.__cur.execute(SQLCommands.select_all_institutes())
         return self.__cur.fetchall()
 
@@ -173,16 +173,15 @@ class SQLEngine:
     def _update_user(self, user_id: int, group_id: int, teacher_id: int = 0):
         self.__cur.execute(SQLCommands.update_user(user_id, group_id, teacher_id))
 
+    def update_schedule_user(self, update: bool, user_id: int):
+        self.__cur.execute(SQLCommands.update_schedule_user(update,user_id))
+
     def user_select(self, user_id: int):
         self.__cur.execute(SQLCommands.user_select(user_id))
         return self.__cur.fetchone()
 
-    def  _get_workday(self, workday_id: int):
-        self.__cur.execute(SQLCommands.get_workday(workday_id))
-        return self.__cur.fetchall()
-
-    def _get_teachers_workday(self, workday_id: int,teachers_id: int):
-        self.__cur.execute(SQLCommands.get_teachers_workday(workday_id,teachers_id))
+    def _get_teachers_workday(self, date: str,teachers_id: int):
+        self.__cur.execute(SQLCommands.get_teachers_workday(date,teachers_id))
         return self.__cur.fetchall()
 
     def _get_teachers_of_lesson(self, lesson_id: int):
@@ -239,7 +238,7 @@ class SQLEngine:
         return self.__cur.fetchall()
 
     def get_users_with_group_id(self, group_id: int):
-        self.__cur.execute(SQLCommands.get_users_with_group_id(group_id))
+        self.__cur.execute(SQLCommands.get_users_for_update_schedule(group_id))
         return self.__cur.fetchall()
 
     def commit(self):

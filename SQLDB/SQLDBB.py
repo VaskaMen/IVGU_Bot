@@ -1,4 +1,4 @@
-from datetime import datetime, date, time
+from datetime import date, time
 from typing import Any
 
 from IVGU.ScheduleObject.DirectionSchedule import DirectionSchedule
@@ -87,9 +87,6 @@ class SQLDBB(SQLEngine):
             list_of_any.append(sm_str)
         return list_of_any
 
-    @staticmethod
-    def convert_str_to_date(s: str) -> date:
-        return datetime.strptime(s.split(' ')[0], '%Y-%m-%d').date()
 
     def get_workday(self, workday_id):
         date_and_subgroup = self.get_date_and_subgroup_by_workday(workday_id)
@@ -119,6 +116,20 @@ class SQLDBB(SQLEngine):
                            type_subject=lesson[3],
                            teacher_place=list_teach_place)
         return lesson_
+
+    def get_teachers_workday(self, date: date, teacher_id: int) -> WorkDay:
+        lessons = self.__get_list_teachers_lessons(date, teacher_id)
+        workday = WorkDay(lessons, date, "Belov")
+        return workday
+
+    def __get_list_teachers_lessons(self, date: date, teacher_id: int) -> list[Lesson]:
+        lessons = self._get_teachers_workday(str(date), teacher_id)
+        con_lessons = []
+        for lesson in lessons:
+            lesson_ = self.__lesson_tuple_into_lesson(lesson)
+            con_lessons.append(lesson_)
+        return con_lessons
+
 
     @staticmethod
     def __remove_zero(elem: str):

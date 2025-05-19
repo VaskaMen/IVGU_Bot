@@ -1,6 +1,6 @@
 from telebot.types import ReplyKeyboardMarkup
 
-from NotifyTypes import NotifyTypes
+from Notify.NotifyTypes import NotifyTypes
 
 
 class Notify:
