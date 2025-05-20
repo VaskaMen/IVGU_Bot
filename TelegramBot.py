@@ -73,6 +73,13 @@ class IvguBot:
                                       reply_markup=self.botcreate.create_today_or_tomorrow())
                 self.sql.commit()
                 state.set(RegisterState.done)
+            elif teacher == '/register':
+                state.set(RegisterState.reregister_first)
+                registermsg = ["Начать регистрацию"]
+                self.bot.send_message(
+                    message.chat.id,
+                    text=BotText.register_text,
+                    reply_markup=BotCreator.create_text_buttons(registermsg))
             else:
                 self.bot.send_message(message.from_user.id,BotText.teacher_error)
 
