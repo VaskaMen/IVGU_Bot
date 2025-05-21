@@ -1,6 +1,7 @@
 from typing import Any
 
 import psycopg2
+from psycopg2._psycopg import connection
 
 from IVGU.ScheduleObject.Lesson import Lesson
 from IVGU.ScheduleObject.TeacherPlace import TeacherPlace
@@ -10,16 +11,10 @@ from datetime import datetime
 
 
 class SQLEngine:
-    def __init__(self):
-        self.__con = psycopg2.connect(
-            host="localhost",
-            database="Ivgu",
-            user="postgres",
-            password="admin",
-            port=5432,
-            client_encoding='UTF-8'
+    __con: connection | connection = None
 
-        )
+    def __init__(self):
+        self.connect()
         self.__con.autocommit = True
 
         self.__cur = self.__con.cursor()
@@ -48,6 +43,21 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.add_form(8,'Очно-заочная Форма обучения'))
         self.__cur.execute(SQLCommands.add_form(7,'Заочная Форма обучения'))
         self.__cur.execute(SQLCommands.add_group(-1,-1,-1,-1,-1))
+
+    def connect(self):
+        self.__con = psycopg2.connect(
+            host="localhost",
+            database="Ivgu",
+            user="postgres",
+            password="admin",
+            port=5432,
+            client_encoding='UTF-8',
+
+
+        )
+
+    def close_connection(self):
+        self.__con.close()
 
     def _add_subject(self, lesson: Lesson) -> int:
         self.__cur.execute(SQLCommands.add_subject(lesson.name))
