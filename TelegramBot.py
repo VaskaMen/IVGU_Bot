@@ -28,24 +28,36 @@ class IvguBot:
     def bot_run(self):
         self.bot.polling(none_stop=True, interval=0)
 
+    def preregister_with_choice(self, message, state: StateContext):
+        state.set(RegisterState.start_pre_registration)
+        self.bot.send_message(
+            message.chat.id,
+            text=BotText.start_text,
+        )
+        choice = ["Нет", "Да"]
+        self.bot.send_message(
+            message.chat.id,
+            text=BotText.start_choice,
+            reply_markup=BotCreator.create_text_buttons(choice)
+        )
+
+    def preregister_with_choice_by_error(self, message, state: StateContext):
+        state.set(RegisterState.start_pre_registration)
+        choice = ["Нет", "Да"]
+        self.bot.send_message(
+            message.chat.id,
+            text=BotText.start_choice,
+            reply_markup=BotCreator.create_text_buttons(choice)
+        )
 
     def register_routes(self):
         @self.bot.message_handler(commands=['start'])
         def start(message, state: StateContext):
             if self.sql.user_select(message.chat.id) is not None:
                 state.set(RegisterState.done)
+                self.bot.send_message(message.chat.id,BotText.already_logged)
             else:
-                state.set(RegisterState.start_pre_registration)
-                self.bot.send_message(
-                    message.chat.id,
-                    text=BotText.start_text,
-                    )
-                choice = ["Нет","Да"]
-                self.bot.send_message(
-                    message.chat.id,
-                    text=BotText.start_choice,
-                    reply_markup=BotCreator.create_text_buttons(choice)
-                )
+                self.preregister_with_choice(message, state)
 
         @self.bot.message_handler(state=RegisterState.start_pre_registration)
         def pre_registration(message, state: StateContext):
@@ -57,8 +69,9 @@ class IvguBot:
                                       reply_markup=BotCreator.create_text_buttons(start_str)
                                       )
             elif message.text == "Да":
+                button =['/register']
+                self.bot.send_message(message.from_user.id,BotText.teacher_insert, reply_markup=BotCreator.create_text_buttons(button))
                 state.set(RegisterState.teacher)
-                self.bot.send_message(message.from_user.id,BotText.teacher_insert)
 
         @self.bot.message_handler(state=RegisterState.teacher)
         def add_teacher(message, state: StateContext):
@@ -85,13 +98,16 @@ class IvguBot:
 
         @self.bot.message_handler(commands=['register'])
         def start_registration(message, state: StateContext):
-            self.sql.update_schedule_user(False, message.chat.id)
-            state.set(RegisterState.reregister_first)
-            registermsg = ["Начать регистрацию"]
-            self.bot.send_message(
-                message.chat.id,
-                text=BotText.register_text,
-                reply_markup=BotCreator.create_text_buttons(registermsg))
+            if self.sql.user_select(message.chat.id) is None:
+                self.preregister_with_choice(message, state)
+            else:
+                self.sql.update_schedule_user(False, message.chat.id)
+                state.set(RegisterState.reregister_first)
+                registermsg = ["Начать регистрацию"]
+                self.bot.send_message(
+                    message.chat.id,
+                    text=BotText.register_text,
+                    reply_markup=BotCreator.create_text_buttons(registermsg))
 
         @self.bot.message_handler(state=RegisterState.reregister_first)
         def reregister(message, state: StateContext):
@@ -132,11 +148,15 @@ class IvguBot:
         def handle_start_registration(message, state: StateContext):
             state.set(RegisterState.institute)
             institutes = self.sql.get_list_institutes()
-            self.bot.send_message(
-                message.from_user.id,
-                text=BotText.insert_institute,
-                reply_markup=BotCreator.create_text_buttons(institutes,1)
-            )
+            if not institutes:
+                self.bot.send_message(message.from_user.id,BotText.error)
+                self.preregister_with_choice_by_error(message, state)
+            else:
+                self.bot.send_message(
+                    message.from_user.id,
+                    text=BotText.insert_institute,
+                    reply_markup=BotCreator.create_text_buttons(institutes,1)
+                )
 
         @self.bot.message_handler(state = RegisterState.institute)
         def handle_institute(message, state: StateContext):
@@ -146,12 +166,16 @@ class IvguBot:
             with state.data() as data:
                 institute = data.get("institute")
             departments = self.sql.get_list_departments(institute)
+            if not departments:
+                self.bot.send_message(message.from_user.id,BotText.error)
+                self.preregister_with_choice_by_error(message, state)
 
-            self.bot.send_message(
-                message.from_user.id,
-                text=BotText.insert_department,
-                reply_markup=BotCreator.create_text_buttons(departments,1)
-            )
+            else:
+                self.bot.send_message(
+                    message.from_user.id,
+                    text=BotText.insert_department,
+                    reply_markup=BotCreator.create_text_buttons(departments,1)
+                )
 
         @self.bot.message_handler(state = RegisterState.form)
         def handle_form(message, state: StateContext):
@@ -161,12 +185,16 @@ class IvguBot:
             with state.data() as data:
                 department = data.get("department")
             forms = self.sql.get_list_department_forms(department)
+            if not forms:
+                self.bot.send_message(message.from_user.id,BotText.error)
+                self.preregister_with_choice_by_error(message, state)
 
-            self.bot.send_message(
-                message.from_user.id,
-                text=BotText.insert_form,
-                reply_markup=BotCreator.create_text_buttons(forms)
-            )
+            else:
+                self.bot.send_message(
+                    message.from_user.id,
+                    text=BotText.insert_form,
+                    reply_markup=BotCreator.create_text_buttons(forms)
+                )
 
         @self.bot.message_handler(state = RegisterState.level)
         def handle_form(message, state: StateContext):
@@ -177,12 +205,16 @@ class IvguBot:
                 department = data.get("department")
                 form = data.get("form")
             levels = self.sql.get_list_department_form_levels(department,form)
+            if not levels:
+                self.bot.send_message(message.from_user.id,BotText.error)
+                self.preregister_with_choice_by_error(message, state)
 
-            self.bot.send_message(
-                message.from_user.id,
-                text=BotText.insert_level,
-                reply_markup=BotCreator.create_text_buttons(levels)
-            )
+            else:
+                self.bot.send_message(
+                    message.from_user.id,
+                    text=BotText.insert_level,
+                    reply_markup=BotCreator.create_text_buttons(levels)
+                )
 
         @self.bot.message_handler(state = RegisterState.course)
         def handle_course(message, state: StateContext):
@@ -194,12 +226,16 @@ class IvguBot:
                 form = data.get("form")
                 level = data.get("level")
             courses = self.sql.get_list_courses(department, form, level)
+            if not  courses:
+                self.bot.send_message(message.from_user.id,BotText.error)
+                self.preregister_with_choice_by_error(message, state)
 
-            self.bot.send_message(
-                message.from_user.id,
-                text=BotText.insert_course,
-                reply_markup=BotCreator.create_text_buttons(courses)
-            )
+            else:
+                self.bot.send_message(
+                    message.from_user.id,
+                    text=BotText.insert_course,
+                    reply_markup=BotCreator.create_text_buttons(courses)
+                )
 
         @self.bot.message_handler(state = RegisterState.direction)
         def handle_direction(message, state: StateContext):
@@ -212,12 +248,17 @@ class IvguBot:
                 level = data.get("level")
                 course = data.get("course")
             directions = self.sql.get_list_directions(department, form, level, course)
+            if not directions:
+                self.bot.send_message(message.from_user.id,BotText.error)
+                self.preregister_with_choice_by_error(message, state)
 
-            self.bot.send_message(
-                message.from_user.id,
-                text=BotText.insert_direction,
-                reply_markup=BotCreator.create_text_buttons(directions,1)
-            )
+            else:
+                self.bot.send_message(
+                    message.from_user.id,
+                    text=BotText.insert_direction,
+                    reply_markup=BotCreator.create_text_buttons(directions,1)
+                )
+
         @self.bot.message_handler(state = RegisterState.subdirection)
         def handle_direction(message, state: StateContext):
             state.add_data(direction = message.text)
@@ -230,12 +271,16 @@ class IvguBot:
                 course = data.get("course")
                 direction = data.get("direction")
             subdirections = self.sql.get_list_subdirections(department, form, level, course, direction[:134])
+            if not subdirections:
+                self.bot.send_message(message.from_user.id,BotText.error)
+                self.preregister_with_choice_by_error(message, state)
 
-            self.bot.send_message(
-                message.from_user.id,
-                text=BotText.insert_subdirection,
-                reply_markup=BotCreator.create_text_buttons(subdirections)
-            )
+            else:
+                self.bot.send_message(
+                    message.from_user.id,
+                    text=BotText.insert_subdirection,
+                    reply_markup=BotCreator.create_text_buttons(subdirections)
+                )
 
         @self.bot.message_handler(state = RegisterState.subgroup)
         def handle_subgroup(message, state: StateContext):
@@ -250,11 +295,16 @@ class IvguBot:
                 direction = data.get("direction")
                 subdirection = data.get("subdirection")
             subgroups = self.sql.get_list_subgroups(department, form, level, course, direction[:134],subdirection[:134])
-            self.bot.send_message(
-                message.from_user.id,
-                text=BotText.insert_subgroup,
-                reply_markup=BotCreator.create_text_buttons(subgroups)
-            )
+            if not subgroups:
+                self.bot.send_message(message.from_user.id,BotText.error)
+                self.preregister_with_choice_by_error(message, state)
+
+            else:
+                self.bot.send_message(
+                    message.from_user.id,
+                    text=BotText.insert_subgroup,
+                    reply_markup=BotCreator.create_text_buttons(subgroups)
+                )
 
 
         @self.bot.message_handler(state = RegisterState.save)
@@ -270,7 +320,7 @@ class IvguBot:
                 direction = str(data.get("direction")).replace('…','')
                 subdirection = str(data.get("subdirection")).replace('…','')
                 subgroup = data.get("subgroup")
-            group_id = self.sql.get_group_id(department, form, level, course, direction, subdirection,subgroup)
+            group_id = self.sql.get_group_id(department, form, level, course, direction, subdirection, subgroup)
 
             self.sql.set_user(message.from_user.id, group_id)
             self.sql.commit()
