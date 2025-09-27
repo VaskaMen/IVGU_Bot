@@ -35,6 +35,7 @@ class SQLEngine:
         self.__cur.execute(CreateCommands.create_table_types())
         self.__cur.execute(CreateCommands.create_table_users())
         self.__cur.execute(CreateCommands.create_table_workday())
+        self.__cur.execute(CreateCommands.create_table_requests())
         self.__con.commit()
         self.__cur.execute(SQLCommands.add_level(1, "Бакалавриат"))
         self.__cur.execute(SQLCommands.add_level(2, "Магистратура"))
@@ -47,9 +48,9 @@ class SQLEngine:
 
     def connect(self):
         self.__con = psycopg2.connect(
-            host="1",
-            database="",
-            user="",
+            host="localhost",
+            database="ivgu",
+            user="postgres",
             password=seec.password_post,
             port=5432,
             client_encoding='UTF-8'
@@ -138,6 +139,9 @@ class SQLEngine:
             return con
         else:
             return time_sliced
+
+    def add_request(self, user_id: int, datetime_of_request: datetime.time):
+        self.__cur.execute(SQLCommands.add_request(user_id, datetime_of_request))
 
     def add_group(self, course: int, subgroup: int, level: int,form: int, subdirection: int):
         self.__cur.execute(SQLCommands.add_group(course, subgroup, level, form, subdirection))

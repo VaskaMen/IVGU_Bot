@@ -158,3 +158,13 @@ class CreateCommands:
              "group" integer
              )
              """
+
+    @staticmethod
+    def create_table_requests() -> str:
+        return """create table if not exists Requests
+             (
+             id serial primary key,
+             user_id int,
+             datetime_of_request timestamp
+             )
+             """

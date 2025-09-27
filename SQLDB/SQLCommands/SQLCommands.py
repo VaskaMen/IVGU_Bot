@@ -147,6 +147,12 @@ class SQLCommands:
                 )"""
 
     @staticmethod
+    def add_request(user_id: int, datetime_of_request: datetime):
+        return f"""INSERT INTO Requests (user_id, datetime_of_request)
+                VALUES ({user_id}, '{datetime_of_request}')
+                """
+
+    @staticmethod
     def add_type(name: str) -> str:
         return f"""INSERT INTO Types (name)
                 SELECT '{name}'

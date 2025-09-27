@@ -382,7 +382,9 @@ class IvguBot:
         def text(message):
             teacher_id = self.sql.get_users_teacher_id(message.from_user.id)[0]
             group_id = self.sql.user_select(message.from_user.id)[0]
-            print(f"{datetime.now()} Send message to {message.from_user.id}")
+            datetim = datetime.now()
+            print(f"{datetim} Send message to {message.from_user.id}")
+            self.sql.add_request(message.from_user.id, str(datetim))
             if message.text == "Сегодня" and teacher_id == 0:
                 date = str(datetime.now().date())
                 workday_id = self.sql.find_last_workday(date,group_id)[0]
