@@ -5,7 +5,6 @@ from datetime import datetime
 import schedule
 
 import seecret
-from psycopg2.errorcodes import CONNECTION_EXCEPTION
 
 from IVGU.APIIVGU import APIIVGU
 from Notify.IVGUNotify import IVGUNotify
@@ -24,12 +23,13 @@ def run_bot():
     while True:
         try:
             ivgu_bot.bot.polling(none_stop=True, interval=0)
-        except CONNECTION_EXCEPTION as ex:
-            print("Ошибка CONNECTION_EXCEPTION " + ex)
-            sql.close_connection()
-            sql.connect()
         except Exception as ex:
+            if ex.__str__() == "cursor already closed":
+                sql.close_connection()
+                sql.connect()
+                print("Cursor error, reconnect")
             print(ex)
+
 
 
 def update_schedule():

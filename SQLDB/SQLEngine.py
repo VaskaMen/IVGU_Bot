@@ -1,6 +1,7 @@
 from typing import Any
 
 import psycopg2
+import seecret as seec
 from psycopg2._psycopg import connection
 
 from IVGU.ScheduleObject.Lesson import Lesson
@@ -35,29 +36,36 @@ class SQLEngine:
         self.__cur.execute(CreateCommands.create_table_users())
         self.__cur.execute(CreateCommands.create_table_workday())
         self.__con.commit()
-        self.__cur.execute(SQLCommands.add_level(1,"Бакалавриат"))
-        self.__cur.execute(SQLCommands.add_level(2,"Магистратура"))
-        self.__cur.execute(SQLCommands.add_level(3,"Специалитет"))
-        self.__cur.execute(SQLCommands.add_level(4,"ДОП"))
-        self.__cur.execute(SQLCommands.add_form(6,'Очная Форма обучения'))
-        self.__cur.execute(SQLCommands.add_form(8,'Очно-заочная Форма обучения'))
-        self.__cur.execute(SQLCommands.add_form(7,'Заочная Форма обучения'))
-        self.__cur.execute(SQLCommands.add_group(-1,-1,-1,-1,-1))
+        self.__cur.execute(SQLCommands.add_level(1, "Бакалавриат"))
+        self.__cur.execute(SQLCommands.add_level(2, "Магистратура"))
+        self.__cur.execute(SQLCommands.add_level(3, "Специалитет"))
+        self.__cur.execute(SQLCommands.add_level(4, "ДОП"))
+        self.__cur.execute(SQLCommands.add_form(6, 'Очная Форма обучения'))
+        self.__cur.execute(SQLCommands.add_form(8, 'Очно-заочная Форма обучения'))
+        self.__cur.execute(SQLCommands.add_form(7, 'Заочная Форма обучения'))
+        self.__cur.execute(SQLCommands.add_group(-1, -1, -1, -1, -1))
 
     def connect(self):
         self.__con = psycopg2.connect(
-            host="localhost",
-            database="Ivgu",
-            user="postgres",
-            password="admin",
+            host="1",
+            database="",
+            user="",
+            password=seec.password_post,
             port=5432,
-            client_encoding='UTF-8',
-
-
+            client_encoding='UTF-8'
         )
+        self.__cur = self.__con.cursor()
 
     def close_connection(self):
+        self.__close_cursor()
+        self.__close_connection()
+
+    def __close_connection(self):
         self.__con.close()
+
+    def __close_cursor(self):
+        self.__cur.close()
+
 
     def _add_subject(self, lesson: Lesson) -> int:
         self.__cur.execute(SQLCommands.add_subject(lesson.name))
@@ -90,12 +98,12 @@ class SQLEngine:
 
     def add_direction(self, direction: str, department_id: int):
         self.__cur.execute(SQLCommands.add_direction(direction, department_id))
-        self.__cur.execute(SQLCommands.find_direction_id(direction,department_id))
+        self.__cur.execute(SQLCommands.find_direction_id(direction, department_id))
         return self.__cur.fetchone()[0]
 
     def add_subdirection(self, subdirection: str, direction_id: int):
         self.__cur.execute((SQLCommands.add_subdirection(subdirection, direction_id)))
-        self.__cur.execute(SQLCommands.find_subdirection_id(subdirection,direction_id))
+        self.__cur.execute(SQLCommands.find_subdirection_id(subdirection, direction_id))
         return self.__cur.fetchone()[0]
 
     def add_department(self, id_of_department: int, name: str, id_of_institute: int):
@@ -154,11 +162,11 @@ class SQLEngine:
         return self.__cur.fetchall()
 
     def _get_list_department_form_levels(self,department: str, form: str):
-        self.__cur.execute(SQLCommands.select_all_department_form_levels(department,form))
+        self.__cur.execute(SQLCommands.select_all_department_form_levels(department, form))
         return self.__cur.fetchall()
 
     def _get_list_courses(self, department: str, form: str, level: str):
-        self.__cur.execute(SQLCommands.select_all_courses(department,form,level))
+        self.__cur.execute(SQLCommands.select_all_courses(department, form, level))
         return self.__cur.fetchall()
 
     def _get_list_directions(self, department: str, form: str, level: str, course: str|int):
@@ -174,7 +182,7 @@ class SQLEngine:
         return self.__cur.fetchall()
 
     def _get_group_id(self, department: str, form: str, level: str, course: str|int, direction: str, subdirection: str, subgroup: str):
-        self.__cur.execute(SQLCommands.get_group_id(department, form, level, course, direction, subdirection,subgroup))
+        self.__cur.execute(SQLCommands.get_group_id(department, form, level, course, direction, subdirection, subgroup))
         return self.__cur.fetchone()
 
     def _insert_user(self, user_id: int, group_id: int, teacher_id: int = 0):
@@ -184,14 +192,14 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.update_user(user_id, group_id, teacher_id))
 
     def update_schedule_user(self, update: bool, user_id: int):
-        self.__cur.execute(SQLCommands.update_schedule_user(update,user_id))
+        self.__cur.execute(SQLCommands.update_schedule_user(update, user_id))
 
     def user_select(self, user_id: int):
         self.__cur.execute(SQLCommands.user_select(user_id))
         return self.__cur.fetchone()
 
     def _get_teachers_workday(self, date: str,teachers_id: int):
-        self.__cur.execute(SQLCommands.get_teachers_workday(date,teachers_id))
+        self.__cur.execute(SQLCommands.get_teachers_workday(date, teachers_id))
         return self.__cur.fetchall()
 
     def _get_teachers_of_lesson(self, lesson_id: int):
@@ -203,7 +211,7 @@ class SQLEngine:
         return self.__cur.fetchall()
 
     def _get_all_teachers_date_after_date(self, teacher_id: int, date: str):
-        self.__cur.execute(SQLCommands.get_teacher_dates_after_date(teacher_id,date))
+        self.__cur.execute(SQLCommands.get_teacher_dates_after_date(teacher_id, date))
         return self.__cur.fetchall()
 
     def get_teacher_id(self, teacher_name: str):
