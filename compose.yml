@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+       IVGU_EMAIL: "@gmail.com"
+       IVGU_PASSWORD: "password"
+       TELEGRAM_TOKEN: "token"
+       POSTGRES_PASSWORD: "password"
+       SERVER_IP: db
+       DATABASE_NAME: "ivgu"
+       USER_NAME: "postgres"
+       DATABASE_PORT: 5432
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+
+  db:
+    image: "postgres:15.15-bookworm"
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "ivgu"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+volumes:
+  postgres:

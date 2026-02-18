@@ -164,7 +164,7 @@ class CreateCommands:
         return """create table if not exists Requests
              (
              id serial primary key,
-             user_id int,
+             user_id bigint,
              datetime_of_request timestamp
              )
              """

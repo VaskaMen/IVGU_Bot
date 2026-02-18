@@ -384,6 +384,8 @@ class IvguBot:
             group_id = self.sql.user_select(message.from_user.id)[0]
             datetim = datetime.now()
             print(f"{datetim} Send message to {message.from_user.id}")
+            with open("log/log.txt", 'a', encoding='utf-8') as file:
+                file.writelines(f"{datetim} Send message to {message.from_user.id}\n")
             self.sql.add_request(message.from_user.id, str(datetim))
             if message.text == "Сегодня" and teacher_id == 0:
                 date = str(datetime.now().date())

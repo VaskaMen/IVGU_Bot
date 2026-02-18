@@ -48,11 +48,11 @@ class SQLEngine:
 
     def connect(self):
         self.__con = psycopg2.connect(
-            host="localhost",
-            database="ivgu",
-            user="postgres",
-            password=seec.password_post,
-            port=5432,
+            host=seec.server_ip,
+            database=seec.database,
+            user=seec.user_name,
+            password=seec.password_postgres,
+            port=seec.port,
             client_encoding='UTF-8'
         )
         self.__cur = self.__con.cursor()
