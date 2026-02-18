@@ -29,8 +29,6 @@ def run_bot():
                 sql.connect()
                 print("Cursor error, reconnect")
             print(ex)
-            with open("log/log.txt", 'a', encoding='utf-8') as file:
-                file.writelines(f'{datetime.now()}: \n {ex}')
 
 
 
@@ -62,20 +60,6 @@ schedule_collector_thread = threading.Thread(target=start_schedule)
 
 threads.append(bot_thread_run)
 threads.append(schedule_collector_thread)
-
-def global_thread_exception_handler(args):
-    print(123123123)
-    with open("log/log.txt", 'a', encoding='utf-8') as f:
-        f.write(f"{'='*60}\n")
-        f.write(f"НЕОБРАБОТАННОЕ ИСКЛЮЧЕНИЕ В ПОТОКЕ\n")
-        f.write(f"Время: {threading.get_ident()}\n")
-        f.write(f"Поток: {args.thread.name if args.thread else 'Unknown'}\n")
-        f.write(f"Тип исключения: {args.exc_type.__name__}\n")
-        f.write(f"Сообщение: {args.exc_value}\n")
-        f.write("Трассировка стека:\n")
-        f.write(f"\n{'='*60}\n\n")
-
-threading.excepthook = global_thread_exception_handler
 
 for t in threads:
     t.start()
