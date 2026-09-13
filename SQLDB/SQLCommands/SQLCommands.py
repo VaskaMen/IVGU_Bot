@@ -511,6 +511,50 @@ class SQLCommands:
         order by workday.date"""
 
     @staticmethod
+    def get_dates_before_date(group_id: int, date: str, date_two_weeks: str) -> str:
+        return  f'''select   
+                    Workday."date"
+                    
+                    from Lessons
+                    
+                    left join Workday
+                    on Lessons.workday = Workday.id
+                    
+                    where 
+                    Workday.group = {group_id} AND
+                    Workday.date >= '{date_two_weeks}' AND
+                    Workday.date <= '{date}'
+
+					group by workday."date"
+                    order by workday."date"
+                '''
+
+    @staticmethod
+    def get_teacher_dates_before_date(teacher_id: int, date: str, date_two_weeks: str) -> str:
+        return f"""select	
+
+            workday.date
+
+            from TeachersPlace
+
+    		left join lessons
+    		on TeachersPlace.lesson = Lessons.id
+
+    		LEFT join workday
+    		on Lessons.workday = workday.id
+
+    		left join teachers
+    		on TeachersPlace.teacher = Teachers.id
+
+            where teachers.id = {teacher_id} AND
+            workday.id in (select max(workday.id) from workday group by "date", workday.group) AND
+            workday.date <= '{date}' AND
+            workday.date >= '{date_two_weeks}'
+
+            group by workday.date
+            order by workday.date"""
+
+    @staticmethod
     def find_teacher_id_by_name(teacher_name: str) -> str:
         return f"""select Teachers.id
         from Teachers

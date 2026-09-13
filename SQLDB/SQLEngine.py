@@ -218,6 +218,14 @@ class SQLEngine:
         self.__cur.execute(SQLCommands.get_teacher_dates_after_date(teacher_id, date))
         return self.__cur.fetchall()
 
+    def _get_two_weeks_dates_before_date(self, groups_id: int, date: str, date_two_weeks: str):
+        self.__cur.execute(SQLCommands.get_dates_before_date(groups_id, date, date_two_weeks))
+        return self.__cur.fetchall()
+
+    def _get_two_weeks_teachers_dates_before_date(self, teacher_id: int, date: str, date_two_weeks: str):
+        self.__cur.execute(SQLCommands.get_teacher_dates_before_date(teacher_id, date, date_two_weeks))
+        return self.__cur.fetchall()
+
     def get_teacher_id(self, teacher_name: str):
         self.__cur.execute(SQLCommands.find_teacher_id_by_name(teacher_name))
         return self.__cur.fetchone()

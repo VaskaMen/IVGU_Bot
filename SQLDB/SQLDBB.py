@@ -154,3 +154,9 @@ class SQLDBB(SQLEngine):
     def get_actual_teacher_dates(self, teacher_id: int, date: str):
         dates = self._get_all_teachers_date_after_date(teacher_id,date)
         return self.__add_any_in_list(dates)
+
+    def get_last_two_weeks(self, groups_id: int, date: str, date_two_weeks: str):
+        return self.__add_any_in_list(self._get_two_weeks_dates_before_date(groups_id, date, date_two_weeks))
+
+    def get_teachers_last_two_weeks(self, teacher_id: int, date: str, date_two_weeks: str):
+        return self.__add_any_in_list(self._get_two_weeks_teachers_dates_before_date(teacher_id, date, date_two_weeks))

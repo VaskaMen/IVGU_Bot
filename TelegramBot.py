@@ -343,9 +343,9 @@ class IvguBot:
         @self.bot.message_handler(commands=['all_schedules'])
         def handle_all_schedules(message):
             teacher_id = self.sql.get_users_teacher_id(message.from_user.id)[0]
+            date = str(datetime.now().date())
             if teacher_id == 0:
                 group_id = self.sql.user_select(message.from_user.id)[0]
-                date = str(datetime.now().date())
                 dates = self.sql.get_actual_dates(group_id, date)
                 reworked_dates = self.datefun.get_actual_dates(dates)
 
@@ -354,13 +354,33 @@ class IvguBot:
                                  reply_markup=BotCreator.create_text_buttons(reworked_dates,1))
 
             elif teacher_id != 0:
-                date = str(datetime.now().date())
                 dates = self.sql.get_actual_teacher_dates(teacher_id, date)
                 reworked_dates = self.datefun.get_actual_dates(dates)
 
                 self.bot.send_message(message.from_user.id,
                                  BotText.schedule_option,
                                  reply_markup=BotCreator.create_text_buttons(reworked_dates,1))
+
+        @self.bot.message_handler(commands=['last_two_weeks'])
+        def handle_last_two_weeks(message):
+            teacher_id = self.sql.get_users_teacher_id(message.from_user.id)[0]
+            date = str(datetime.now().date())
+            date_two_weeks = str((datetime.now() - timedelta(weeks=2)).date())
+            if teacher_id == 0:
+                group_id = self.sql.user_select(message.from_user.id)[0]
+                dates = self.sql.get_last_two_weeks(group_id, date, date_two_weeks)
+                reworked_dates = self.datefun.get_actual_dates(dates)
+
+                self.bot.send_message(message.from_user.id,
+                                      BotText.schedule_option,
+                                      reply_markup=BotCreator.create_text_buttons(reworked_dates, 1))
+
+            elif teacher_id != 0:
+                dates = self.sql.get_teachers_last_two_weeks(teacher_id, date, date_two_weeks)
+                reworked_dates = self.datefun.get_actual_dates(dates)
+                self.bot.send_message(message.from_user.id,
+                                      BotText.schedule_option,
+                                      reply_markup=BotCreator.create_text_buttons(reworked_dates, 1))
 
         @self.bot.message_handler(commands=['subscribe_updates'])
         def handle_update_schedule(message):
