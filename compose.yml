@@ -12,6 +12,11 @@ services:
        DATABASE_NAME: "ivgu"
        USER_NAME: "postgres"
        DATABASE_PORT: 5432
+
+    command: >
+      sh -c "mkdir -p /log &&
+             touch /log/log.txt"
+
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
