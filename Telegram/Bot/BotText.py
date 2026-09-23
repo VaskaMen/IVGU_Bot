@@ -41,6 +41,8 @@ class BotText:
 
     error = '''Упс! Что-то пошло не так. Попробуйте ещё раз.'''
 
+    null_schedule = """Нет расписания на этот день."""
+
     @staticmethod
     def print_all(institute: str,
                 department: str,

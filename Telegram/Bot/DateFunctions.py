@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 
 class DateFunctions:
@@ -80,10 +80,18 @@ class DateFunctions:
             day = int(splitted[2])
             month = month_mapping[splitted[1]]
             year = splitted[0]
-            new_date = str(day) + " " + month + " " + year + " " + weekday
+            new_date = weekday + ", " + str(day) + " " + month + " " + year
             actual_dates.append(new_date)
         return actual_dates
 
     @staticmethod
     def convert_date_str_to_date(s: str) -> date:
         return datetime.strptime(s.split(' ')[0], '%Y-%m-%d').date()
+
+    @staticmethod
+    def get_date_by_weekday_id(weekday_id):
+        today = datetime.now().date()
+
+        monday = today - timedelta(days=today.weekday())
+
+        return monday + timedelta(days=weekday_id)

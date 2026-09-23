@@ -2,8 +2,8 @@ from datetime import datetime
 
 from telebot import TeleBot
 
-from Bot.BotCreator import BotCreator
-from Bot.DateFunctions import DateFunctions
+from Telegram.Bot.BotCreator import BotCreator
+from Telegram.Bot.DateFunctions import DateFunctions
 from Notify.NotifyMessage import Notify
 from Notify.NotifySystem import NotifySystem
 from Notify.NotifyTypes import NotifyTypes

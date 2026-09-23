@@ -1,13 +1,17 @@
 from datetime import datetime, timedelta
 
+import requests
 import telebot
 from telebot import StateMemoryStorage, custom_filters
 from telebot.states.sync import StateContext, StateMiddleware
 
-from Bot.BotCreator import BotCreator
-from Bot.DateFunctions import DateFunctions
-from Bot.BotText import BotText
-from Bot.RegisterState import RegisterState
+from Telegram.Bot.BotCreator import BotCreator
+from Telegram.Bot.DateFunctions import DateFunctions
+from Telegram.Bot.BotText import BotText
+from Telegram.Bot.RegisterState import RegisterState
+from Telegram.TelegramObjects.RichMessageSender import RichMessageSender
+from Telegram.TelegramObjects.RichWorkdayTable import RichWorkdayTable
+from IVGU.ScheduleObject.WorkDay import WorkDay
 from SQLDB.SQLDBB import SQLDBB
 
 class IvguBot:
@@ -16,6 +20,7 @@ class IvguBot:
         self.datefun = DateFunctions()
         self.sql = sqldb
         self.botcreate = BotCreator()
+        self.token = token
 
         state_storage = StateMemoryStorage()
         self.bot = telebot.TeleBot(token, state_storage= state_storage, use_class_middlewares=True)
@@ -24,6 +29,18 @@ class IvguBot:
         self.bot.add_custom_filter(custom_filters.TextMatchFilter())
         self.bot.setup_middleware(StateMiddleware(self.bot))
         self.register_routes()
+
+        self.week_but = [
+            ("mon", "Пн"),
+            ("tue", "Вт"),
+            ("wed", "Ср"),
+            ("thu", "Чт"),
+            ("fri", "Пт"),
+            ("sat", "Сб"),
+            ("sun", "Вс")
+        ]
+
+        self.week = [(0,'mon'), (1,'tue'), (2,'wed'), (3,'thu'), (4,'fri'), (5,'sat'), (6,'sun')]
 
     def bot_run(self):
         self.bot.polling(none_stop=True, interval=0)
@@ -340,6 +357,82 @@ class IvguBot:
                              BotText.schedule_option,
                              reply_markup=self.botcreate.create_today_or_tomorrow())
 
+        @self.bot.message_handler(commands=['schedule1'])
+        def handle_schedule1(message):
+            teacher_id = self.sql.get_users_teacher_id(message.from_user.id)[0]
+            group_id = self.sql.user_select(message.from_user.id)[0]
+            date = datetime.now().date()
+            if teacher_id == 0:
+
+                workday_id = self.sql.find_last_workday(date, group_id)[0]
+                workday = self.sql.get_workday(workday_id)
+                date = date.weekday()
+                html = (RichWorkdayTable()
+                        .build_schedule_table(workday)
+                        .build_schedule_buttons(date)
+                        .table)
+
+
+            else:
+                workday = self.sql.get_teachers_workday(date, teacher_id)
+                html = (RichWorkdayTable()
+                        .build_schedule_table(workday)
+                        .build_schedule_buttons(date)
+                        .table)
+
+            RichMessageSender.send_message(html, message.from_user.id)
+
+        @self.bot.callback_query_handler(
+            func=lambda call: call.data.startswith("weekday_")
+        )
+        def handle_schedule1_callback(call):
+
+            selected_weekday_num = int(call.data.replace("weekday_", ""))
+
+            date = self.datefun.get_date_by_weekday_id(selected_weekday_num)
+
+            user_id = call.from_user.id
+
+            teacher_id = self.sql.get_users_teacher_id(user_id)[0]
+
+            if teacher_id == 0:
+                group_id = self.sql.user_select(user_id)[0]
+                workday_result = self.sql.find_last_workday(
+                    date,
+                    group_id
+                )
+                if workday_result:
+                    workday_id = workday_result[0]
+                    workday = self.sql.get_workday(workday_id)
+
+                    html = (RichWorkdayTable()
+                            .build_schedule_table(workday)
+                            .build_schedule_buttons(selected_weekday_num)
+                            .table)
+                else:
+                    selected_weekday_num =datetime.now()
+                    workday = WorkDay([],date,'')
+                    html = (RichWorkdayTable()
+                            .build_schedule_table(workday)
+                            .build_schedule_buttons(selected_weekday_num)
+                            .table)
+
+            else:
+                workday = self.sql.get_teachers_workday(
+                    date,
+                    teacher_id
+                )
+
+                html = (RichWorkdayTable()
+                        .build_schedule_table(workday)
+                        .build_schedule_buttons(date)
+                        .table)
+
+            RichMessageSender.edit_message(html, call.message.chat.id, call.message.id)
+
+            self.bot.answer_callback_query(call.id)
+
+
         @self.bot.message_handler(commands=['all_schedules'])
         def handle_all_schedules(message):
             teacher_id = self.sql.get_users_teacher_id(message.from_user.id)[0]
@@ -431,11 +524,23 @@ class IvguBot:
 
             elif self.datefun.check_date_format(message.text) and teacher_id == 0:
                 date = self.datefun.convert_str_to_date(message.text)
-                workday_id = self.sql.find_last_workday(date,group_id)[0]
-                workday = self.sql.get_workday(workday_id)
-                self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
+                workday_id = self.sql.find_last_workday(date,group_id)
+                if workday_id:
+                    workday = self.sql.get_workday(workday_id[0])
+
+                    html = RichWorkdayTable().build_schedule_table(workday).table
+
+                    RichMessageSender.send_message(html, message.from_user.id)
+                else:
+                    self.bot.send_message(message.from_user.id, BotText.null_schedule, parse_mode='Markdown')
 
             elif self.datefun.check_date_format(message.text) and teacher_id != 0:
                 date = self.datefun.convert_str_to_date(message.text)
-                workday = str(self.sql.get_teachers_workday(date, teacher_id))
-                self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
+                workday = self.sql.get_teachers_workday(date, teacher_id)
+                if workday:
+
+                    html = RichWorkdayTable().build_schedule_table(workday).table
+
+                    RichMessageSender.send_message(html, message.from_user.id)
+                else:
+                    self.bot.send_message(message.from_user.id, BotText.null_schedule, parse_mode='Markdown')
