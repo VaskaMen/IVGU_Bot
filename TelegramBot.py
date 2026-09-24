@@ -504,32 +504,34 @@ class IvguBot:
                 date = str(datetime.now().date())
                 workday_id = self.sql.find_last_workday(date,group_id)[0]
                 workday = self.sql.get_workday(workday_id)
-                self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
+                html = RichWorkdayTable().build_schedule_table(workday).table
+                RichMessageSender.send_message(html, message.from_user.id)
 
             elif message.text == "Сегодня" and teacher_id != 0:
                 date = datetime.now().date()
                 workday = self.sql.get_teachers_workday(date, teacher_id)
-                self.bot.send_message(message.from_user.id, str(workday), parse_mode='Markdown')
+                html = RichWorkdayTable().build_schedule_table(workday).table
+                RichMessageSender.send_message(html, message.from_user.id)
 
             elif message.text == "Завтра" and teacher_id == 0:
                 date = datetime.now().date() + timedelta(days=1)
                 workday_id = self.sql.find_last_workday(date,group_id)[0]
-                workday = str(self.sql.get_workday(workday_id))
-                self.bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
+                workday = self.sql.get_workday(workday_id)
+                html = RichWorkdayTable().build_schedule_table(workday).table
+                RichMessageSender.send_message(html, message.from_user.id)
 
             elif message.text == "Завтра" and teacher_id != 0:
                 date = datetime.now().date() + timedelta(days=1)
-                workday = str(self.sql.get_teachers_workday(date, teacher_id))
-                self.bot.send_message(message.from_user.id, workday, parse_mode='Markdown')
+                workday = self.sql.get_teachers_workday(date, teacher_id)
+                html = RichWorkdayTable().build_schedule_table(workday).table
+                RichMessageSender.send_message(html, message.from_user.id)
 
             elif self.datefun.check_date_format(message.text) and teacher_id == 0:
                 date = self.datefun.convert_str_to_date(message.text)
                 workday_id = self.sql.find_last_workday(date,group_id)
                 if workday_id:
                     workday = self.sql.get_workday(workday_id[0])
-
                     html = RichWorkdayTable().build_schedule_table(workday).table
-
                     RichMessageSender.send_message(html, message.from_user.id)
                 else:
                     self.bot.send_message(message.from_user.id, BotText.null_schedule, parse_mode='Markdown')
@@ -538,9 +540,7 @@ class IvguBot:
                 date = self.datefun.convert_str_to_date(message.text)
                 workday = self.sql.get_teachers_workday(date, teacher_id)
                 if workday:
-
                     html = RichWorkdayTable().build_schedule_table(workday).table
-
                     RichMessageSender.send_message(html, message.from_user.id)
                 else:
                     self.bot.send_message(message.from_user.id, BotText.null_schedule, parse_mode='Markdown')

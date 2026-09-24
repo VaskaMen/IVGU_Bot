@@ -6,10 +6,15 @@ class DateFunctions:
     def check_date_format(self, message: str):
         message1 = self.__remove_extra_space(message)
         split_message = message1.split(" ")
-        return (self.__check_day_format(split_message[0])
-                and self.__check_month(split_message[1]))\
-                and self.__check_year(split_message[2])
-
+        if len(split_message) == 3:
+            return (self.__check_day_format(split_message[0])
+                    and self.__check_month(split_message[1]))\
+                    and self.__check_year(split_message[2])
+        elif len(split_message) == 4:
+            return (self.__check_day_format(split_message[1])
+                    and self.__check_month(split_message[2])) \
+                    and self.__check_year(split_message[3])
+        return None
 
     @staticmethod
     def __check_day_format(day: str) -> bool:
@@ -48,6 +53,8 @@ class DateFunctions:
             "декабря": 12
         }
         split = str_date.split(" ")
+        if len(split) ==4:
+            split.pop(0)
         day = split[0]
         month_name = split[1]
         year = split[2]
